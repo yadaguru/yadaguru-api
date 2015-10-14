@@ -1,12 +1,12 @@
 /* global __dirname */
 /* global process */
-var port = process.env.PORT || 3000,
+var port = process.env.PORT || 8080,
     path = require('path'),
     mongoose = require('mongoose');
 
 module.exports = function() {
   var db;
-  if (process.env.NODE_ENV == 'TEST') {
+  if (process.env.NODE_ENV === 'TEST') {
     console.log('** TEST **');
     db = mongoose.connect('mongodb://localhost/yadaguru_test');
   } else {

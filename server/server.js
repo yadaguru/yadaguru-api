@@ -1,6 +1,4 @@
-var express  = require('express'),
-    mongoose = require('mongoose'),
-    config   = require('./config/config.js')(),
+var config   = require('./config/config.js')(),
     app      = require('./config/express.js')(config.clientPath);
 
 require('./config/passport.js')();
