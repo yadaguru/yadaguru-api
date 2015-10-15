@@ -16,7 +16,7 @@ var postMock = function(categoryName) {
     send: sinon.spy()
   };
 
-  var categoryController = require('../server/controllers/categoryController')(Category);
+  var categoryController = require('../routes/controllers/categoryController')(Category);
   categoryController.post(req, res);
   return res;
 };

@@ -1,31 +1,33 @@
-var express = require('express');
+var express  = require('express'),
+    mongoose = require('mongoose'),
+    TestDate = mongoose.model('TestDate');
 
-var routes = function(TestMessage) {
+var routes = function() {
   var router = express.Router();
 
-  var testMessageController = require('../controllers/testMessageController')(TestMessage);
+  var testDateController = require('./controllers/testDateController')(TestDate);
 
   // GET and POST on [/] can be found in the controller
   router.route('/')
-    .get(testMessageController.get)
-    .post(testMessageController.post);
+    .get(testDateController.get)
+    .post(testDateController.post);
 
   // Middleware to use for all requests
-  // Before reaching the route, find the testMessage by ID and pass it up
+  // Before reaching the route, find the testDate by ID and pass it up
   router.use('/:_id', function(req, res, next) {
-    TestMessage.findById(req.params._id, function(err, testMessage) {
-      
+    TestDate.findById(req.params._id, function(err, testDate) {
+
       // If there is an error send the 500 and error message
-      // If there is a testMessage found add it to the request and hand it up the
+      // If there is a testDate found add it to the request and hand it up the
       // pipeline
-      // Else return a 404 if no testMessage found
+      // Else return a 404 if no testDate found
       if(err) {
         res.status(500).send(err);
-      } else if(testMessage) {
-        req.testMessage = testMessage;
+      } else if(testDate) {
+        req.testDate = testDate;
         next();
       } else {
-        res.status(404).send('No testMessage found');
+        res.status(404).send('No testDate found');
       }
     });
   });
@@ -35,7 +37,7 @@ var routes = function(TestMessage) {
 
     // For get requests just return the data
     .get(function(req, res) {
-      res.json(req.testMessage);
+      res.json(req.testDate);
     })
 
     // For update PUT requests process and return new data
@@ -45,26 +47,26 @@ var routes = function(TestMessage) {
       if(req.body._id) {
         delete req.body._id;
       }
-      
-      // Take data from body and replace data in testMessage object
+
+      // Take data from body and replace data in testDate object
       // retrieved earlier
       for(var key in req.body) {
-        req.testMessage[key] = req.body[key];
+        req.testDate[key] = req.body[key];
       }
 
-      // Save new testMessage object and return
-      req.testMessage.save(function(err) {
+      // Save new testDate object and return
+      req.testDate.save(function(err) {
         if(err) {
           res.status(500).send(err);
         } else {
-          res.json(req.testMessage);
+          res.json(req.testDate);
         }
       });
     })
 
     // Attempt to remove item from db
     .delete(function(req, res) {
-      req.testMessage.remove(function(err) {
+      req.testDate.remove(function(err) {
         if(err) {
           res.status(500).send(err);
         } else {
@@ -72,7 +74,7 @@ var routes = function(TestMessage) {
         }
       });
     });
-  
+
   return router;
 };
 

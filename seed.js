@@ -1,7 +1,6 @@
 var args     = require('yargs').argv,
     fs       = require('fs'),
     mongoose = require('mongoose'),
-    util     = require('util'),
     path     = require('path');
 
 //TODO: Add helpful help messages

@@ -1,4 +1,4 @@
-var app      = require('../server/server.js'),
+var app      = require('../server.js'),
     mongoose = require('mongoose'),
     Category = mongoose.model('Category'),
     should   = require('should'),

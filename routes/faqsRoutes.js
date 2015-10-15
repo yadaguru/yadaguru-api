@@ -1,32 +1,34 @@
-var express = require('express'),
-    account = require('../account');
+var express  = require('express'),
+    account  = require('../account'),
+    mongoose = require('mongoose'),
+    Faq      = mongoose.model('Faq');
 
-var routes = function(Category) {
+var routes = function() {
   var router = express.Router();
 
-  var categoryController = require('../controllers/categoryController')(Category);
+  var faqController = require('./controllers/faqController')(Faq);
 
   // GET and POST on [/] can be found in the controller
   router.route('/')
-    .get(categoryController.get)
-    .post(account.requiresRoleApi('admin'), categoryController.post);
+    .get(faqController.get)
+    .post(account.requiresRoleApi('admin'), faqController.post);
 
   // Middleware to use for all requests
-  // Before reaching the route, find the category by ID and pass it up
+  // Before reaching the route, find the faq by ID and pass it up
   router.use('/:_id', function(req, res, next) {
-    Category.findById(req.params._id, function(err, category) {
+    Faq.findById(req.params._id, function(err, faq) {
 
       // If there is an error send the 500 and error message
-      // If there is a category found add it to the request and hand it up the
+      // If there is a faq found add it to the request and hand it up the
       // pipeline
-      // Else return a 404 if no category found
+      // Else return a 404 if no faq found
       if(err) {
         res.status(500).send(err);
-      } else if(category) {
-        req.category = category;
+      } else if(faq) {
+        req.faq = faq;
         next();
       } else {
-        res.status(404).send('No category found');
+        res.status(404).send('No faq found');
       }
     });
   });
@@ -36,7 +38,7 @@ var routes = function(Category) {
 
     // For get requests just return the data
     .get(function(req, res) {
-      res.json(req.category);
+      res.json(req.faq);
     })
 
     // For update PUT requests process and return new data
@@ -47,25 +49,25 @@ var routes = function(Category) {
         delete req.body._id;
       }
 
-      // Take data from body and replace data in category object
+      // Take data from body and replace data in faq object
       // retrieved earlier
       for(var key in req.body) {
-        req.category[key] = req.body[key];
+        req.faq[key] = req.body[key];
       }
 
-      // Save new category object and return
-      req.category.save(function(err) {
+      // Save new faq object and return
+      req.faq.save(function(err) {
         if(err) {
           res.status(500).send(err);
         } else {
-          res.json(req.category);
+          res.json(req.faq);
         }
       });
     })
 
     // Attempt to remove item from db
     .delete(account.requiresRoleApi('admin'), function(req, res) {
-      req.category.remove(function(err) {
+      req.faq.remove(function(err) {
         if(err) {
           res.status(500).send(err);
         } else {

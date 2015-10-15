@@ -16,7 +16,7 @@ module.exports = function(clientPath) {
     res.header('Access-Control-Allow-Headers', 'Content-Type');
     next();
   };
-  
+
   app.use(allowCrossDomain);
   app.use(morgan('dev', {
     skip: function() { return process.env.NODE_ENV === 'TEST'; }

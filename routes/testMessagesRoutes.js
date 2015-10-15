@@ -1,31 +1,33 @@
-var express = require('express');
+var express     = require('express'),
+    mongoose    = require('mongoose'),
+    TestMessage = mongoose.model('TestMessage');
 
-var routes = function(TestDate) {
+var routes = function() {
   var router = express.Router();
 
-  var testDateController = require('../controllers/testDateController')(TestDate);
+  var testMessageController = require('./controllers/testMessageController')(TestMessage);
 
   // GET and POST on [/] can be found in the controller
   router.route('/')
-    .get(testDateController.get)
-    .post(testDateController.post);
+    .get(testMessageController.get)
+    .post(testMessageController.post);
 
   // Middleware to use for all requests
-  // Before reaching the route, find the testDate by ID and pass it up
+  // Before reaching the route, find the testMessage by ID and pass it up
   router.use('/:_id', function(req, res, next) {
-    TestDate.findById(req.params._id, function(err, testDate) {
-      
+    TestMessage.findById(req.params._id, function(err, testMessage) {
+
       // If there is an error send the 500 and error message
-      // If there is a testDate found add it to the request and hand it up the
+      // If there is a testMessage found add it to the request and hand it up the
       // pipeline
-      // Else return a 404 if no testDate found
+      // Else return a 404 if no testMessage found
       if(err) {
         res.status(500).send(err);
-      } else if(testDate) {
-        req.testDate = testDate;
+      } else if(testMessage) {
+        req.testMessage = testMessage;
         next();
       } else {
-        res.status(404).send('No testDate found');
+        res.status(404).send('No testMessage found');
       }
     });
   });
@@ -35,7 +37,7 @@ var routes = function(TestDate) {
 
     // For get requests just return the data
     .get(function(req, res) {
-      res.json(req.testDate);
+      res.json(req.testMessage);
     })
 
     // For update PUT requests process and return new data
@@ -45,26 +47,26 @@ var routes = function(TestDate) {
       if(req.body._id) {
         delete req.body._id;
       }
-      
-      // Take data from body and replace data in testDate object
+
+      // Take data from body and replace data in testMessage object
       // retrieved earlier
       for(var key in req.body) {
-        req.testDate[key] = req.body[key];
+        req.testMessage[key] = req.body[key];
       }
 
-      // Save new testDate object and return
-      req.testDate.save(function(err) {
+      // Save new testMessage object and return
+      req.testMessage.save(function(err) {
         if(err) {
           res.status(500).send(err);
         } else {
-          res.json(req.testDate);
+          res.json(req.testMessage);
         }
       });
     })
 
     // Attempt to remove item from db
     .delete(function(req, res) {
-      req.testDate.remove(function(err) {
+      req.testMessage.remove(function(err) {
         if(err) {
           res.status(500).send(err);
         } else {
@@ -72,7 +74,7 @@ var routes = function(TestDate) {
         }
       });
     });
-  
+
   return router;
 };
 

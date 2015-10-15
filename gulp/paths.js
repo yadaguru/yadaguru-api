@@ -1,6 +1,6 @@
 var clientRoot = 'client/',
-    serverRoot = 'server/',
-    publicCssRoot = clientRoot + 'public/css/';
+    serverRoot = '',
+    publicCssRoot = clientRoot + 'public/css/',
     bowerPath  = clientRoot + 'vendor/';
 
 module.exports = {
