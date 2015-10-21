@@ -10,7 +10,7 @@
   "scripts": {
     "test": "npm run test-node",
     "test-node": "node node_modules/mocha/bin/mocha",
-    "test-client" : "node node_modules/karma/bin/karma start",
+    "test-client": "node node_modules/karma/bin/karma start",
     "test-travis": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
     "test-browser": "mocha-phantomjs ./test/browser/index.html",
     "start": "node ./server/server.js"
@@ -77,6 +77,10 @@
     "morgan": "^1.5.3",
     "passport": "^0.2.2",
     "passport-local": "^1.0.0",
-    "serve-favicon": "^2.2.1"
+    "pg": "^4.4.3",
+    "pg-query": "^0.11.0",
+    "serve-favicon": "^2.2.1",
+    "squel": "^4.2.0",
+    "when": "^3.7.3"
   }
 }
