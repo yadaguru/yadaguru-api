@@ -1,9 +1,7 @@
 var express  = require('express'),
-    account  = require('./middleware/account'),
-    mongoose = require('mongoose'),
-    Faq      = mongoose.model('Faq');
+    account  = require('./middleware/account');
 
-var routes = function() {
+var routes = function(Faq) {
   var router = express.Router();
 
   var faqController = require('./controllers/faqController')(Faq);

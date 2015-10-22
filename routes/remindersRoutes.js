@@ -1,9 +1,7 @@
 var express  = require('express'),
-    account  = require('./middleware/account'),
-    mongoose = require('mongoose'),
-    Reminder = mongoose.model('Reminder');
+    account  = require('./middleware/account');
 
-var routes = function() {
+var routes = function(Reminder) {
   var router = express.Router();
 
   var reminderController = require('./controllers/reminderController')(Reminder);

@@ -33,11 +33,11 @@ var testMessageController = function(TestMessage) {
     }).sort('testMessage');
   };
 
-  // POST route [/api/test-messages] 
+  // POST route [/api/test-messages]
   var post = function(req, res) {
 
     // Return an error if there is missing data, else save data
-    if(!req.body.satMessage || 
+    if(!req.body.satMessage ||
        !req.body.satDetail ||
        !req.body.actMessage ||
        !req.body.actDetail ||

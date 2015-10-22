@@ -1,8 +1,6 @@
-var express     = require('express'),
-    mongoose    = require('mongoose'),
-    TestMessage = mongoose.model('TestMessage');
+var express = require('express');
 
-var routes = function() {
+var routes = function(TestMessage) {
   var router = express.Router();
 
   var testMessageController = require('./controllers/testMessageController')(TestMessage);

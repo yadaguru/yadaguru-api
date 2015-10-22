@@ -10,16 +10,11 @@ exports.authenticate = function(req, res) {
     if (!user) {
       return res.send({ success: false, message: info.message });
     }
-    user = user.dataValues;
+    user.clean();
     req.login(user, function (err) {
       if (err) {
         res.send(err);
       } else {
-        delete user.salt;
-        delete user.hashed_password;
-        delete user.created_at;
-        delete user.updated_at;
-        delete user.deleted_at;
         res.send({ success: true, user: user });
       }
     });

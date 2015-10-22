@@ -17,11 +17,12 @@ module.exports = function (User) {
     }));
 
   passport.serializeUser(function (user, done) {
+    console.log('id: ' + user.id);
     done(null, user.id);
   });
 
   passport.deserializeUser(function (id, done) {
-    User.findOne(id).success(function (user) {
+    User.findById(id).then(function (user) {
       done(null, user);
     });
   });

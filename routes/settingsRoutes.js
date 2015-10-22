@@ -1,12 +1,11 @@
 var express  = require('express'),
-    account  = require('./middleware/account'),
-    mongoose = require('mongoose'),
-    Settings = mongoose.model('Settings');
+    account  = require('./middleware/account');
 
-var routes = function() {
+var routes = function(models) {
   var router = express.Router();
+  var Setting = models.User;
 
-  var settingsController = require('./controllers/settingsController')(Settings);
+  var settingsController = require('./controllers/settingsController')(Setting);
 
   // GET and POST on [/] can be found in the controller
   router.route('/')
@@ -16,7 +15,7 @@ var routes = function() {
   // Middleware to use for all requests
   // Before reaching the route, find the settings by ID and pass it up
   router.use('/:_id', function(req, res, next) {
-    Settings.findById(req.params._id, function(err, settings) {
+    Setting.findById(req.params._id, function(err, settings) {
 
       // If there is an error send the 500 and error message
       // If there is a settings found add it to the request and hand it up the

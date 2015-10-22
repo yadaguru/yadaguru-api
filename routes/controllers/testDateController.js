@@ -33,11 +33,11 @@ var testDateController = function(TestDate) {
     }).sort('testDate');
   };
 
-  // POST route [/api/test-dates] 
+  // POST route [/api/test-dates]
   var post = function(req, res) {
 
     // Return an error if there is missing data, else save data
-    if(!req.body.testDate || 
+    if(!req.body.testDate ||
        !req.body.registrationDate ||
        !req.body.testType) {
       res.status(400);

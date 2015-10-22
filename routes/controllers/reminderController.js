@@ -33,11 +33,11 @@ var reminderController = function(Reminder) {
     }).sort('category name');
   };
 
-  // POST route [/api/reminders] 
+  // POST route [/api/reminders]
   var post = function(req, res) {
 
     // Return an error if there is missing data, else save data
-    if(!req.body.name || 
+    if(!req.body.name ||
        !req.body.message ||
        !req.body.detail ||
        !req.body.lateMessage ||

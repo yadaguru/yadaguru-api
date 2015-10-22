@@ -1,34 +1,24 @@
 var config     = require('./config/config.js')(),
-    app        = require('./config/express.js')(config.clientPath),
+    app        = require('./config/express.js')(),
+    models     = require('./models'),
     requireDir = require('require-dir');
 
-var models = require('./models');
 require('./config/passport.js')(models.User);
 
-// require('./config/expressRoutes.js')(app);
-app.use('/api/auth', require('./routes/authRoutes')(models.User));
-// var routes = requireDir('routes');
-// for (var route in routes) {
-//   if (routes.hasOwnProperty(route)) {
-//     // Remove 'Routes' from file name
-//     // camelCase to dash-format for route names
-//     var routeName = route.replace('Routes', '')
-//       .replace(/\W+/g, '-')
-//       .replace(/([a-z\d])([A-Z])/g, '$1-$2')
-//       .toLowerCase();
-//     var router = routes[route];
-//     app.use('/api/' + routeName, router());
-//     console.log('Registered route ' + routeName);
-//   }
-// }
-
-app.get('/login', function(req, res) {
-  res.sendFile(config.clientPath + '/login/index.html');
-});
-
-app.get('/admin', function(req, res) {
-  res.sendFile(config.clientPath + '/admin/index.html');
-});
+var routes = requireDir('routes');
+for (var route in routes) {
+  if (routes.hasOwnProperty(route)) {
+    // Remove Routes from name
+    // camelCase to dash-format for route names
+    var routeName = route.replace('Routes', '')
+      .replace(/\W+/g, '-')
+      .replace(/([a-z\d])([A-Z])/g, '$1-$2')
+      .toLowerCase();
+    var router = routes[route](models);
+    app.use('/api/' + routeName, router);
+    console.log('Registered route ' + routeName);
+  }
+}
 
 app.listen(config.port, function () {
   console.log('Running on PORT: ' + config.port);

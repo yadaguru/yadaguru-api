@@ -33,7 +33,7 @@ var settingsController = function(Settings) {
     }).sort('settings');
   };
 
-  // POST route [/api/settings] 
+  // POST route [/api/settings]
   var post = function(req, res) {
 
     // Return an error if there is missing data, else save data

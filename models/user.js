@@ -33,6 +33,15 @@ module.exports = function(sequelize, DataTypes) {
     instanceMethods: {
       authenticate: function(passwordToMatch) {
         return UserAccount.hashPassword(this.salt, passwordToMatch) === this.hashed_password;
+      },
+      clean: function() {
+        var dataValues = this.dataValues;
+        delete dataValues.salt;
+        delete dataValues.hashed_password;
+        delete dataValues.created_at;
+        delete dataValues.updated_at;
+        delete dataValues.deleted_at;
+        return dataValues;
       }
     }
   });

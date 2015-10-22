@@ -1,8 +1,6 @@
-var express  = require('express'),
-    mongoose = require('mongoose'),
-    TestDate = mongoose.model('TestDate');
+var express = require('express');
 
-var routes = function() {
+var routes = function(TestDate) {
   var router = express.Router();
 
   var testDateController = require('./controllers/testDateController')(TestDate);
