@@ -2,25 +2,25 @@ var config     = require('./config/config.js')(),
     app        = require('./config/express.js')(config.clientPath),
     requireDir = require('require-dir');
 
-require('./config/passport.js')();
+var models = require('./models');
+require('./config/passport.js')(models.User);
 
 // require('./config/expressRoutes.js')(app);
-requireDir('models');
-
-var routes = requireDir('routes');
-for (var route in routes) {
-  if (routes.hasOwnProperty(route)) {
-    // Remove 'Routes' from file name
-    // camelCase to dash-format for route names
-    var routeName = route.replace('Routes', '')
-      .replace(/\W+/g, '-')
-      .replace(/([a-z\d])([A-Z])/g, '$1-$2')
-      .toLowerCase();
-    var router = routes[route];
-    app.use('/api/' + routeName, router());
-    console.log('Registered route ' + routeName);
-  }
-}
+app.use('/api/auth', require('./routes/authRoutes')(models.User));
+// var routes = requireDir('routes');
+// for (var route in routes) {
+//   if (routes.hasOwnProperty(route)) {
+//     // Remove 'Routes' from file name
+//     // camelCase to dash-format for route names
+//     var routeName = route.replace('Routes', '')
+//       .replace(/\W+/g, '-')
+//       .replace(/([a-z\d])([A-Z])/g, '$1-$2')
+//       .toLowerCase();
+//     var router = routes[route];
+//     app.use('/api/' + routeName, router());
+//     console.log('Registered route ' + routeName);
+//   }
+// }
 
 app.get('/login', function(req, res) {
   res.sendFile(config.clientPath + '/login/index.html');

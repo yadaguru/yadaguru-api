@@ -1,35 +1,28 @@
 var passport      = require('passport'),
-    LocalStrategy = require('passport-local').Strategy,
-    mongoose      = require('mongoose'),
-    User          = require('../models/user');
+    LocalStrategy = require('passport-local').Strategy;
 
-module.exports = function () {
+module.exports = function (User) {
 
   passport.use(new LocalStrategy(
     function (username, password, done) {
-      User.findOne({ username: username }).exec(function (err, user) {
-        if (user && user.authenticate(password)) {
-          return done(null, user);
+      User.find({ where: { username: username } }).then(function (user) {
+        if (!user) {
+          return done(null, false, { message: 'Username does not exist' });
+        } else if (!user.authenticate(password)) {
+          return done(null, false, { message: 'Incorrect password' });
         } else {
-          return done(null, false);
+          return done(null, user);
         }
       });
-    }
-    ));
+    }));
 
   passport.serializeUser(function (user, done) {
-    if (user) {
-      done(null, user._id);
-    }
+    done(null, user.id);
   });
 
   passport.deserializeUser(function (id, done) {
-    User.findOne({ _id: id }).exec(function (err, user) {
-      if (user) {
-        return done(null, user);
-      } else {
-        return done(null, false);
-      }
+    User.findOne(id).success(function (user) {
+      done(null, user);
     });
   });
 

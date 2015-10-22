@@ -1,16 +1,27 @@
+'use strict';
+
 var passport = require('passport');
 
 exports.authenticate = function(req, res) {
-  var auth = passport.authenticate('local', function (err, user) {
-    if (err) { res.send(err); }
-    if (!user) { res.send({ success: false }); }
-    req.logIn(user, function (err) {
-      if (err) { res.send(err); }
-      user = user.toObject();
-      delete user.salt;
-      delete user.hashedPassword;
-      delete user.__v;
-      res.send({ success: true, user: user });
+  var auth = passport.authenticate('local', function (err, user, info) {
+    if (err) {
+      return res.send(err);
+    }
+    if (!user) {
+      return res.send({ success: false, message: info.message });
+    }
+    user = user.dataValues;
+    req.login(user, function (err) {
+      if (err) {
+        res.send(err);
+      } else {
+        delete user.salt;
+        delete user.hashed_password;
+        delete user.created_at;
+        delete user.updated_at;
+        delete user.deleted_at;
+        res.send({ success: true, user: user });
+      }
     });
   });
   auth(req, res);

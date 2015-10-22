@@ -12,29 +12,44 @@ var tableQueries = { };
 var tables = {
   'category': [
     'id SERIAL PRIMARY KEY',
-    'name TEXT UNIQUE'
+    'name TEXT UNIQUE',
+    'updated_at TIMESTAMPTZ',
+    'created_at TIMESTAMPTZ',
+    'deleted_at TIMESTAMPTZ'
   ],
   'faq': [
     'id SERIAL PRIMARY KEY',
-    'content TEXT'
+    'content TEXT',
+    'updated_at TIMESTAMPTZ',
+    'created_at TIMESTAMPTZ',
+    'deleted_at TIMESTAMPTZ'
   ],
   'setting': [
     'id SERIAL PRIMARY KEY',
     'summer_cut_off_month SMALLINT',
-    'summer_cut_off_day SMALLINT'
+    'summer_cut_off_day SMALLINT',
+    'updated_at TIMESTAMPTZ',
+    'created_at TIMESTAMPTZ',
+    'deleted_at TIMESTAMPTZ'
   ],
   'test_date': [
     'id SERIAL PRIMARY KEY',
     'test_date DATE',
     'registration_date DATE',
-    'test_type TEXT'
+    'test_type TEXT',
+    'updated_at TIMESTAMPTZ',
+    'created_at TIMESTAMPTZ',
+    'deleted_at TIMESTAMPTZ'
   ],
   'user_account': [
     'id SERIAL PRIMARY KEY',
     'username TEXT',
     'salt TEXT',
     'hashed_password TEXT',
-    'roles TEXT[]'
+    'roles TEXT[]',
+    'updated_at TIMESTAMPTZ',
+    'created_at TIMESTAMPTZ',
+    'deleted_at TIMESTAMPTZ'
   ],
   'test_message': [
     'id SERIAL PRIMARY KEY',
@@ -42,7 +57,10 @@ var tables = {
     'sat_detail TEXT',
     'act_message TEXT',
     'act_detail TEXT',
-    'test_category TEXT REFERENCES category(name)'
+    'test_category TEXT REFERENCES category(name)',
+    'updated_at TIMESTAMPTZ',
+    'created_at TIMESTAMPTZ',
+    'deleted_at TIMESTAMPTZ'
   ],
   'reminder': [
     'id SERIAL PRIMARY KEY',
@@ -52,7 +70,10 @@ var tables = {
     'late_message TEXT',
     'late_detail TEXT',
     'category TEXT REFERENCES category(name)',
-    'timeframes TEXT'
+    'timeframes TEXT',
+    'updated_at TIMESTAMPTZ',
+    'created_at TIMESTAMPTZ',
+    'deleted_at TIMESTAMPTZ'
   ]
 };
 

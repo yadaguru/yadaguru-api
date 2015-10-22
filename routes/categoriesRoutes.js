@@ -1,5 +1,5 @@
 var express  = require('express'),
-    account  = require('../account'),
+    account  = require('./middleware/account'),
     mongoose = require('mongoose'),
     Category = mongoose.model('Category');
 

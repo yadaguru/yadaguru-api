@@ -1,0 +1,29 @@
+{
+  "development": {
+    "username": "yadaguru",
+    "password": "yadaguru",
+    "database": "yadaguru",
+    "host": "127.0.0.1",
+    "port": 5432,
+    "protocol": "postgres",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "yadaguru",
+    "password": "yadaguru",
+    "database": "yadaguru",
+    "host": "127.0.0.1",
+    "port": 5432,
+    "protocol": "postgres",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "yadaguru",
+    "password": "yadaguru",
+    "database": "yadaguru",
+    "host": "127.0.0.1",
+    "port": 5432,
+    "protocol": "postgres",
+    "dialect": "postgres"
+  }
+}

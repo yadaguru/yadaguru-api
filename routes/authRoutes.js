@@ -1,7 +1,7 @@
 var express = require('express'),
-    account = require('../account');
+    account = require('./middleware/account');
 
-var routes = function() {
+var routes = function(User) {
   var router = express.Router();
 
   router.post('/login', account.authenticate);
@@ -16,12 +16,20 @@ var routes = function() {
       var user = req.user.toObject();
       delete user.salt;
       delete user.hashedPassword;
-      delete user.__v;
       res.send({ success: true, user: user });
     } else {
       res.send({ success: false });
     }
   });
+
+  // router.post('/create', function(req, res) {
+  //   var salt = User.createSalt();
+  //   var hash = User.hashPassword(salt, req.body.password);
+  //   User.create({ username: req.body.username, salt: salt, hashed_password: hash, roles: ['admin'] })
+  //     .then(function() {
+  //       res.sendStatus(200);
+  //     });
+  // });
 
   return router;
 };

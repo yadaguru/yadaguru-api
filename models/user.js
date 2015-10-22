@@ -1,33 +1,40 @@
-var mongoose = require('mongoose'),
-    crypto   = require('crypto'),
-    Schema   = mongoose.Schema;
+var crypto    = require('crypto');
 
-var userSchema = new Schema({
-  username: {type: String},
-  salt: {type: String},
-  hashedPassword: {type: String},
-  roles: {type: Array}
-});
+module.exports = function(sequelize, DataTypes) {
+  var UserAccount = sequelize.define("User", {
+    // Do not need to define created_at, edited_at, deleted_at or id
+    username: DataTypes.TEXT,
+    salt: DataTypes.TEXT,
+    hashed_password: DataTypes.TEXT,
+    roles: DataTypes.ARRAY(DataTypes.TEXT)
+  }, {
+    paranoid: true,
 
-var createSalt = function() {
-  return crypto.randomBytes(128).toString('base64');
+    // don't use camelcase for automatically added attributes but underscore style
+    // so updatedAt will be updated_at
+    underscored: true,
+
+    // disable the modification of tablenames; By default, sequelize will automatically
+    // transform all passed model names (first parameter of define) into plural.
+    // if you don't want that, set the following
+    freezeTableName: true,
+
+    // define the table's name
+    tableName: 'user_account',
+    classMethods: {
+      createSalt: function() {
+        return crypto.randomBytes(128).toString('base64');
+      },
+      hashPassword: function(salt, pwd) {
+        var hmac = crypto.createHmac('sha1', salt);
+        return hmac.update(pwd).digest('hex');
+      }
+    },
+    instanceMethods: {
+      authenticate: function(passwordToMatch) {
+        return UserAccount.hashPassword(this.salt, passwordToMatch) === this.hashed_password;
+      }
+    }
+  });
+  return UserAccount;
 };
-
-var hashPwd = function(salt, pwd) {
-  var hmac = crypto.createHmac('sha1', salt);
-  return hmac.update(pwd).digest('hex');
-};
-
-userSchema.statics = {
-  createSalt: createSalt,
-  hashPwd: hashPwd
-}
-
-userSchema.methods = {
-  authenticate: function(passwordToMatch) {
-    return hashPwd(this.salt, passwordToMatch) === this.hashedPassword;
-  }
-}
-
-var User = mongoose.model('User', userSchema);
-module.exports = User;
