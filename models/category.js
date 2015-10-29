@@ -1,12 +1,7 @@
-var crypto    = require('crypto');
-
 module.exports = function(sequelize, DataTypes) {
-  var UserAccount = sequelize.define("User", {
+  var Category = sequelize.define("Category", {
     // Do not need to define created_at, edited_at, deleted_at or id
-    username: { type: DataTypes.TEXT, allowNull: false },
-    salt: { type: DataTypes.TEXT, allowNull: false },
-    hashedPassword: { type: DataTypes.TEXT, allowNull: false, field: 'hashed_password' },
-    roles: { type: DataTypes.ARRAY(DataTypes.TEXT), allowNull: false }
+    name: { type: DataTypes.TEXT, allowNull: false }
   }, {
     // Adds createdAt and updatedAt timestamps to the model.
     timestamps: true,
@@ -25,28 +20,14 @@ module.exports = function(sequelize, DataTypes) {
     freezeTableName: true,
 
     // define the table's name
-    tableName: 'user_account',
-    classMethods: {
-      createSalt: function() {
-        return crypto.randomBytes(128).toString('base64');
-      },
-      hashPassword: function(salt, pwd) {
-        var hmac = crypto.createHmac('sha1', salt);
-        return hmac.update(pwd).digest('hex');
-      }
-    },
+    tableName: 'category',
     instanceMethods: {
-      authenticate: function(passwordToMatch) {
-        return UserAccount.hashPassword(this.salt, passwordToMatch) === this.hashedPassword;
-      },
       clean: function() {
-        delete this.dataValues.salt;
-        delete this.dataValues.hashed_password;
         delete this.dataValues.created_at;
         delete this.dataValues.updated_at;
         delete this.dataValues.deleted_at;
       }
     }
   });
-  return UserAccount;
+  return Category;
 };

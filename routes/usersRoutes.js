@@ -1,12 +1,11 @@
 var express = require('express'),
     account = require('./middleware/account');
 
-var routes = function(models) {
+var routes = function(User) {
   var router = express.Router();
-  var User   = models.User;
 
   router.get('/', account.requiresRoleApi('admin'), function(req, res) {
-    User.findAll({}).then(function(users) {
+    User.findAll({ }).then(function(users) {
       res.send(users);
     });
   });

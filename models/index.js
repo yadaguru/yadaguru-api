@@ -1,3 +1,4 @@
+//TODO: Clean up formatting
 var fs = require('fs');
 var path = require('path');
 var basename  = path.basename(module.filename);
@@ -9,14 +10,16 @@ var database = process.env.DATABASE_URL || 'postgres://yadaguru:yadaguru@localho
 var sequelize = new Sequelize(database, clone(config));
 var db        = {};
 
-fs
-  .readdirSync(__dirname)
+fs.readdirSync(__dirname)
   .filter(function(file) {
     return (file.indexOf('.') !== 0) && (file !== basename);
   })
   .forEach(function(file) {
-    var model = sequelize['import'](path.join(__dirname, file));
-    db[model.name] = model;
+    var model = sequelize.import(path.join(__dirname, file));
+    // Models keys are plural name so they can match on routes
+    var modelKey = model.options.name.plural;
+    modelKey = modelKey.charAt(0).toLowerCase() + modelKey.slice(1);
+    db[modelKey] = model;
   });
 
 Object.keys(db).forEach(function(modelName) {

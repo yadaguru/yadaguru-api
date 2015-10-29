@@ -1,12 +1,9 @@
-var crypto    = require('crypto');
-
 module.exports = function(sequelize, DataTypes) {
-  var UserAccount = sequelize.define("User", {
+  var TestDate = sequelize.define("TestDate", {
     // Do not need to define created_at, edited_at, deleted_at or id
-    username: { type: DataTypes.TEXT, allowNull: false },
-    salt: { type: DataTypes.TEXT, allowNull: false },
-    hashedPassword: { type: DataTypes.TEXT, allowNull: false, field: 'hashed_password' },
-    roles: { type: DataTypes.ARRAY(DataTypes.TEXT), allowNull: false }
+    testDate: { type: DataTypes.DATE, allowNull: false, field: 'test_date' },
+    registrationDate: { type: DataTypes.DATE, allowNull: false, field: 'registration_date' },
+    testType: { type: DataTypes.TEXT, allowNull: false, field: 'test_type' }
   }, {
     // Adds createdAt and updatedAt timestamps to the model.
     timestamps: true,
@@ -25,28 +22,14 @@ module.exports = function(sequelize, DataTypes) {
     freezeTableName: true,
 
     // define the table's name
-    tableName: 'user_account',
-    classMethods: {
-      createSalt: function() {
-        return crypto.randomBytes(128).toString('base64');
-      },
-      hashPassword: function(salt, pwd) {
-        var hmac = crypto.createHmac('sha1', salt);
-        return hmac.update(pwd).digest('hex');
-      }
-    },
+    tableName: 'test_date',
     instanceMethods: {
-      authenticate: function(passwordToMatch) {
-        return UserAccount.hashPassword(this.salt, passwordToMatch) === this.hashedPassword;
-      },
       clean: function() {
-        delete this.dataValues.salt;
-        delete this.dataValues.hashed_password;
         delete this.dataValues.created_at;
         delete this.dataValues.updated_at;
         delete this.dataValues.deleted_at;
       }
     }
   });
-  return UserAccount;
+  return TestDate;
 };

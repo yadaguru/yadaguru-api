@@ -25,7 +25,7 @@ exports.authenticate = function(req, res) {
 exports.requiresRoleApi = function(role) {
   return function(req, res, next) {
     if(!req.isAuthenticated() || req.user.roles.indexOf(role) === -1) {
-      res.status(403);
+      res.status(403).send('Not authorized');
       res.end();
     } else {
       next();
