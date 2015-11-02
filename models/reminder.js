@@ -7,7 +7,7 @@ module.exports = function(sequelize, DataTypes) {
     lateMessage: { type: DataTypes.TEXT, allowNull: false, field: 'late_message' },
     lateDetail: { type: DataTypes.TEXT, allowNull: false, field: 'late_detail' },
     category: { type: DataTypes.TEXT, allowNull: false, references: { model: 'Category', key: 'name' } },
-    timeframes: { type: DataTypes.TEXT, allowNull: false }
+    timeframes: { type: DataTypes.ARRAY(DataTypes.TEXT), allowNull: false }
   }, {
     // Adds createdAt and updatedAt timestamps to the model.
     timestamps: true,

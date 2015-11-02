@@ -70,7 +70,7 @@ var tables = {
     'late_message TEXT',
     'late_detail TEXT',
     'category TEXT REFERENCES category(name)',
-    'timeframes TEXT',
+    'timeframes TEXT[]',
     'updated_at TIMESTAMPTZ',
     'created_at TIMESTAMPTZ',
     'deleted_at TIMESTAMPTZ'
