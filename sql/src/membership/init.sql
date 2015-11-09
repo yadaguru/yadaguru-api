@@ -58,7 +58,6 @@ create type member_summary as (
   location json,
   logs json,
   roles json
-
 );
 
 --drop in pgcrypto if it's not there
