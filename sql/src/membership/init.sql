@@ -57,7 +57,6 @@ create type member_summary as (
   social json,
   location json,
   logs json,
-  notes json,
   roles json
 
 );

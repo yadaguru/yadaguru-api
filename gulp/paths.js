@@ -1,16 +1,8 @@
-var clientRoot = 'client/',
-    serverRoot = '',
-    publicCssRoot = clientRoot + 'public/css/',
-    bowerPath  = clientRoot + 'vendor/';
+var paths = {};
+paths.serverRoot = __dirname + '/..';
 
-module.exports = {
-  clientRoot: clientRoot,
-  serverRoot: serverRoot,
-  publicCssRoot: publicCssRoot,
-  allClient: [
-    clientRoot + '**/*.js',
-    clientRoot + '**/*.css',
-    clientRoot + '**/*.html',
-    !bowerPath
-  ]
-};
+paths.sqlRoot = paths.serverRoot + '/sql/';
+paths.sqlSrc = paths.sqlRoot + 'src/';
+paths.sqlDistFile = paths.sqlRoot + 'dist/yadaguru.sql';
+
+module.exports = paths;
