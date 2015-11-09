@@ -4,7 +4,7 @@ create table timeframes(
 );
 
 create table reminders_timeframes(
-  reminder_id bigint not null,
+  reminder_id int not null,
   timeframe_id int[] not null,
   primary key (reminder_id, timeframe_id)
 );
