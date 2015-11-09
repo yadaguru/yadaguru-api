@@ -1,5 +1,5 @@
 var massive          = require('massive'),
-    sql              = require('../../sql'),
+    sql              = require('../../../sql'),
     connectionString = 'postgres://postgres:postgres@localhost:5432/yadaguru';
 
 var Helpers = function(){
