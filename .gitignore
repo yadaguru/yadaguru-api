@@ -1,5 +1,6 @@
 *.swp
-/node_modules/*
-/.settings/*
+node_modules/*
+.settings/*
 npm-debug.log
-/.idea/*
+.idea/*
+sql/dist/*
