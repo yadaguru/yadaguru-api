@@ -9,11 +9,11 @@ create table reminders_categories(
   primary key (reminder_id, category_id)
 );
 
-insert into reminder.categories (value) values('Absolute Deadline');
-insert into reminder.categories (value) values('Application');
-insert into reminder.categories (value) values('Essay Writing');
-insert into reminder.categories (value) values('Financial Aid');
-insert into reminder.categories (value) values('General Reminder');
-insert into reminder.categories (value) values('Portfolio Prep');
-insert into reminder.categories (value) values('Recommendations');
-insert into reminder.categories (value) values('Testing Registration');
+insert into reminder.categories (name) values('Absolute Deadline');
+insert into reminder.categories (name) values('Application');
+insert into reminder.categories (name) values('Essay Writing');
+insert into reminder.categories (name) values('Financial Aid');
+insert into reminder.categories (name) values('General Reminder');
+insert into reminder.categories (name) values('Portfolio Prep');
+insert into reminder.categories (name) values('Recommendations');
+insert into reminder.categories (name) values('Testing Registration');

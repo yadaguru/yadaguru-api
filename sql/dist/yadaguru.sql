@@ -1,4 +1,4 @@
---built on Mon Nov 09 2015 12:12:33 GMT-0500 (Eastern Standard Time)
+--built on Tue Nov 10 2015 14:25:33 GMT-0500 (Eastern Standard Time)
 
 BEGIN;
 
@@ -62,7 +62,6 @@ create type member_summary as (
   location json,
   logs json,
   roles json
-
 );
 
 --drop in pgcrypto if it's not there
@@ -701,6 +700,131 @@ BEGIN
   select membership.change_status(member_email,10,'Activated member') into succeeded;
 END;
 $$ LANGUAGE PLPGSQL;
+
+
+select 'functions installed' as result;
+
+COMMIT;
+
+--built on Tue Nov 10 2015 14:25:34 GMT-0500 (Eastern Standard Time)
+
+BEGIN;
+
+--kill the membership schema, tables, and functions
+drop schema if exists reminder CASCADE;
+
+--good to use a schema to keep your tables, views, functions
+--organized and confined
+create schema reminder;
+
+--set this so what we create here will be applied to the membership schema
+set search_path=reminder;
+
+--global functions
+
+--log enum
+-- TODO: Flesh out log_type
+create type log_type as ENUM('system');
+-- TODO: log level enum, error, ect.
+
+--type for reminder summary
+-- TODO: Write reminder_summary
+
+select 'DB Initialized' as result;
+
+
+create table categories(
+  id serial primary key not null,
+  name varchar(25) not null unique
+);
+
+create table reminders_categories(
+  reminder_id int not null,
+  category_id int not null,
+  primary key (reminder_id, category_id)
+);
+
+insert into reminder.categories (name) values('Absolute Deadline');
+insert into reminder.categories (name) values('Application');
+insert into reminder.categories (name) values('Essay Writing');
+insert into reminder.categories (name) values('Financial Aid');
+insert into reminder.categories (name) values('General Reminder');
+insert into reminder.categories (name) values('Portfolio Prep');
+insert into reminder.categories (name) values('Recommendations');
+insert into reminder.categories (name) values('Testing Registration');
+
+
+create table faqs(
+  id serial primary key not null,
+  question text unique,
+  answer text
+);
+
+
+create table logs(
+  id serial primary key not null,
+  subject log_type,
+  -- TODO: Should we have a memberid reference for this?
+  -- If not do we want to capture other data?
+  entry text not null,
+  data json,
+  created_at timestamptz default current_timestamp
+);
+
+
+create table settings(
+  id serial primary key not null,
+  name varchar(50) not null unique,
+  value varchar(50)
+);
+
+insert into reminder.settings(name, value) values ('summerCutoffMonth', '7');
+insert into reminder.settings(name, value) values ('summerCutoffDay', '2');
+
+
+create table timeframes(
+  id serial primary key not null,
+  value varchar(25) not null unique
+);
+
+create table reminders_timeframes(
+  reminder_id int not null,
+  timeframe_id int[] not null,
+  primary key (reminder_id, timeframe_id)
+);
+
+insert into reminder.timeframes (value) values('jan1');
+insert into reminder.timeframes (value) values('may1');
+insert into reminder.timeframes (value) values('summer');
+insert into reminder.timeframes (value) values('0');
+insert into reminder.timeframes (value) values('7');
+insert into reminder.timeframes (value) values('12');
+insert into reminder.timeframes (value) values('14');
+insert into reminder.timeframes (value) values('21');
+insert into reminder.timeframes (value) values('30');
+insert into reminder.timeframes (value) values('60');
+insert into reminder.timeframes (value) values('90');
+
+
+select 'tables installed' as result;
+
+set search_path = reminder;
+
+--ALTER TABLE reminders_timeframes
+--ADD CONSTRAINT reminder_timeframes_timeframes
+--FOREIGN KEY (timeframe_id) REFERENCES timeframes (id) on delete cascade;
+
+--ALTER TABLE reminders_timeframes
+--ADD CONSTRAINT reminder_timeframes_reminders
+--FOREIGN KEY (reminder_id) REFERENCES reminders (id) on delete cascade;
+
+--ALTER TABLE reminders_categories
+--ADD CONSTRAINT reminder_categories_categories
+--FOREIGN KEY (category_id) REFERENCES categories (id) on delete cascade;
+
+--ALTER TABLE reminders_categories
+--ADD CONSTRAINT reminder_categories_reminders
+--FOREIGN KEY (reminder_id) REFERENCES reminders (id) on delete cascade;
 
 
 select 'functions installed' as result;
