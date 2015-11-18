@@ -43,8 +43,6 @@ BEGIN
   member_status,
   member_can_login,
   member_is_admin,
-  found_user.first,
-  found_user.last,
   found_user.member_key,
   found_user.email_validation_token,
   found_user.created_at,

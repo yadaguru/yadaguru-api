@@ -48,8 +48,6 @@ create type member_summary as (
   status varchar(50),
   can_login bool,
   is_admin bool,
-  first varchar(25),
-  last varchar(25),
   member_key varchar(12),
   email_validation_token varchar(36),
   created_at timestamptz,

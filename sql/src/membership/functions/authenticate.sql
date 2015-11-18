@@ -57,13 +57,6 @@ BEGIN
             select 'Successfully authenticated' into message;
             select found_user.id into return_id;
 
-            --a nice return name
-            if found_user.first is null then
-                select found_user.email into return_name;
-            else
-                select(found_user.first || ' ' || found_user.last) into return_name;
-            end if;
-
             -- update user stats
             update membership.members set
             signin_count = signin_count + 1

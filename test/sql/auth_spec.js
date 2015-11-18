@@ -21,7 +21,6 @@ describe('Authentication', function() {
     var authResult = {};
     before(function(done) {
       helpers.db.membership.authenticate(['test@test.com', 'password', 'local', '127.0.0.1'], function(err, res) {
-
         authResult = res[0];
         done();
       });

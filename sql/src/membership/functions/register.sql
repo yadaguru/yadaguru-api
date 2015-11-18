@@ -10,7 +10,7 @@ returns TABLE (
     email varchar(255),
     success BOOLEAN,
     status int,
-    email_validation_token varchar(36))  
+    email_validation_token varchar(36))
 as
 $$
 DECLARE

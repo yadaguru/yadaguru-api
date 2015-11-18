@@ -1,9 +1,7 @@
 create or replace function get_current_user(session_id bigint)
 returns TABLE(
     member_id bigint,
-    email varchar(255),
-    first varchar(50),
-    last varchar(50))
+    email varchar(255))
 as
 $$
 DECLARE
@@ -24,9 +22,7 @@ begin
 
     return query
     select found_user.id,
-    found_user.email,
-    found_user.first,
-    found_user.last;
+    found_user.email;
 
 end;
 $$ language plpgsql;
