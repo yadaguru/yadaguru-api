@@ -3,3 +3,6 @@
 /.settings/*
 npm-debug.log
 /.idea/*
+sql/dist/*
+empty/*
+.vagrant
