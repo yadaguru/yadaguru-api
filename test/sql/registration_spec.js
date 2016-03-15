@@ -15,10 +15,8 @@ describe('Registration', function() {
   describe('New Registration with valid info', function() {
     var regResult = {};
     before(function(done) {
-      //register a user then pull out the info
       helpers.register(goodUser, function(err, res) {
         regResult = res;
-        //console.log(res);
         done();
       });
     });
@@ -39,10 +37,8 @@ describe('Registration', function() {
   describe('Registering an existing user', function() {
     var regResult;
     before(function(done) {
-      //register a user then pull out the info
       helpers.register(goodUser, function(err, res) {
         assert(err === null, err);
-        //do it again
         helpers.register(goodUser, function(err, res2) {
           assert(err === null, err);
           regResult = res2;
@@ -54,7 +50,7 @@ describe('Registration', function() {
       assert(!regResult.success, 'Oops - they got in');
     });
     it('gives a reason why', function() {
-      assert.equal(regResult.message, 'Phone number exists', regResult.message);
+      assert.equal(regResult.message, 'Phone number exists');
     });
   });
 });

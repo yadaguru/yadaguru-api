@@ -39,7 +39,7 @@ $$ LANGUAGE PLPGSQL;
 create sequence membership_id_seq;
 
 --log enum, change as needed
-create type log_type as ENUM('registration', 'authentication', 'activity', 'system');
+create type log_type as ENUM('registration', 'authentication', 'activity', 'system', 'validation');
 
 -- for our member lookup bits
 create type member_summary as (

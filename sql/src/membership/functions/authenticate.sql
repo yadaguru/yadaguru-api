@@ -35,44 +35,33 @@ BEGIN
 
     if not return_id is NULL then
 
-        select can_login from membership.status
-        inner join membership.users on membership.status.id = membership.users.membership_status_id
-        where membership.users.id = return_id into member_can_login;
+        select true into success;
 
-        if member_can_login then
-            --yay!
-            select true into success;
+        select * from membership.users where membership.users.id=return_id into found_user;
+        select 'Successfully authenticated' into message;
+        select found_user.id into return_id;
 
-            select * from membership.users where membership.users.id=return_id into found_user;
-            select 'Successfully authenticated' into message;
-            select found_user.id into return_id;
+        -- update user stats
+        update membership.users set
+        signin_count = signin_count + 1
+        where id = return_id;
 
-            -- update user stats
-            update membership.users set
-            signin_count = signin_count + 1
-            where id = return_id;
-
-            -- deal with old sessions
-            if exists(select id from membership.sessions where membership.sessions.user_id=return_id and expires_at >= now() ) then
-                update membership.sessions set expires_at = now() where membership.sessions.user_id=return_id and expires_at >= now();
-            end if;
-
-            -- since this is a new login, create a new session - this will invalidate
-            -- any shared login sessions where 2 people use the same account
-            select session_length_weeks into session_length from membership.settings limit 1;
-
-            --create a session
-            insert into membership.sessions(user_id, created_at, expires_at, ip)
-            values (return_id, now(), now() + interval '1 week' * session_length, ip) returning id into new_session_id;
-
-            -- add a log entry
-            insert into  membership.logs(subject, entry, user_id, created_at)
-            values('authentication', 'Successfully logged in', return_id, now());
-
-        else
-            --TODO: Use a friendly message here from the DB
-            select 'Currently unable to login' into message;
+        -- deal with old sessions
+        if exists(select id from membership.sessions where membership.sessions.user_id=return_id and expires_at >= now() ) then
+            update membership.sessions set expires_at = now() where membership.sessions.user_id=return_id and expires_at >= now();
         end if;
+
+        -- since this is a new login, create a new session - this will invalidate
+        -- any shared login sessions where 2 people use the same account
+        select session_length_weeks into session_length from membership.settings limit 1;
+
+        --create a session
+        insert into membership.sessions(user_id, created_at, expires_at, ip)
+        values (return_id, now(), now() + interval '1 week' * session_length, ip) returning id into new_session_id;
+
+        -- add a log entry
+        insert into  membership.logs(subject, entry, user_id, created_at)
+        values('authentication', 'Successfully logged in', return_id, now());
 
     end if;
 

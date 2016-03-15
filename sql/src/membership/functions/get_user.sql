@@ -13,14 +13,6 @@ BEGIN
   if exists(select users.id from membership.users where users.id=user_id) then
     select * into found_user from membership.users where users.id=user_id;
 
-    select name into member_status
-    from membership.status
-    where membership.status.id = found_user.membership_status_id;
-
-    select membership.status.can_login into member_can_login
-    from membership.status
-    where membership.status.id = found_user.membership_status_id;
-
     select exists (select membership.users_roles.user_id
                   from membership.users_roles
                   where membership.users_roles.user_id = found_user.id AND role_id = 10) into member_is_admin;

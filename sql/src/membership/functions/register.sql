@@ -20,19 +20,11 @@ DECLARE
 BEGIN
     select false, new_phone_number into success, return_phone_number;
 
-    -- TODO: move to first login
-    -- TODO: verify passwords match
-    -- if(pass <> confirm) THEN
-        -- select 'Password and confirm do not match' into message;
-
     if exists(select membership.users.phone_number from membership.users where membership.users.phone_number=return_phone_number)  then
         select 0 into new_id;
         select 'Phone number exists' into message;
     ELSE
         select true into success;
-        -- TODO: move to first login
-        -- TODO: encrypt confirm_code, personal_code, phone_number
-        -- SELECT membership.crypt(pass, membership.gen_salt('bf', 10)) into hashedpw;
         select membership.random_value(6) into phone_number_validation_token;
 
         insert into membership.users(phone_number, created_at, phone_number_validation_token)
