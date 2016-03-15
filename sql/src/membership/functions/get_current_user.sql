@@ -6,14 +6,14 @@ as
 $$
 DECLARE
 found_id bigint;
-found_user membership.members;
+found_user membership.users;
 begin
 
     --session exist?
     if exists(select id from membership.sessions where id=session_id AND expires_at >= now()) then
         --get the user record
         select membership.sessions.member_id into found_id from membership.sessions where id=session_id;
-        select * from membership.members where id=found_id into found_user;
+        select * from membership.users where id=found_id into found_user;
 
         --reset the expiration on the session
         update membership.sessions set expires_at = now() + interval '2 weeks' where membership.sessions.id = session_id;

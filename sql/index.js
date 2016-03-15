@@ -67,7 +67,11 @@ var getFunctions = function(dir) {
   var sqlFiles = [];
   // Read directory
   var functionDir = path.join(dir, 'functions/');
-  var files = fs.readdirSync(functionDir);
+  try {
+    var files = fs.readdirSync(functionDir);
+  } catch (e) {
+    return;
+  }
   // For each file
   _.each(files, function(file) {
     // if .sql

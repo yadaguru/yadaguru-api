@@ -4,7 +4,7 @@ as $$
 DECLARE found_id bigint;
 BEGIN
   select id
-  from membership.members
+  from membership.users
   into found_id
   where email = member_email;
 

@@ -4,9 +4,9 @@ DECLARE
 found_id bigint;
 BEGIN
   select false into succeeded;
-  select id into found_id from membership.members where email=member_email;
+  select id into found_id from membership.users where email=member_email;
   if found_id IS NOT NULL THEN
-    update membership.members set membership_status_id=new_status_id where email=member_email;
+    update membership.users set membership_status_id=new_status_id where email=member_email;
     --add a log entry
     insert into membership.logs(subject,entry,member_id, created_at)
     values('authentication',message,found_id,now());

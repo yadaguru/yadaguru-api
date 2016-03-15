@@ -2,7 +2,7 @@ create or replace function get_member(member_id bigint)
 returns setof member_summary
 as $$
 DECLARE
-  found_user membership.members;
+  found_user membership.users;
   parsed_logs json;
   parsed_roles json;
   member_status varchar(50);
@@ -10,8 +10,8 @@ DECLARE
   member_is_admin bool;
 BEGIN
 
-  if exists(select members.id from membership.members where members.id=member_id) then
-    select * into found_user from membership.members where members.id=member_id;
+  if exists(select users.id from membership.users where users.id=member_id) then
+    select * into found_user from membership.users where users.id=member_id;
 
     select name into member_status
     from membership.status

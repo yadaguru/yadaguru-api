@@ -20,7 +20,7 @@ DECLARE
   new_session_id bigint;
   message varchar(255);
   success boolean;
-  found_user membership.members;
+  found_user membership.users;
   session_length int;
   member_can_login boolean;
   search_token varchar(255);
@@ -46,19 +46,19 @@ BEGIN
     if not return_id is NULL then
 
         select can_login from membership.status
-        inner join membership.members on membership.status.id = membership.members.membership_status_id
-        where membership.members.id = return_id into member_can_login;
+        inner join membership.users on membership.status.id = membership.users.membership_status_id
+        where membership.users.id = return_id into member_can_login;
 
         if member_can_login then
             --yay!
             select true into success;
 
-            select * from membership.members where membership.members.id=return_id into found_user;
+            select * from membership.users where membership.users.id=return_id into found_user;
             select 'Successfully authenticated' into message;
             select found_user.id into return_id;
 
             -- update user stats
-            update membership.members set
+            update membership.users set
             signin_count = signin_count + 1
             where id = return_id;
 

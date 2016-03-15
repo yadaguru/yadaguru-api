@@ -17,7 +17,7 @@ data_result json;
 BEGIN
   select false into success;
   select 'User not found with this email' into message;
-  select id into found_id from membership.members where email = member_email;
+  select id into found_id from membership.users where email = member_email;
 
   if found_id is not null then
     --replace the provider for this user completely

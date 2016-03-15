@@ -30,7 +30,7 @@ BEGIN
     if(pass <> confirm) THEN
         select 'Password and confirm do not match' into message;
 
-    elseif exists(select membership.members.email from membership.members where membership.members.email=return_email)  then
+    elseif exists(select membership.users.email from membership.users where membership.users.email=return_email)  then
         select 0 into new_id;
         select 'Email exists' into message;
     ELSE
@@ -39,7 +39,7 @@ BEGIN
         SELECT membership.crypt(pass, membership.gen_salt('bf', 10)) into hashedpw;
         select membership.random_value(36) into validation_token;
 
-        insert into membership.members(email, created_at, membership_status_id,email_validation_token)
+        insert into membership.users(email, created_at, membership_status_id,email_validation_token)
         VALUES(new_email, now(), return_status, validation_token) returning id into new_id;
 
         select 'Successfully registered' into message;
@@ -52,7 +52,7 @@ BEGIN
         insert into membership.logins(member_id, provider, provider_key, provider_token)
         values(new_id, 'token',null,validation_token);
 
-        -- add them to the members role
+        -- add them to the users role
         insert into membership.members_roles(member_id, role_id)
         VALUES(new_id, 99);
 

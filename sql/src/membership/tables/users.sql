@@ -1,5 +1,5 @@
--- Keeps track of members
-create table members(
+-- Keeps track of users
+create table users(
     id bigint primary key not null unique DEFAULT id_generator(),
     member_key varchar(12) not null unique default random_value(12),
     email_validation_token varchar(36) default random_value(36),
@@ -15,6 +15,6 @@ create table members(
 );
 
 CREATE TRIGGER members_search_vector_refresh
-BEFORE INSERT OR UPDATE ON members
+BEFORE INSERT OR UPDATE ON users
 FOR EACH ROW EXECUTE PROCEDURE
 tsvector_update_trigger(search, 'pg_catalog.english',  email);
