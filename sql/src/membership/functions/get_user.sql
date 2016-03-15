@@ -1,4 +1,4 @@
-create or replace function get_member(member_id bigint)
+create or replace function get_member(user_id bigint)
 returns setof member_summary
 as $$
 DECLARE
@@ -10,8 +10,8 @@ DECLARE
   member_is_admin bool;
 BEGIN
 
-  if exists(select users.id from membership.users where users.id=member_id) then
-    select * into found_user from membership.users where users.id=member_id;
+  if exists(select users.id from membership.users where users.id=user_id) then
+    select * into found_user from membership.users where users.id=user_id;
 
     select name into member_status
     from membership.status
@@ -21,17 +21,17 @@ BEGIN
     from membership.status
     where membership.status.id = found_user.membership_status_id;
 
-    select exists (select membership.members_roles.member_id
-                  from membership.members_roles
-                  where membership.members_roles.member_id = found_user.id AND role_id = 10) into member_is_admin;
+    select exists (select membership.users_roles.user_id
+                  from membership.users_roles
+                  where membership.users_roles.user_id = found_user.id AND role_id = 10) into member_is_admin;
 
     select json_agg(x) into parsed_logs from
-    (select * from membership.logs where membership.logs.member_id=found_user.id) x;
+    (select * from membership.logs where membership.logs.user_id=found_user.id) x;
 
     select json_agg(z) into parsed_roles from
     (select * from membership.roles
-    inner join membership.members_roles on membership.roles.id = membership.members_roles.role_id
-    where membership.members_roles.member_id=found_user.id) z;
+    inner join membership.users_roles on membership.roles.id = membership.users_roles.role_id
+    where membership.users_roles.user_id=found_user.id) z;
 
 
 

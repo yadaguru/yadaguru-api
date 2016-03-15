@@ -1,4 +1,4 @@
---built on Tue Nov 10 2015 14:25:33 GMT-0500 (Eastern Standard Time)
+--built on Tue Mar 15 2016 14:13:03 GMT-0400 (EDT)
 
 BEGIN;
 
@@ -52,8 +52,6 @@ create type member_summary as (
   status varchar(50),
   can_login bool,
   is_admin bool,
-  first varchar(25),
-  last varchar(25),
   member_key varchar(12),
   email_validation_token varchar(36),
   created_at timestamptz,
@@ -70,21 +68,11 @@ create extension if not exists pgcrypto with schema membership;
 select 'DB Initialized' as result;
 
 
--- Details for external auth providers
-create table logins (
-    id bigint primary key not null unique DEFAULT id_generator(),
-    member_id bigint not null,
-    provider varchar(50) not null default 'local',
-    provider_key varchar(255),
-    provider_token varchar(255) not null
-);
-
-
 -- Stores data from specific users
 create table logs(
     id serial primary key not null,
     subject log_type,
-    member_id bigint not null,
+    user_id bigint not null,
     entry text not null,
     data json,
     created_at timestamptz default current_timestamp
@@ -92,6 +80,8 @@ create table logs(
 
 
 -- Membership mailers
+
+-- TODO refactor to be texts over emails
 create table mailers(
     id serial primary key not null,
     name varchar(255) not null,
@@ -114,30 +104,6 @@ insert into membership.mailers(name,from_address,from_name, subject, template_ma
 values('general','noreply@site.com','Admin','Welcome to Our Site','Welcome to our site!');
 
 
--- Keeps track of members
-create table members(
-    id bigint primary key not null unique DEFAULT id_generator(),
-    first varchar(25),
-    last varchar(25),
-    member_key varchar(12) not null unique default random_value(12),
-    email_validation_token varchar(36) default random_value(36),
-    reset_password_token varchar(36),
-    reset_password_token_set_at timestamptz,
-    email varchar(255) unique not null,
-    search tsvector,
-    created_at timestamptz DEFAULT current_timestamp,
-    signin_count int,
-    membership_status_id int not null,
-    social json,
-    location json
-);
-
-CREATE TRIGGER members_search_vector_refresh
-BEFORE INSERT OR UPDATE ON members
-FOR EACH ROW EXECUTE PROCEDURE
-tsvector_update_trigger(search, 'pg_catalog.english',  email, first, last);
-
-
 -- List of all roles
 create table roles(
     id integer primary key not null,
@@ -145,10 +111,10 @@ create table roles(
 );
 
 -- member-role mapping
-create table members_roles(
-    member_id bigint not null,
+create table users_roles(
+    user_id bigint not null,
     role_id int not null,
-    primary key (member_id, role_id)
+    primary key (user_id, role_id)
 );
 
 -- default roles
@@ -161,13 +127,14 @@ create table sessions(
     id bigint primary key not null unique DEFAULT id_generator(),
     token varchar(24) not null unique default random_value(24),
     ip inet,
-    member_id bigint not null,
+    user_id bigint not null,
     created_at timestamptz not null DEFAULT current_timestamp,
     expires_at timestamptz not null
 );
 
 
 -- Settings for logins
+-- TODO: Major refactor for phone number login
 create table settings(
     id serial primary key not null,
     allow_token_login boolean not null default true,
@@ -199,76 +166,44 @@ insert into membership.status(id, name, description,can_login) values(99, 'Banne
 insert into membership.status(id, name, description,can_login) values(88, 'Locked', 'Member is locked out due to failed logins',false);
 
 
+-- Keeps track of users
+create table users(
+    id bigint primary key not null unique DEFAULT id_generator(),
+    phone_number char(10) not null unique,
+    created_at timestamptz DEFAULT current_timestamp,
+    phone_number_validation_token char(6) default random_value(6),
+    personal_login_token char(6),
+    reset_password_token_set_at timestamptz,
+    search tsvector,
+    signin_count int
+);
+
+CREATE TRIGGER users_search_vector_refresh
+BEFORE INSERT OR UPDATE ON users
+FOR EACH ROW EXECUTE PROCEDURE
+tsvector_update_trigger(search, 'pg_catalog.english',  phone_number);
+
+
 select 'tables installed' as result;
 
 set search_path = membership;
 
-ALTER TABLE logins
-ADD CONSTRAINT logins_members
-FOREIGN KEY (member_id) REFERENCES members (id) on delete cascade;
-
 ALTER TABLE logs
 ADD CONSTRAINT logs_members
-FOREIGN KEY (member_id) REFERENCES members (id) on delete cascade;
+FOREIGN KEY (user_id) REFERENCES users (id) on delete cascade;
 
-ALTER TABLE members_roles
+ALTER TABLE users_roles
 ADD CONSTRAINT member_roles_members
-FOREIGN KEY (member_id) REFERENCES members (id) on delete cascade;
+FOREIGN KEY (user_id) REFERENCES users (id) on delete cascade;
 
-ALTER TABLE members_roles
+ALTER TABLE users_roles
 ADD CONSTRAINT member_roles_roles
 FOREIGN KEY (role_id) REFERENCES roles (id) on delete cascade;
 
 ALTER TABLE sessions
 ADD CONSTRAINT sessions_members
-FOREIGN KEY (member_id) REFERENCES members(id) on delete cascade;
+FOREIGN KEY (user_id) REFERENCES users(id) on delete cascade;
 
-
-create or replace function add_login(
-    member_email varchar(255),
-    key varchar(50),
-    token varchar(255),
-    new_provider varchar(50)
-)
-returns TABLE(
-  message varchar(255),
-  success boolean
-) as
-$$
-DECLARE
-success boolean;
-message varchar(255);
-found_id bigint;
-data_result json;
-BEGIN
-  select false into success;
-  select 'User not found with this email' into message;
-  select id into found_id from membership.members where email = member_email;
-
-  if found_id is not null then
-    --replace the provider for this user completely
-    delete from membership.logins where found_id = membership.logins.member_id AND membership.logins.provider = new_provider;
-
-    --add the login
-    insert into membership.logins(member_id,provider_key, provider_token, provider)
-    values (found_id, key,token,new_provider);
-
-    --add log entry
-    insert into membership.logs(subject,entry,member_id, created_at)
-    values('authentication','Added ' || new_provider || ' login',found_id,now());
-
-    select true into success;
-    select 'Added login successfully' into message;
-
-
-  end if;
-
-  return query
-  select message, success;
-
-END;
-$$
-language plpgsql;
 
 create or replace function add_member_to_role(member_email varchar(255), new_role_id int, out succeeded bool)
 as $$
@@ -277,13 +212,13 @@ found_member_id bigint;
 selected_role varchar(50);
 BEGIN
     select false into succeeded;
-    if exists(select id from membership.members where email=member_email) then
-        select id into found_member_id from membership.members where email=member_email;
-        if not exists(select member_id from membership.members_roles where member_id = found_member_id and role_id=new_role_id) then
-            insert into membership.members_roles(member_id, role_id) values (found_member_id, new_role_id);
+    if exists(select id from membership.users where email=member_email) then
+        select id into found_member_id from membership.users where email=member_email;
+        if not exists(select user_id from membership.users_roles where user_id = found_member_id and role_id=new_role_id) then
+            insert into membership.users_roles(user_id, role_id) values (found_member_id, new_role_id);
             --add a log entry
             select description into selected_role from membership.roles where id=new_role_id;
-            insert into membership.logs(subject,entry,member_id, created_at)
+            insert into membership.logs(subject,entry,user_id, created_at)
             values('registration','Member added to role ' || selected_role,found_member_id,now());
             select true into succeeded;
         end if;
@@ -292,13 +227,13 @@ END;
 $$ LANGUAGE plpgsql;
 
 create or replace function authenticate(
-    pkey varchar(255),
-    ptoken varchar(255),
+    phone_number char(10),
+    personal_login_token char(6),
     prov varchar(50),
     ip inet
 )
 returns TABLE (
-    member_id bigint,
+    user_id bigint,
     session_id bigint,
     message varchar(255),
     email varchar(255),
@@ -313,7 +248,7 @@ DECLARE
   new_session_id bigint;
   message varchar(255);
   success boolean;
-  found_user membership.members;
+  found_user membership.users;
   session_length int;
   member_can_login boolean;
   search_token varchar(255);
@@ -323,48 +258,33 @@ BEGIN
     select false into success;
     select 'Invalid username or password' into message;
 
-    if prov = 'local' then
-      -- find the user with a crypted password
-      select membership.logins.member_id from membership.logins
-      where membership.logins.provider_key=pkey
-      AND membership.logins.provider_token = membership.crypt(ptoken,provider_token)
-      AND membership.logins.provider=prov into return_id;
-    else
-      -- find the user with a token
-      select membership.logins.member_id from membership.logins
-      WHERE membership.logins.provider_token = ptoken
-      AND membership.logins.provider=prov into return_id;
-    end if;
+    select membership.users.id from membership.users
+      where membership.users.phone_number=phone_number
+      AND membership.users.personal_login_token = personal_login_token
+      into return_id;
 
     if not return_id is NULL then
 
         select can_login from membership.status
-        inner join membership.members on membership.status.id = membership.members.membership_status_id
-        where membership.members.id = return_id into member_can_login;
+        inner join membership.users on membership.status.id = membership.users.membership_status_id
+        where membership.users.id = return_id into member_can_login;
 
         if member_can_login then
             --yay!
             select true into success;
 
-            select * from membership.members where membership.members.id=return_id into found_user;
+            select * from membership.users where membership.users.id=return_id into found_user;
             select 'Successfully authenticated' into message;
             select found_user.id into return_id;
 
-            --a nice return name
-            if found_user.first is null then
-                select found_user.email into return_name;
-            else
-                select(found_user.first || ' ' || found_user.last) into return_name;
-            end if;
-
             -- update user stats
-            update membership.members set
+            update membership.users set
             signin_count = signin_count + 1
             where id = return_id;
 
             -- deal with old sessions
-            if exists(select id from membership.sessions where membership.sessions.member_id=return_id and expires_at >= now() ) then
-                update membership.sessions set expires_at = now() where membership.sessions.member_id=return_id and expires_at >= now();
+            if exists(select id from membership.sessions where membership.sessions.user_id=return_id and expires_at >= now() ) then
+                update membership.sessions set expires_at = now() where membership.sessions.user_id=return_id and expires_at >= now();
             end if;
 
             -- since this is a new login, create a new session - this will invalidate
@@ -372,11 +292,11 @@ BEGIN
             select session_length_weeks into session_length from membership.settings limit 1;
 
             --create a session
-            insert into membership.sessions(member_id, created_at, expires_at, ip)
+            insert into membership.sessions(user_id, created_at, expires_at, ip)
             values (return_id, now(), now() + interval '1 week' * session_length, ip) returning id into new_session_id;
 
             -- add a log entry
-            insert into  membership.logs(subject, entry, member_id, created_at)
+            insert into  membership.logs(subject, entry, user_id, created_at)
             values('authentication', 'Successfully logged in', return_id, now());
 
         else
@@ -394,10 +314,11 @@ BEGIN
 END;
 $$ LANGUAGE PLPGSQL;
 
+
 create or replace function change_password(
-  member_email varchar(255),
-  old_password varchar(255),
-  new_password varchar(255)
+  phone_number char(10),
+  personal_login_token char(10),
+  new_personal_login_token char(10)
 )
 returns TABLE(
   message varchar(255),
@@ -413,19 +334,19 @@ BEGIN
   select false into password_changed;
 
   --first, verify that the old password is correct and also find the user
-  select membership.logins.member_id from membership.logins
-  where membership.logins.provider_key=member_email
-  AND membership.logins.provider_token = membership.crypt(old_password,provider_token)
-  AND membership.logins.provider='local' into found_id;
+  select membership.users.id from membership.users
+  where membership.users.phone_number=phone_number
+  AND membership.users.personal_login_token=personal_login_token
+  into found_id;
 
 
   if found_id IS NOT NULL THEN
     -- crypt the new one and save it
-    update membership.logins set provider_token = membership.crypt(new_password, membership.gen_salt('bf', 10))
-    where member_id = found_id AND provider='local';
+    update membership.users set personal_login_token = new_personal_login_token
+    where user_id = found_id;
 
     -- log the change
-    insert into membership.logs(subject,entry,member_id, created_at)
+    insert into membership.logs(subject,entry,user_id, created_at)
     values('authentication','Password changed', found_id,now());
 
     select true into password_changed;
@@ -442,22 +363,20 @@ $$ LANGUAGE PLPGSQL;
 
 create or replace function get_current_user(session_id bigint)
 returns TABLE(
-    member_id bigint,
-    email varchar(255),
-    first varchar(50),
-    last varchar(50))
+    user_id bigint,
+    email varchar(255))
 as
 $$
 DECLARE
 found_id bigint;
-found_user membership.members;
+found_user membership.users;
 begin
 
     --session exist?
     if exists(select id from membership.sessions where id=session_id AND expires_at >= now()) then
         --get the user record
-        select membership.sessions.member_id into found_id from membership.sessions where id=session_id;
-        select * from membership.members where id=found_id into found_user;
+        select membership.sessions.user_id into found_id from membership.sessions where id=session_id;
+        select * from membership.users where id=found_id into found_user;
 
         --reset the expiration on the session
         update membership.sessions set expires_at = now() + interval '2 weeks' where membership.sessions.id = session_id;
@@ -466,19 +385,33 @@ begin
 
     return query
     select found_user.id,
-    found_user.email,
-    found_user.first,
-    found_user.last;
+    found_user.email;
 
 end;
 $$ language plpgsql;
 
 
-create or replace function get_member(member_id bigint)
+create or replace function get_member_by_email(member_email varchar(255))
+returns setof member_summary
+as $$
+DECLARE found_id bigint;
+BEGIN
+  select id
+  from membership.users
+  into found_id
+  where email = member_email;
+
+  return query
+  select * from membership.get_member(found_id);
+END;
+$$ LANGUAGE PLPGSQL;
+
+
+create or replace function get_member(user_id bigint)
 returns setof member_summary
 as $$
 DECLARE
-  found_user membership.members;
+  found_user membership.users;
   parsed_logs json;
   parsed_roles json;
   member_status varchar(50);
@@ -486,8 +419,8 @@ DECLARE
   member_is_admin bool;
 BEGIN
 
-  if exists(select members.id from membership.members where members.id=member_id) then
-    select * into found_user from membership.members where members.id=member_id;
+  if exists(select users.id from membership.users where users.id=user_id) then
+    select * into found_user from membership.users where users.id=user_id;
 
     select name into member_status
     from membership.status
@@ -497,17 +430,17 @@ BEGIN
     from membership.status
     where membership.status.id = found_user.membership_status_id;
 
-    select exists (select membership.members_roles.member_id
-                  from membership.members_roles
-                  where membership.members_roles.member_id = found_user.id AND role_id = 10) into member_is_admin;
+    select exists (select membership.users_roles.user_id
+                  from membership.users_roles
+                  where membership.users_roles.user_id = found_user.id AND role_id = 10) into member_is_admin;
 
     select json_agg(x) into parsed_logs from
-    (select * from membership.logs where membership.logs.member_id=found_user.id) x;
+    (select * from membership.logs where membership.logs.user_id=found_user.id) x;
 
     select json_agg(z) into parsed_roles from
     (select * from membership.roles
-    inner join membership.members_roles on membership.roles.id = membership.members_roles.role_id
-    where membership.members_roles.member_id=found_user.id) z;
+    inner join membership.users_roles on membership.roles.id = membership.users_roles.role_id
+    where membership.users_roles.user_id=found_user.id) z;
 
 
 
@@ -519,8 +452,6 @@ BEGIN
   member_status,
   member_can_login,
   member_is_admin,
-  found_user.first,
-  found_user.last,
   found_user.member_key,
   found_user.email_validation_token,
   found_user.created_at,
@@ -533,98 +464,71 @@ end;
 $$ LANGUAGE PLPGSQL;
 
 
-create or replace function get_member_by_email(member_email varchar(255))
-returns setof member_summary
-as $$
-DECLARE found_id bigint;
-BEGIN
-  select id
-  from membership.members
-  into found_id
-  where email = member_email;
-
-  return query
-  select * from membership.get_member(found_id);
-END;
-$$ LANGUAGE PLPGSQL;
-
-
 create or replace function register(
-    new_email varchar(255),
-    pass varchar(255),
-    confirm varchar(255)
+    new_phone_number char(10)
 )
 
 returns TABLE (
     new_id bigint,
     message varchar(255),
-    email varchar(255),
+    phone_number varchar(10),
     success BOOLEAN,
     status int,
-    email_validation_token varchar(36))  
+    phone_number_validation_token char(6))
 as
 $$
 DECLARE
     new_id bigint;
     message varchar(255);
-    hashedpw varchar(255);
+    -- hashedpw varchar(255);
     success BOOLEAN;
-    return_email varchar(255);
+    return_phone_number char(10);
     return_status int;
-    validation_token varchar(36);
-    verify_email boolean;
+    phone_number_validation_token char(10);
+    verify_phone_number boolean;
 
 BEGIN
     --default this to 'Not Approved'
-    select 30, false, new_email into return_status, success, return_email;
+    select 30, false, new_phone_number into return_status, success, return_phone_number;
 
-    if(pass <> confirm) THEN
-        select 'Password and confirm do not match' into message;
+    -- TODO: move to first login
+    -- TODO: verify passwords match
+    -- if(pass <> confirm) THEN
+        -- select 'Password and confirm do not match' into message;
 
-    elseif exists(select membership.members.email from membership.members where membership.members.email=return_email)  then
+    if exists(select membership.users.phone_number from membership.users where membership.users.phone_number=return_phone_number)  then
         select 0 into new_id;
-        select 'Email exists' into message;
+        select 'Phone Number exists' into message;
     ELSE
         select true into success;
-        --encrypt password
-        SELECT membership.crypt(pass, membership.gen_salt('bf', 10)) into hashedpw;
-        select membership.random_value(36) into validation_token;
+        -- TODO: move to first login
+        -- TODO: encrypt confirm_code, personal_code, phone_number
+        -- SELECT membership.crypt(pass, membership.gen_salt('bf', 10)) into hashedpw;
+        select membership.random_value(6) into phone_number_validation_token;
 
-        insert into membership.members(email, created_at, membership_status_id,email_validation_token)
-        VALUES(new_email, now(), return_status, validation_token) returning id into new_id;
+        insert into membership.users(phone_number, created_at, phone_number_validation_token, membership_status_id )
+        VALUES(new_phone_number, now(), phone_number_validation_token, return_status, phone_number_validation_token) returning id into new_id;
 
         select 'Successfully registered' into message;
 
-        --add login bits to member_logins
-        insert into membership.logins(member_id, provider, provider_key, provider_token)
-        values(new_id, 'local',return_email,hashedpw);
-
-        --add auth token
-        insert into membership.logins(member_id, provider, provider_key, provider_token)
-        values(new_id, 'token',null,validation_token);
-
-        -- add them to the members role
-        insert into membership.members_roles(member_id, role_id)
+        -- add them to the users role
+        insert into membership.users_roles(user_id, role_id)
         VALUES(new_id, 99);
 
         --add log entry
-        insert into membership.logs(subject,entry,member_id, created_at)
+        insert into membership.logs(subject,entry,user_id, created_at)
         values('registration','Added to system, set role to User',new_id,now());
 
-        --if the settings say we don't need to verify them, then activate now
-        select email_validation_required into verify_email from membership.settings limit 1;
-
-        if verify_email = false then
-          perform membership.change_status(return_email,10,'Activated member during registration');
-        end if;
+        perform membership.change_status(return_email,10,'Activated member during registration');
 
         --TODO: Mailer
     end if;
 
     return query
-    select new_id, message, new_email, success, return_status, validation_token;
+    select new_id, message, new_phone_number, success, return_status, phone_number_validation_token;
 END;
 $$ LANGUAGE PLPGSQL;
+
 
 create or replace function remove_member_from_role(
   member_email varchar(255),
@@ -636,12 +540,12 @@ DECLARE
   selected_role varchar(50);
 BEGIN
   select false into succeeded;
-  if exists(select id from membership.members where email=member_email) then
-    select id into found_member_id from membership.members where email=member_email;
-    delete from membership.members_roles where member_id=found_member_id AND role_id=remove_role_id;
+  if exists(select id from membership.users where email=member_email) then
+    select id into found_member_id from membership.users where email=member_email;
+    delete from membership.users_roles where user_id=found_member_id AND role_id=remove_role_id;
     --add a log entry
     select description into selected_role from membership.roles where id=remove_role_id;
-    insert into logs(subject,entry,member_id, created_at)
+    insert into logs(subject,entry,user_id, created_at)
     values('registration','Member removed from role ' || selected_role,found_member_id,now());
     select true into succeeded;
   end if;
@@ -654,11 +558,11 @@ DECLARE
 found_id bigint;
 BEGIN
   select false into succeeded;
-  select id into found_id from membership.members where email=member_email;
+  select id into found_id from membership.users where email=member_email;
   if found_id IS NOT NULL THEN
-    update membership.members set membership_status_id=new_status_id where email=member_email;
+    update membership.users set membership_status_id=new_status_id where email=member_email;
     --add a log entry
-    insert into membership.logs(subject,entry,member_id, created_at)
+    insert into membership.logs(subject,entry,user_id, created_at)
     values('authentication',message,found_id,now());
     select true into succeeded;
   end if;
@@ -706,7 +610,7 @@ select 'functions installed' as result;
 
 COMMIT;
 
---built on Tue Nov 10 2015 14:25:34 GMT-0500 (Eastern Standard Time)
+--built on Tue Mar 15 2016 14:13:03 GMT-0400 (EDT)
 
 BEGIN;
 
@@ -827,6 +731,6 @@ set search_path = reminder;
 --FOREIGN KEY (reminder_id) REFERENCES reminders (id) on delete cascade;
 
 
-select 'functions installed' as result;
+
 
 COMMIT;

@@ -3,9 +3,7 @@ var assert = require('assert');
 var helpers = require('./helpers');
 
 var goodUser = {
-  email: 'test@test.com',
-  password: 'password',
-  confirm: 'password'
+  phone_number: '1234567890'
 };
 
 describe('Registration', function() {
@@ -32,7 +30,7 @@ describe('Registration', function() {
       assert.equal('Successfully registered', regResult.message, 'Wrong message');
     });
     it('creates log entries', function(done) {
-      helpers.db.query('select * from membership.logs where member_id=$1', [regResult.new_id], function(err, res) {
+      helpers.db.query('select * from membership.logs where user_id=$1', [regResult.new_id], function(err, res) {
         assert.ok(res.length > 0);
         done();
       });
@@ -56,40 +54,7 @@ describe('Registration', function() {
       assert(!regResult.success, 'Oops - they got in');
     });
     it('gives a reason why', function() {
-      assert.equal(regResult.message, 'Email exists', regResult.message);
-    });
-  });
-
-  describe('New registration with mismatched passwords', function() {
-    var regResult = {};
-    before(function(done) {
-      //register a user then pull out the info
-      helpers.register({
-        email: 'test2@test.com',
-        password: 'password',
-        confirm: 'wdfdf'
-      }, function(err, res) {
-        regResult = res;
-        done();
-      });
-    });
-    it('is not successful', function() {
-      assert.equal(regResult.success, false, 'Oops - they got in');
-    });
-    it('gives a reason why', function() {
-      assert.equal(regResult.message, 'Password and confirm do not match', 'Bad message');
-    });
-  });
-  describe('Activating a user', function() {
-    var result = {};
-    before(function(done) {
-      helpers.db.membership.activate_member('test@test.com', function(err, res) {
-        result = res[0];
-        done();
-      });
-    });
-    it('sets the status', function() {
-      assert.ok(result.succeeded);
+      assert.equal(regResult.message, 'Phone number exists', regResult.message);
     });
   });
 });

@@ -14,7 +14,8 @@ var Helpers = function(){
   };
 
   this.register = function(args, next){
-    this.db.membership.register([args.email, args.password, args.confirm], function(err,res){
+    this.db.membership.register([args.phone_number], function(err,res){
+      if(err) console.log(err);
       next(err,res[0]);
     });
   };

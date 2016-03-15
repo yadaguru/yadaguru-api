@@ -1,4 +1,6 @@
 -- Membership mailers
+
+-- TODO refactor to be texts over emails
 create table mailers(
     id serial primary key not null,
     name varchar(255) not null,

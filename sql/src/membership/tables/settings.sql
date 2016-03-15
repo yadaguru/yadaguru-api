@@ -1,4 +1,5 @@
 -- Settings for logins
+-- TODO: Major refactor for phone number login
 create table settings(
     id serial primary key not null,
     allow_token_login boolean not null default true,

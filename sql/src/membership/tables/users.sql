@@ -1,20 +1,16 @@
 -- Keeps track of users
 create table users(
     id bigint primary key not null unique DEFAULT id_generator(),
-    member_key varchar(12) not null unique default random_value(12),
-    email_validation_token varchar(36) default random_value(36),
-    reset_password_token varchar(36),
-    reset_password_token_set_at timestamptz,
-    email varchar(255) unique not null,
-    search tsvector,
+    phone_number char(10) not null unique,
     created_at timestamptz DEFAULT current_timestamp,
-    signin_count int,
-    membership_status_id int not null,
-    social json,
-    location json
+    phone_number_validation_token char(6) default random_value(6),
+    personal_login_token char(6),
+    reset_password_token_set_at timestamptz,
+    search tsvector,
+    signin_count int
 );
 
-CREATE TRIGGER members_search_vector_refresh
+CREATE TRIGGER users_search_vector_refresh
 BEFORE INSERT OR UPDATE ON users
 FOR EACH ROW EXECUTE PROCEDURE
-tsvector_update_trigger(search, 'pg_catalog.english',  email);
+tsvector_update_trigger(search, 'pg_catalog.english',  phone_number);

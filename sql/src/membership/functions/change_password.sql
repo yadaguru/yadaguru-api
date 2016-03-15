@@ -1,7 +1,7 @@
 create or replace function change_password(
-  member_email varchar(255),
-  old_password varchar(255),
-  new_password varchar(255)
+  phone_number char(10),
+  personal_login_token char(10),
+  new_personal_login_token char(10)
 )
 returns TABLE(
   message varchar(255),
@@ -17,19 +17,19 @@ BEGIN
   select false into password_changed;
 
   --first, verify that the old password is correct and also find the user
-  select membership.logins.member_id from membership.logins
-  where membership.logins.provider_key=member_email
-  AND membership.logins.provider_token = membership.crypt(old_password,provider_token)
-  AND membership.logins.provider='local' into found_id;
+  select membership.users.id from membership.users
+  where membership.users.phone_number=phone_number
+  AND membership.users.personal_login_token=personal_login_token
+  into found_id;
 
 
   if found_id IS NOT NULL THEN
     -- crypt the new one and save it
-    update membership.logins set provider_token = membership.crypt(new_password, membership.gen_salt('bf', 10))
-    where member_id = found_id AND provider='local';
+    update membership.users set personal_login_token = new_personal_login_token
+    where user_id = found_id;
 
     -- log the change
-    insert into membership.logs(subject,entry,member_id, created_at)
+    insert into membership.logs(subject,entry,user_id, created_at)
     values('authentication','Password changed', found_id,now());
 
     select true into password_changed;

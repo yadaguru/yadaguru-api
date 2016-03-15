@@ -7,9 +7,7 @@ describe('Status checks', function() {
   before(function(done) {
     helpers.initDb(function(err, res) {
       helpers.register({
-        email: 'test@test.com',
-        password: 'password',
-        confirm: 'password'
+        phone_number: '1234567890'
       }, function(err, res) {
         assert.ok(res.success, 'Can\'t add user for some reason');
         newId = res.new_id;

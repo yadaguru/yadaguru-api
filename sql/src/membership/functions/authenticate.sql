@@ -1,16 +1,14 @@
 create or replace function authenticate(
-    pkey varchar(255),
-    ptoken varchar(255),
-    prov varchar(50),
+    auth_phone_number char(10),
+    auth_personal_login_token char(6),
     ip inet
 )
 returns TABLE (
-    member_id bigint,
+    user_id bigint,
     session_id bigint,
     message varchar(255),
-    email varchar(255),
-    success boolean,
-    public_name varchar(255)
+    phone_number char(10),
+    success boolean
 ) as
 
 $$
@@ -28,20 +26,12 @@ BEGIN
 
     --defaults
     select false into success;
-    select 'Invalid username or password' into message;
+    select 'Invalid phone number or password' into message;
 
-    if prov = 'local' then
-      -- find the user with a crypted password
-      select membership.logins.member_id from membership.logins
-      where membership.logins.provider_key=pkey
-      AND membership.logins.provider_token = membership.crypt(ptoken,provider_token)
-      AND membership.logins.provider=prov into return_id;
-    else
-      -- find the user with a token
-      select membership.logins.member_id from membership.logins
-      WHERE membership.logins.provider_token = ptoken
-      AND membership.logins.provider=prov into return_id;
-    end if;
+    select membership.users.id from membership.users
+      where membership.users.phone_number=auth_phone_number
+      AND membership.users.personal_login_token = auth_personal_login_token
+      into return_id;
 
     if not return_id is NULL then
 
@@ -63,8 +53,8 @@ BEGIN
             where id = return_id;
 
             -- deal with old sessions
-            if exists(select id from membership.sessions where membership.sessions.member_id=return_id and expires_at >= now() ) then
-                update membership.sessions set expires_at = now() where membership.sessions.member_id=return_id and expires_at >= now();
+            if exists(select id from membership.sessions where membership.sessions.user_id=return_id and expires_at >= now() ) then
+                update membership.sessions set expires_at = now() where membership.sessions.user_id=return_id and expires_at >= now();
             end if;
 
             -- since this is a new login, create a new session - this will invalidate
@@ -72,11 +62,11 @@ BEGIN
             select session_length_weeks into session_length from membership.settings limit 1;
 
             --create a session
-            insert into membership.sessions(member_id, created_at, expires_at, ip)
+            insert into membership.sessions(user_id, created_at, expires_at, ip)
             values (return_id, now(), now() + interval '1 week' * session_length, ip) returning id into new_session_id;
 
             -- add a log entry
-            insert into  membership.logs(subject, entry, member_id, created_at)
+            insert into  membership.logs(subject, entry, user_id, created_at)
             values('authentication', 'Successfully logged in', return_id, now());
 
         else
@@ -89,7 +79,7 @@ BEGIN
     return query
     --the command result has success, message, and a JSON package
     --select success, message, data_result;
-    select return_id, new_session_id, message, pkey, success, return_name;
+    select return_id, new_session_id, message, auth_phone_number, success;
 
 END;
 $$ LANGUAGE PLPGSQL;

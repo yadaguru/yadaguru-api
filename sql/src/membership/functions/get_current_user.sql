@@ -1,6 +1,6 @@
 create or replace function get_current_user(session_id bigint)
 returns TABLE(
-    member_id bigint,
+    user_id bigint,
     email varchar(255))
 as
 $$
@@ -12,7 +12,7 @@ begin
     --session exist?
     if exists(select id from membership.sessions where id=session_id AND expires_at >= now()) then
         --get the user record
-        select membership.sessions.member_id into found_id from membership.sessions where id=session_id;
+        select membership.sessions.user_id into found_id from membership.sessions where id=session_id;
         select * from membership.users where id=found_id into found_user;
 
         --reset the expiration on the session
