@@ -4,7 +4,7 @@ var gulp             = require('gulp'),
     paths            = require('../paths'),
     distFile         = paths.sqlDistFile,
     sql              = require('../../sql'),
-    connectionString = 'postgres://postgres:postgres@localhost:5432/yadaguru'; // TODO: Move to settings file
+    connectionString = 'postgres://yadaguru:yadaguru@localhost:15432/yadaguru'; // TODO: Move to settings file
 
 // TODO: Promisify functions to avoid need for sync calls
 // TODO: Create yadaguru user
