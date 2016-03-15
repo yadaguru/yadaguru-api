@@ -1,7 +1,7 @@
 var config           = require('./config/config.js')(),
     app              = require('./config/express.js')(),
     massive          = require('massive'),
-    connectionString = 'postgres://postgres:postgres@localhost:5432/yadaguru'; // TODO: Move to settings file
+    connectionString = 'postgres://postgres:postgres@localhost:15432/yadaguru'; // TODO: Move to settings file
 
 // connect to Massive and get DB, loading tables, functions, ect
 var massiveInstance = massive.connectSync({ connectionString : connectionString });
