@@ -9,6 +9,12 @@ var massiveInstance = massive.connectSync({ connectionString : connectionString 
 // Set a reference to the massive instance on app
 app.set('db', massiveInstance);
 
+// Import controllers
+var categories = require('./controllers/categories');
+
+// Setup routes
+app.use('/api/categories', categories);
+
 app.listen(config.port, function () {
   console.log('Running on PORT: ' + config.port);
 });
