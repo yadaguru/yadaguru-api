@@ -1,10 +1,25 @@
 var express = require('express');
 var router = express.Router();
 
+var categories = [
+  {
+    id: 1,
+    category: 'foo'
+  },
+  {
+    id: 2,
+    category: 'bar'
+  }
+];
+
 /**
  * Gets all categories
  */
 router.get('/', function(req, res, next) {
+
+  // some call to database
+
+  res.status(200).send(categories);
 
 });
 
@@ -13,6 +28,7 @@ router.get('/', function(req, res, next) {
  */
 router.get('/:id', function(req, res, next) {
 
+  var id = req.params.id;
 
 });
 
@@ -21,6 +37,7 @@ router.get('/:id', function(req, res, next) {
  */
 router.post('/', function(req, res, next) {
 
+  var categoryName = req.body.name;
 
 });
 

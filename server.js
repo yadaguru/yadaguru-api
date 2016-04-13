@@ -1,13 +1,24 @@
-var config           = require('./config/config.js')(),
-    app              = require('./config/express.js')(),
-    massive          = require('massive'),
-    connectionString = 'postgres://postgres:postgres@localhost:15432/yadaguru'; // TODO: Move to settings file
+var express              = require('express');
+    //massive          = require('massive'),
+    //connectionString = 'postgres://postgres:postgres@localhost:15432/yadaguru'; // TODO: Move to settings file
+
+var app = express();
 
 // connect to Massive and get DB, loading tables, functions, ect
-var massiveInstance = massive.connectSync({ connectionString : connectionString });
+//var massiveInstance = massive.connectSync({ connectionString : connectionString });
 
 // Set a reference to the massive instance on app
-app.set('db', massiveInstance);
+//app.set('db', massiveInstance);
+
+var router = express.Router();
+
+router.get('/', function(req, res) {
+
+  res.status(200).send('foobar');
+
+});
+
+app.use('/', router);
 
 // Import controllers
 var categories = require('./controllers/categories');
@@ -15,8 +26,8 @@ var categories = require('./controllers/categories');
 // Setup routes
 app.use('/api/categories', categories);
 
-app.listen(config.port, function () {
-  console.log('Running on PORT: ' + config.port);
+app.listen(3005, function () {
+  console.log('Running on PORT: ' + 3005);
 });
 
 module.exports = app;
