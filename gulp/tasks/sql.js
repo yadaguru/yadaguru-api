@@ -4,11 +4,8 @@ var gulp             = require('gulp'),
     paths            = require('../paths'),
     distFile         = paths.sqlDistFile,
     sql              = require('../../sql'),
-    connectionString = 'postgres://yadaguru:yadaguru@localhost:15432/yadaguru'; // TODO: Move to settings file
+    connectionString = 'postgres://yadaguru:yadaguru@localhost:15432/yadaguru'; // TODO: Move to env variable
 
-// TODO: Promisify functions to avoid need for sync calls
-// TODO: Create yadaguru user
-// TODO: Set ownership of database & internals to yadaguru to avoid superuser account
 gulp.task('build-sql', function() {
   fs.writeFileSync(distFile, sql.getSql());
 });
