@@ -29,6 +29,12 @@ router.get('/', function(req, res, next) {
 router.get('/:id', function(req, res, next) {
 
   var id = req.params.id;
+  var categories = [{
+    "id": id,
+    "name": "Category"
+  }]
+  
+  res.status(200).send(categories);
 
 });
 
