@@ -25,7 +25,7 @@ var categories = require('./controllers/categories');
 
 // Setup routes
 app.use('/api/categories', categories);
-
+app.use('/api/reminders', require('./controllers/remindersController'));
 app.use('/api/users', require('./controllers/usersController'));
 
 app.listen(3005, function () {
