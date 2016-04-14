@@ -20,11 +20,8 @@ router.get('/', function(req, res) {
 
 app.use('/', router);
 
-// Import controllers
-var categories = require('./controllers/categories');
-
 // Setup routes
-app.use('/api/categories', categories);
+app.use('/api/categories', require('./controllers/categoriesController'));
 app.use('/api/reminders', require('./controllers/remindersController'));
 app.use('/api/users', require('./controllers/usersController'));
 
