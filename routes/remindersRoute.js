@@ -1,17 +1,17 @@
 var express = require('express');
 var router = express.Router();
-var usersService = require('../services/usersService');
-var usersController = require('../controllers/usersController')(userService);
+var remindersService = require('../services/remindersService');
+var remindersController = require('../controllers/remindersController')(remindersService);
 
 var routes = function() {
     router.route('/')
-        .get(usersController.get);
+        .get(remindersController.getByUserId);
 
     router.route('/:reminderId')
-        .get(usersController.getById);
+        .get(remindersController.getByIdAndUserId);
 
     router.route('/schools/:schoolId')
-        .get(usersController.getBySchoolId);
+        .get(remindersController.getBySchoolId);
 
     return router;
 };

@@ -1,16 +1,45 @@
 var remindersController = function(remindersService) {
 
-    var post = function(req, res) {
-        var phoneNumber = req.body.phoneNumber;
+    var getByUserId = function(req, res) {
+        
+        // TODO get user id from token 
+        var userId = '';
 
-        var userId = remindersService.create(phoneNumber);
+        var reminders = remindersService.findByUserId(userId);
 
         res.status(200);
-        res.send({ id: userId });
+        res.send(reminders);
+    };
+
+    var getByIdAndUserId = function(req, res) {
+
+    	// TODO get user id from token
+    	var userId = '';
+        var reminderId = req.params.reminderId;
+
+        // Should return null if the reminder is not assigned to the user
+        var reminder = remindersService.findByIdAndUserId(reminderId, userId);
+
+        res.status(200);
+        res.send(reminder);
+    };
+
+    var getByUserIdAndSchoolId = function(req, res) {
+
+        // TODO get user id from token
+    	var userId = '';
+        var schoolId = req.params.schoolId;
+
+        var reminders = remindersService.findByUserIdAndSchoolId(userId, schoolId);
+
+        res.status(200);
+        res.send(reminders);
     };
 
     return {
-      post: post
+    	getByUserId : getByUserId,
+  		getByIdAndUserId : getByIdAndUserId,
+      	getByUserIdAndSchoolId : getByUserIdAndSchoolId
     };
 };
 
