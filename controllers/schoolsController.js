@@ -8,7 +8,7 @@ var schoolsController = function(schoolsService) {
 		// TODO get user ID from header token
 		var userId = '';
 
-		var schools = schoolsService.getByUserId(userId);
+		var schools = schoolsService.findByUserId(userId);
 
 		res.status(200);
         res.send(schools);
@@ -24,10 +24,15 @@ var schoolsController = function(schoolsService) {
 
 		var schoolId = req.params.schoolId;
 
-		var school = schoolsService.getByIdAndUserId(schoolId, userId);
+		var school = schoolsService.findByIdAndUserId(schoolId, userId);
 
-		res.status(200);
-        res.send(school);
+		if (school){
+			res.status(200);
+        	res.send(school);
+		} else {
+			res.status(404);
+			res.send('School ID not found');
+		}
 	};
 
 	/**
@@ -61,19 +66,32 @@ var schoolsController = function(schoolsService) {
 
 		var schoolId = req.params.schoolId;
 
-		var tempSchool = schoolsService.getByIdAndUserId(schoolId, userId);
+		var tempSchool = schoolsService.findByIdAndUserId(schoolId, userId);
 
-		tempSchool.name = req.body.name;
-		tempSchool.dueDate = req.body.dueDate;
-		tempSchool.isActive = req.body.isActive;
+		// Make sure this school exists
+		if (tempSchool) {
 
-		var schools = schoolsService.update(tempSchool);
+			tempSchool.name = req.body.name;
+			tempSchool.dueDate = req.body.dueDate;
+			tempSchool.isActive = req.body.isActive;
 
-		res.status(200);
-        res.send(schools);
+			var schools = schoolsService.update(tempSchool);
+
+			res.status(200);
+        	res.send(schools);
+		} else {
+
+			// the school does not exist, or is not assigned to this user
+			res.status(404);
+			res.send('School ID not found');
+		}
+		
 	};
 
-	var delete = function (req, res) {
+	/**
+	 *	DELETE /api/schools/{school_id}
+	 */
+	var remove = function (req, res) {
 
 		// TODO get user ID from header token
 		var userId = '';
@@ -84,7 +102,7 @@ var schoolsController = function(schoolsService) {
 
 		if (isReal) {
 
-			schoolsService.delete(schoolId);
+			schoolsService.remove(schoolId);
 			res.status(200);
 
 		} else {
@@ -94,6 +112,14 @@ var schoolsController = function(schoolsService) {
 			res.send('School ID not found');
 		}
 	};
+
+	return {
+		get : get,
+    	getById : getById,
+  		post : post,
+      	put : put,
+      	remove : remove
+    };
 };
 
 module.exports = schoolsController;
