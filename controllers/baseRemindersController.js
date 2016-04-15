@@ -1,4 +1,13 @@
-var baseRemindersController = function(baseRemindersService) {
+var baseRemindersController = function(baseRemindersService, httpResponseService) {
+
+  var _requiredFields = [
+    'name',
+    'message',
+    'detail',
+    'timeframes',
+    'category'
+  ];
+
 
   var getAll = function(req, res) {
 
@@ -21,6 +30,12 @@ var baseRemindersController = function(baseRemindersService) {
 
   var post = function(req, res) {
 
+    if (!httpResponseService.hasRequiredFields(req.body, _requiredFields)) {
+      res.status(400);
+      res.send(httpResponseService.getBadRequestResponse(_requiredFields));
+      return;
+    }
+
     var newBaseReminder = {
       name: req.body.name,
       message: req.body.message,
@@ -39,6 +54,12 @@ var baseRemindersController = function(baseRemindersService) {
   };
 
   var put = function(req, res) {
+
+    if (!httpResponseService.hasRequiredFields(req.body, _requiredFields)) {
+      res.status(400);
+      res.send(httpResponseService.getBadRequestResponse(_requiredFields));
+      return;
+    }
 
     var updatedBaseReminder = {
       name: req.body.name,

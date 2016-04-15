@@ -4,6 +4,8 @@ var assert = require('assert');
 var sinon = require('sinon');
 var httpMocks = require('node-mocks-http');
 
+var httpResponseService = require('../../services/httpResponseService');
+
 var mockBaseReminders = [
   {
     id: 1,
@@ -67,7 +69,7 @@ var mockBaseReminderService = {
 
 };
 
-var baseRemindersController = require('../../controllers/baseRemindersController.js')(mockBaseReminderService);
+var baseRemindersController = require('../../controllers/baseRemindersController.js')(mockBaseReminderService, httpResponseService());
 
 describe('BaseReminders Controller', function() {
 
@@ -290,6 +292,64 @@ describe('BaseReminders Controller', function() {
         category: 4
       }
     ]));
+
+  });
+
+  it('should return a 400 error with a message if not all required fields are provided on a post request', function() {
+
+    var req = {
+      body: {
+        message: 'A 3rd message',
+        detail: 'Yet more details',
+        lateMessage: 'Yet another late message',
+        lateDetail: 'Some more late details',
+        timeframes: [5],
+        category: 4
+      }
+    };
+
+    var res = {
+      status: sinon.spy(),
+      send: sinon.spy()
+    };
+
+    baseRemindersController.post(req, res);
+    assert.ok(res.status.calledWith(400));
+    assert.ok(res.send.calledWith({
+      status: 400,
+      message: 'The following fields are required: name, message, detail, timeframes, category'
+    }));
+
+
+
+  });
+
+  it('should return a 400 error with a message if not all required fields are provided on a put request', function() {
+
+    var req = {
+      body: {
+        message: 'A 3rd message',
+        detail: 'Yet more details',
+        lateMessage: 'Yet another late message',
+        lateDetail: 'Some more late details',
+        timeframes: [5],
+        category: 4
+      }
+    };
+
+    var res = {
+      status: sinon.spy(),
+      send: sinon.spy()
+    };
+
+    baseRemindersController.put(req, res);
+    assert.ok(res.status.calledWith(400));
+    assert.ok(res.send.calledWith({
+      status: 400,
+      message: 'The following fields are required: name, message, detail, timeframes, category'
+    }));
+
+
 
   });
 
