@@ -27,6 +27,7 @@ app.use('/api/users', require('./controllers/usersController'));
 app.use('/api/schools', require('./controllers/schoolsController'));
 app.use('/api/base-reminders', require('./controllers/baseRemindersController'));
 app.use('/api/tests', require('./controllers/testsController'));
+app.use('/api/test-dates', require('./controllers/testDatesController'));
 
 app.listen(3005, function () {
   console.log('Running on PORT: ' + 3005);
