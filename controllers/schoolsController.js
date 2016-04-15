@@ -64,7 +64,7 @@ var schoolsController = function(schoolsService) {
     // TODO get user ID from header token
     var userId = '';
 
-    var schools = req.params.schools;
+    var schools = req.body.schools;
     var tempSchool = {};
     var tempSchools = [];
     
@@ -119,6 +119,7 @@ var schoolsController = function(schoolsService) {
 
       res.status(200);
       res.send(schools);
+      
     } else {
 
       // the school does not exist, or is not assigned to this user
@@ -158,6 +159,7 @@ var schoolsController = function(schoolsService) {
     getById: getById,
     post: post,
     put: put,
+    putOnId: putOnId,
     remove: remove
   };
 };

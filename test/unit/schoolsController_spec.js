@@ -135,7 +135,7 @@ describe('Schools Controller', function() {
 
   });
 
-  it('putdate a school with matching uer and school id', function() {
+  it('should update a school with matching user and school id', function() {
 
     var req = {
       params: {schoolId: 0}, body: {
@@ -150,7 +150,7 @@ describe('Schools Controller', function() {
       send: sinon.spy()
     };
 
-    schoolsController.put(req, res);
+    schoolsController.putOnId(req, res);
     assert.ok(res.status.calledWith(200));
 
     req = {
@@ -161,12 +161,12 @@ describe('Schools Controller', function() {
       }
     };
 
-    schoolsController.put(req, res);
+    schoolsController.putOnId(req, res);
     assert.ok(res.status.calledWith(404));
 
   });
 
-  it('putdate a school with matching uer and school id', function() {
+  it('should update a school with matching user and school id', function() {
 
     var req = {params: {schoolId: 0}};
 
@@ -181,6 +181,47 @@ describe('Schools Controller', function() {
     req = {params: {schoolId: 5}};
 
     schoolsController.remove(req, res);
+    assert.ok(res.status.calledWith(404));
+
+  });
+
+  it('should update a school with matching user and school id', function() {
+
+    var req = { body : { schools : [{
+    	  "userId" : "1",
+          "name" : "name",
+          "dueDate" : "2020-10-20",
+          "isActive" : 'true'
+        },{
+          "userId" : "1",
+          "name" : "other name",
+          "dueDate" : "2030-10-20",
+          "isActive" : 'true'
+        }
+    ]}};
+
+    var res = {
+      status: sinon.spy(),
+      send: sinon.spy()
+    };
+
+    schoolsController.put(req, res);
+    assert.ok(res.status.calledWith(200));
+
+    req = {body : { schools : [{
+    	  "userId" : "5",
+          "name" : "name",
+          "dueDate" : "2020-10-20",
+          "isActive" : 'true'
+        },{
+          "userId" : "5",
+          "name" : "other name",
+          "dueDate" : "2030-10-20",
+          "isActive" : 'true'
+        }
+    ]}};
+
+    schoolsController.put(req, res);
     assert.ok(res.status.calledWith(404));
 
   });
