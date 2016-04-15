@@ -25,6 +25,7 @@ app.use('/api/categories', require('./controllers/categoriesController'));
 app.use('/api/reminders', require('./controllers/remindersController'));
 app.use('/api/users', require('./controllers/usersController'));
 app.use('/api/schools', require('./controllers/schoolsController'));
+app.use('/api/base-reminders', require('./controllers/baseRemindersController'));
 app.use('/api/tests', require('./controllers/testsController'));
 
 app.listen(3005, function () {
