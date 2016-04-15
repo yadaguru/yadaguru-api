@@ -4,16 +4,16 @@ var remindersService = require('../services/remindersService');
 var remindersController = require('../controllers/remindersController')(remindersService);
 
 var routes = function() {
-    router.route('/')
-        .get(remindersController.getByUserId);
+  router.route('/')
+    .get(remindersController.getByUserId);
 
-    router.route('/:reminderId')
-        .get(remindersController.getByIdAndUserId);
+  router.route('/:reminderId')
+    .get(remindersController.getByIdAndUserId);
 
-    router.route('/schools/:schoolId')
-        .get(remindersController.getBySchoolId);
+  router.route('/schools/:schoolId')
+    .get(remindersController.getBySchoolId);
 
-    return router;
+  return router;
 };
 
 module.exports = routes;

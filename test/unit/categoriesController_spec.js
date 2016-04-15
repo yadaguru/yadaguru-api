@@ -57,7 +57,7 @@ describe('Categories Controller', function() {
 
   it('should return an array of one matching categories when calling getOne with an id', function() {
 
-    var req ={
+    var req = {
       params: {
         id: 1
       }
@@ -74,7 +74,7 @@ describe('Categories Controller', function() {
 
   });
 
-  it ('should return an array of all categories including the new one when posting a new category', function() {
+  it('should return an array of all categories including the new one when posting a new category', function() {
 
     var req = {
       body: {
@@ -97,7 +97,7 @@ describe('Categories Controller', function() {
 
   });
 
-  it ('should return an array of all categories with updated data when updating a category', function() {
+  it('should return an array of all categories with updated data when updating a category', function() {
 
     var req = {
       body: {
@@ -124,7 +124,7 @@ describe('Categories Controller', function() {
 
   });
 
-  it ('should return an array of all categories without the deleted category when deleting a category', function() {
+  it('should return an array of all categories without the deleted category when deleting a category', function() {
 
     var req = {
       params: {

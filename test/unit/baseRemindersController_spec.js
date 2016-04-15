@@ -109,7 +109,7 @@ describe('BaseReminders Controller', function() {
 
   it('should return an array of one matching BaseReminders when calling getOne with an id', function() {
 
-    var req ={
+    var req = {
       params: {
         id: 1
       }
@@ -137,7 +137,7 @@ describe('BaseReminders Controller', function() {
 
   });
 
-  it ('should return an array of all BaseReminders including the new one when posting a new baseReminder', function() {
+  it('should return an array of all BaseReminders including the new one when posting a new baseReminder', function() {
 
     var req = {
       body: {
@@ -193,7 +193,7 @@ describe('BaseReminders Controller', function() {
 
   });
 
-  it ('should return an array of all BaseReminders with updated data when updating a baseReminder', function() {
+  it('should return an array of all BaseReminders with updated data when updating a baseReminder', function() {
 
     var req = {
       body: {
@@ -253,7 +253,7 @@ describe('BaseReminders Controller', function() {
 
   });
 
-  it ('should return an array of all BaseReminders without the deleted baseReminder when deleting a baseReminder', function() {
+  it('should return an array of all BaseReminders without the deleted baseReminder when deleting a baseReminder', function() {
 
     var req = {
       params: {

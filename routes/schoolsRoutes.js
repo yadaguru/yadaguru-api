@@ -5,19 +5,19 @@ var schoolsController = require('../controllers/schoolsController')(schoolsServi
 
 var routes = function() {
 
-    router.route('/')
-        .get(schoolsController.get);
+  router.route('/')
+    .get(schoolsController.get);
 
-    router.route('/')
-        .post(schoolsController.post);
+  router.route('/')
+    .post(schoolsController.post);
 
-    router.route('/:schoolId')
-        .get(schoolsController.getById);
+  router.route('/:schoolId')
+    .get(schoolsController.getById);
 
-    router.route('/:schoolId')
-        .put(schoolsController.put);
+  router.route('/:schoolId')
+    .put(schoolsController.put);
 
-    return router;
+  return router;
 };
 
 module.exports = routes;

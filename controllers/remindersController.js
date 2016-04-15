@@ -1,46 +1,46 @@
 var remindersController = function(remindersService) {
 
-    var getByUserId = function(req, res) {
-        
-        // TODO get user id from token 
-        var userId = '';
+  var getByUserId = function(req, res) {
 
-        var reminders = remindersService.findByUserId(userId);
+    // TODO get user id from token
+    var userId = '';
 
-        res.status(200);
-        res.send(reminders);
-    };
+    var reminders = remindersService.findByUserId(userId);
 
-    var getByIdAndUserId = function(req, res) {
+    res.status(200);
+    res.send(reminders);
+  };
 
-    	// TODO get user id from token
-    	var userId = '';
-        var reminderId = req.params.reminderId;
+  var getByIdAndUserId = function(req, res) {
 
-        // Should return null if the reminder is not assigned to the user
-        var reminder = remindersService.findByIdAndUserId(reminderId, userId);
+    // TODO get user id from token
+    var userId = '';
+    var reminderId = req.params.reminderId;
 
-        res.status(200);
-        res.send(reminder);
-    };
+    // Should return null if the reminder is not assigned to the user
+    var reminder = remindersService.findByIdAndUserId(reminderId, userId);
 
-    var getByUserIdAndSchoolId = function(req, res) {
+    res.status(200);
+    res.send(reminder);
+  };
 
-        // TODO get user id from token
-    	var userId = '';
-        var schoolId = req.params.schoolId;
+  var getByUserIdAndSchoolId = function(req, res) {
 
-        var reminders = remindersService.findByUserIdAndSchoolId(userId, schoolId);
+    // TODO get user id from token
+    var userId = '';
+    var schoolId = req.params.schoolId;
 
-        res.status(200);
-        res.send(reminders);
-    };
+    var reminders = remindersService.findByUserIdAndSchoolId(userId, schoolId);
 
-    return {
-    	getByUserId : getByUserId,
-  		getByIdAndUserId : getByIdAndUserId,
-      	getByUserIdAndSchoolId : getByUserIdAndSchoolId
-    };
+    res.status(200);
+    res.send(reminders);
+  };
+
+  return {
+    getByUserId: getByUserId,
+    getByIdAndUserId: getByIdAndUserId,
+    getByUserIdAndSchoolId: getByUserIdAndSchoolId
+  };
 };
 
 module.exports = remindersController;
