@@ -57,9 +57,49 @@ var schoolsController = function(schoolsService) {
   };
 
   /**
-   *  PUT /api/schools/{school_id}
+   *  PUT /api/schools/
    */
   var put = function(req, res) {
+
+    // TODO get user ID from header token
+    var userId = '';
+
+    var schools = req.params.schools;
+    var tempSchool = {};
+    var tempSchools = [];
+    
+    // Update each school in request list
+    for (var i = 0; i < schools.length; i++) {
+
+      tempSchool = schoolsService.findByIdAndUserId(schools[i].schoolId, userId);
+      
+      // Make sure this school exists
+      if (tempSchool) {
+
+        tempSchool.name = schools[i].name;
+        tempSchool.dueDate = schools[i].dueDate;
+        tempSchool.isActive = schools[i].isActive;
+        tempSchools.push(schoolsService.update(tempSchool));
+
+      } else {
+
+        // the school does not exist, or is not assigned to this user
+        res.status(404);
+        res.send('School with ID' + schools[i].schoolId + ' not found for this user.');
+        break;
+      }
+    }
+
+
+    res.status(200);
+    res.send(tempSchools);
+
+  };
+
+  /**
+   *  PUT /api/schools/{school_id}
+   */
+  var putOnId = function(req, res) {
 
     // TODO get user ID from header token
     var userId = '';
