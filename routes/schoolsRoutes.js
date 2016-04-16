@@ -11,11 +11,14 @@ var routes = function() {
   router.route('/')
     .post(schoolsController.post);
 
+  router.route('/')
+    .put(schoolsController.put);
+
   router.route('/:schoolId')
     .get(schoolsController.getById);
 
   router.route('/:schoolId')
-    .put(schoolsController.put);
+    .put(schoolsController.putOnId);
 
   return router;
 };
