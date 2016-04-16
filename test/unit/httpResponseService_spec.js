@@ -43,14 +43,14 @@ describe('httpResponseService.hasRequiredFields', function() {
 
 });
 
-describe('httpResponseService.getBadRequestResponse', function() {
+describe('httpResponseService.getMissingFieldsResponse', function() {
 
   var fields = ['foo', 'bar'];
 
-  it('should return an object with a status property of 400 and a message stating required fields', function() {
+  it('should return an object with a status property of 422 and a message stating required fields', function() {
 
-    var badRequestMessage = httpResponseService.getBadRequestResponse(fields);
-    assert.equal(badRequestMessage.status, 400);
+    var badRequestMessage = httpResponseService.getMissingFieldsResponse(fields);
+    assert.equal(badRequestMessage.status, 422);
     assert.equal(badRequestMessage.message, 'The following fields are required: foo, bar');
 
   });

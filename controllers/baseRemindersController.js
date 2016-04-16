@@ -31,8 +31,8 @@ var baseRemindersController = function(baseRemindersService, httpResponseService
   var post = function(req, res) {
 
     if (!httpResponseService.hasRequiredFields(req.body, _requiredFields)) {
-      res.status(400);
-      res.send(httpResponseService.getBadRequestResponse(_requiredFields));
+      res.status(422);
+      res.send(httpResponseService.getMissingFieldsResponse(_requiredFields));
       return;
     }
 
@@ -56,8 +56,8 @@ var baseRemindersController = function(baseRemindersService, httpResponseService
   var put = function(req, res) {
 
     if (!httpResponseService.hasRequiredFields(req.body, _requiredFields)) {
-      res.status(400);
-      res.send(httpResponseService.getBadRequestResponse(_requiredFields));
+      res.status(422);
+      res.send(httpResponseService.getMissingFieldsResponse(_requiredFields));
       return;
     }
 

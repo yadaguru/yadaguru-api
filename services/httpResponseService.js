@@ -19,10 +19,10 @@ var httpResponseService = function() {
 
   };
 
-  var getBadRequestResponse = function(requiredFields) {
+  var getMissingFieldsResponse = function(requiredFields) {
 
     return {
-      status: 400,
+      status: 422,
       message: _assembleMessage('The following fields are required: ', requiredFields)
     }
 
@@ -30,7 +30,7 @@ var httpResponseService = function() {
 
   return {
     hasRequiredFields: hasRequiredFields,
-    getBadRequestResponse: getBadRequestResponse
+    getMissingFieldsResponse: getMissingFieldsResponse
   }
 
 };

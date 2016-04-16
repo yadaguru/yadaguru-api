@@ -314,9 +314,9 @@ describe('BaseReminders Controller', function() {
     };
 
     baseRemindersController.post(req, res);
-    assert.ok(res.status.calledWith(400));
+    assert.ok(res.status.calledWith(422));
     assert.ok(res.send.calledWith({
-      status: 400,
+      status: 422,
       message: 'The following fields are required: name, message, detail, timeframes, category'
     }));
 
@@ -343,9 +343,9 @@ describe('BaseReminders Controller', function() {
     };
 
     baseRemindersController.put(req, res);
-    assert.ok(res.status.calledWith(400));
+    assert.ok(res.status.calledWith(422));
     assert.ok(res.send.calledWith({
-      status: 400,
+      status: 422,
       message: 'The following fields are required: name, message, detail, timeframes, category'
     }));
 
