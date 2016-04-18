@@ -80,7 +80,7 @@ var mockSchoolsService = {
   }
 }
 
-var schoolsController = require('../../controllers/schoolsController.js')(mockSchoolsService, httpResponseService);
+var schoolsController = require('../../controllers/schoolsController.js')(mockSchoolsService, httpResponseService());
 
 describe('Schools Controller', function() {
 
@@ -121,7 +121,7 @@ describe('Schools Controller', function() {
     var req = {
       body: {
         name: "new",
-        dueDate: "some date",
+        dueDate: "2016-01-01",
         isActive: false
       }
     };
@@ -141,7 +141,7 @@ describe('Schools Controller', function() {
     var req = {
       params: {schoolId: 0}, body: {
         name: "new",
-        dueDate: "some date",
+        dueDate: "2016-01-01",
         isActive: false
       }
     };
@@ -157,7 +157,7 @@ describe('Schools Controller', function() {
     req = {
       params: {schoolId: 5}, body: {
         name: "new",
-        dueDate: "some date",
+        dueDate: "2016-01-01",
         isActive: false
       }
     };
@@ -192,12 +192,12 @@ describe('Schools Controller', function() {
     	  "userId" : "1",
           "name" : "name",
           "dueDate" : "2020-10-20",
-          "isActive" : 'true'
+          "isActive" : true
         },{
           "userId" : "1",
           "name" : "other name",
           "dueDate" : "2030-10-20",
-          "isActive" : 'true'
+          "isActive" : true
         }
     ]}};
 
@@ -213,12 +213,12 @@ describe('Schools Controller', function() {
     	  "userId" : "5",
           "name" : "name",
           "dueDate" : "2020-10-20",
-          "isActive" : 'true'
+          "isActive" : true
         },{
           "userId" : "5",
           "name" : "other name",
           "dueDate" : "2030-10-20",
-          "isActive" : 'true'
+          "isActive" : true
         }
     ]}};
 

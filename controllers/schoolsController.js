@@ -1,6 +1,24 @@
 var schoolsController = function(schoolsService, httpResponseService) {
 
-  var _requiredFields = ['name', 'dueDate', 'isActive'];
+  var _fieldRules = {
+    name: {
+      required: true
+    },
+    dueDate: {
+      required: true,
+      message: 'dueDate must be an ISO8601 formmated date',
+      validate: function(value, validator) {
+        return validator.isISO8601(value);
+      }
+    },
+    isActive: {
+      required: true,
+      message: 'isActive must be boolean',
+      validate: function(value) {
+        return typeof value === 'boolean';
+      }
+    }
+  };
 
   /**
    *  GET /api/schools/
@@ -42,9 +60,12 @@ var schoolsController = function(schoolsService, httpResponseService) {
    */
   var post = function(req, res) {
 
-    if (!httpResponseService.hasRequiredFields(req.body, _requiredFields)) {
-      res.status(422);
-      res.send(httpResponseService.getMissingFieldsResponse(_requiredFields));
+    var errors = httpResponseService.validateRequest(req.body, _fieldRules);
+
+    if (errors.length > 0) {
+      var status = 422;
+      res.status(status);
+      res.send(httpResponseService.assembleErrorResponse(status, errors));
       return;
     }
 
@@ -69,24 +90,28 @@ var schoolsController = function(schoolsService, httpResponseService) {
    */
   var put = function(req, res) {
 
-    if (!httpResponseService.hasRequiredFields(req.body, _requiredFields)) {
-      res.status(422);
-      res.send(httpResponseService.getMissingFieldsResponse(_requiredFields));
-      return;
-    }
-
     // TODO get user ID from header token
     var userId = '';
 
     var schools = req.body.schools;
+
     var tempSchool = {};
     var tempSchools = [];
-    
+
     // Update each school in request list
     for (var i = 0; i < schools.length; i++) {
 
+      var errors = httpResponseService.validateRequest(schools[i], _fieldRules);
+
+      if (errors.length > 0) {
+        var status = 422;
+        res.status(status);
+        res.send(httpResponseService.assembleErrorResponse(status, errors));
+        return;
+      }
+
       tempSchool = schoolsService.findByIdAndUserId(schools[i].schoolId, userId);
-      
+
       // Make sure this school exists
       if (tempSchool) {
 
@@ -115,9 +140,12 @@ var schoolsController = function(schoolsService, httpResponseService) {
    */
   var putOnId = function(req, res) {
 
-    if (!httpResponseService.hasRequiredFields(req.body, _requiredFields)) {
-      res.status(422);
-      res.send(httpResponseService.getMissingFieldsResponse(_requiredFields));
+    var errors = httpResponseService.validateRequest(req.body, _fieldRules);
+
+    if (errors.length > 0) {
+      var status = 422;
+      res.status(status);
+      res.send(httpResponseService.assembleErrorResponse(status, errors));
       return;
     }
 
@@ -139,7 +167,7 @@ var schoolsController = function(schoolsService, httpResponseService) {
 
       res.status(200);
       res.send(schools);
-      
+
     } else {
 
       // the school does not exist, or is not assigned to this user
