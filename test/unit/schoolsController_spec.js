@@ -3,6 +3,7 @@
 var assert = require('assert');
 var sinon = require('sinon');
 var httpMocks = require('node-mocks-http');
+var httpResponseService = require('../../services/httpResponseService');
 
 // set up test variables
 var testSchool0 = {
@@ -79,7 +80,7 @@ var mockSchoolsService = {
   }
 }
 
-var schoolsController = require('../../controllers/schoolsController.js')(mockSchoolsService);
+var schoolsController = require('../../controllers/schoolsController.js')(mockSchoolsService, httpResponseService);
 
 describe('Schools Controller', function() {
 

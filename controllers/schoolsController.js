@@ -1,4 +1,6 @@
-var schoolsController = function(schoolsService) {
+var schoolsController = function(schoolsService, httpResponseService) {
+
+  var _requiredFields = ['name', 'dueDate', 'isActive'];
 
   /**
    *  GET /api/schools/
@@ -40,6 +42,12 @@ var schoolsController = function(schoolsService) {
    */
   var post = function(req, res) {
 
+    if (!httpResponseService.hasRequiredFields(req.body, _requiredFields)) {
+      res.status(422);
+      res.send(httpResponseService.getMissingFieldsResponse(_requiredFields));
+      return;
+    }
+
     // TODO get user ID from header token
     var userId = '';
 
@@ -60,6 +68,12 @@ var schoolsController = function(schoolsService) {
    *  PUT /api/schools/
    */
   var put = function(req, res) {
+
+    if (!httpResponseService.hasRequiredFields(req.body, _requiredFields)) {
+      res.status(422);
+      res.send(httpResponseService.getMissingFieldsResponse(_requiredFields));
+      return;
+    }
 
     // TODO get user ID from header token
     var userId = '';
@@ -100,6 +114,12 @@ var schoolsController = function(schoolsService) {
    *  PUT /api/schools/{school_id}
    */
   var putOnId = function(req, res) {
+
+    if (!httpResponseService.hasRequiredFields(req.body, _requiredFields)) {
+      res.status(422);
+      res.send(httpResponseService.getMissingFieldsResponse(_requiredFields));
+      return;
+    }
 
     // TODO get user ID from header token
     var userId = '';
