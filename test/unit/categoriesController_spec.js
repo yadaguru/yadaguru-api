@@ -2,8 +2,7 @@
 
 var assert = require('assert');
 var sinon = require('sinon');
-var httpMocks = require('node-mocks-http');
-
+var httpResponseService = require('../../services/httpResponseService');
 
 var mockCategories = [
   {id: 1, name: 'Foo'},
@@ -13,8 +12,9 @@ var mockCategories = [
 var mockCategoryService = {
 
   create: function(data) {
-    mockCategories.push({id: 3, name: data.name});
-    return mockCategories;
+    var _mockCategories = JSON.parse(JSON.stringify(mockCategories));
+    _mockCategories.push({id: 3, name: data.name});
+    return _mockCategories;
   },
   findAll: function() {
     return mockCategories;
@@ -23,17 +23,19 @@ var mockCategoryService = {
     return [mockCategories[id - 1]];
   },
   update: function(id, data) {
-    mockCategories[id - 1].name = data.name;
-    return mockCategories;
+    var _mockCategories = JSON.parse(JSON.stringify(mockCategories));
+    _mockCategories[id - 1].name = data.name;
+    return _mockCategories;
   },
   destroy: function(id) {
-    mockCategories.splice(id - 1, 1);
-    return mockCategories;
+    var _mockCategories = JSON.parse(JSON.stringify(mockCategories));
+    _mockCategories.splice(id - 1, 1);
+    return _mockCategories;
   }
 
 };
 
-var categoriesController = require('../../controllers/categoriesController.js')(mockCategoryService);
+var categoriesController = require('../../controllers/categoriesController.js')(mockCategoryService, httpResponseService());
 
 describe('Categories Controller', function() {
 
@@ -117,8 +119,7 @@ describe('Categories Controller', function() {
     assert.ok(res.status.calledWith(200));
     assert.ok(res.send.calledWith([
       {id: 1, name: 'Fizz'},
-      {id: 2, name: 'Bar'},
-      {id: 3, name: 'Bazz'}
+      {id: 2, name: 'Bar'}
     ]));
 
 
@@ -140,8 +141,7 @@ describe('Categories Controller', function() {
     categoriesController.del(req, res);
     assert.ok(res.status.calledWith(200));
     assert.ok(res.send.calledWith([
-      {id: 2, name: 'Bar'},
-      {id: 3, name: 'Bazz'}
+      {id: 2, name: 'Bar'}
     ]));
 
   });
