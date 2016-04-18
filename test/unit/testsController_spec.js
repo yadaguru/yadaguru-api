@@ -2,7 +2,8 @@
 
 var assert = require('assert');
 var sinon = require('sinon');
-var httpMocks = require('node-mocks-http');
+
+var httpResponseService = require('../../services/httpResponseService');
 
 var mockTests = [
   {
@@ -22,13 +23,14 @@ var mockTests = [
 var mockTestService = {
 
   create: function(data) {
-    mockTests.push({
+    var _mockTests = JSON.parse(JSON.stringify(mockTests));
+    _mockTests.push({
       id: 3,
       type: data.type,
       message: data.message,
       detail: data.detail
     });
-    return mockTests;
+    return _mockTests;
   },
   findAll: function() {
     return mockTests;
@@ -37,20 +39,22 @@ var mockTestService = {
     return [mockTests[id - 1]];
   },
   update: function(id, data) {
-    var mockTest = mockTests[id - 1];
+    var _mockTests = JSON.parse(JSON.stringify(mockTests));
+    var mockTest = _mockTests[id - 1];
     mockTest.type = data.type;
     mockTest.message = data.message;
     mockTest.detail = data.detail;
-    return mockTests;
+    return _mockTests;
   },
   destroy: function(id) {
-    mockTests.splice(id - 1, 1);
-    return mockTests;
+    var _mockTests = JSON.parse(JSON.stringify(mockTests));
+    _mockTests.splice(id - 1, 1);
+    return _mockTests;
   }
 
 };
 
-var testsController = require('../../controllers/testsController.js')(mockTestService);
+var testsController = require('../../controllers/testsController.js')(mockTestService, httpResponseService());
 
 describe('Tests Controller', function() {
 
@@ -157,7 +161,7 @@ describe('Tests Controller', function() {
         detail: 'Some details'
       },
       params: {
-        id: 3
+        id: 2
       }
     };
 
@@ -177,12 +181,6 @@ describe('Tests Controller', function() {
       },
       {
         id: 2,
-        type: 'ACT',
-        message: 'The ACTs',
-        detail: 'Some details'
-      },
-      {
-        id: 3,
         type: 'NEWTs',
         message: 'Nastily Exhausting Wizarding Test',
         detail: 'Some details'
@@ -213,14 +211,32 @@ describe('Tests Controller', function() {
         type: 'ACT',
         message: 'The ACTs',
         detail: 'Some details'
-      },
-      {
-        id: 3,
-        type: 'NEWTs',
-        message: 'Nastily Exhausting Wizarding Test',
-        detail: 'Some details'
       }
     ]));
+
+  });
+
+  it('should 422 error if required fields are missing', function() {
+
+    var req = {
+      body: {},
+      params: {
+        id: 1
+      }
+    }
+
+    var res = {
+      status: sinon.spy(),
+      send: sinon.spy()
+    };
+
+    testsController.post(req, res);
+    assert.ok(res.status.calledWith(422));
+    assert.ok(res.send.calledWith({
+      status: 422,
+      errors: ['type is required', 'message is required', 'detail is required']
+    }))
+
 
   });
 
