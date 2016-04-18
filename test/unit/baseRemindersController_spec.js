@@ -2,7 +2,6 @@
 
 var assert = require('assert');
 var sinon = require('sinon');
-var httpMocks = require('node-mocks-http');
 
 var httpResponseService = require('../../services/httpResponseService');
 
@@ -32,8 +31,9 @@ var mockBaseReminders = [
 var mockBaseReminderService = {
 
   create: function(data) {
-    mockBaseReminders.push({
-      id: mockBaseReminders.length + 1,
+    var _mockBaseReminders = JSON.parse(JSON.stringify(mockBaseReminders));
+    _mockBaseReminders.push({
+      id: 3,
       name: data.name,
       message: data.message,
       detail: data.detail,
@@ -42,7 +42,7 @@ var mockBaseReminderService = {
       timeframes: data.timeframes,
       category: data.category
     });
-    return mockBaseReminders;
+    return _mockBaseReminders;
   },
   findAll: function() {
     return mockBaseReminders;
@@ -51,7 +51,8 @@ var mockBaseReminderService = {
     return [mockBaseReminders[id - 1]];
   },
   update: function(id, data) {
-    var mockBaseReminder = mockBaseReminders[id - 1];
+    var _mockBaseReminders = JSON.parse(JSON.stringify(mockBaseReminders));
+    var mockBaseReminder = _mockBaseReminders[id - 1];
     mockBaseReminder.name = data.name;
     mockBaseReminder.message = data.message;
     mockBaseReminder.detail = data.detail;
@@ -59,12 +60,13 @@ var mockBaseReminderService = {
     mockBaseReminder.lateDetail = data.lateDetail;
     mockBaseReminder.timeframes = data.timeframes;
     mockBaseReminder.category = data.category;
-    mockBaseReminders[id - 1] = mockBaseReminder;
-    return mockBaseReminders;
+    _mockBaseReminders[id - 1] = mockBaseReminder;
+    return _mockBaseReminders;
   },
   destroy: function(id) {
-    mockBaseReminders.splice(id - 1, 1);
-    return mockBaseReminders;
+    var _mockBaseReminders = JSON.parse(JSON.stringify(mockBaseReminders));
+    _mockBaseReminders.splice(id - 1, 1);
+    return _mockBaseReminders;
   }
 
 };
@@ -199,8 +201,8 @@ describe('BaseReminders Controller', function() {
 
     var req = {
       body: {
-        name: 'A 4th reminder',
-        message: 'A 4th message',
+        name: 'A 3rd reminder',
+        message: 'A 3rd message',
         detail: 'Yet more details',
         timeframes: [5],
         category: 3
@@ -240,16 +242,6 @@ describe('BaseReminders Controller', function() {
         name: 'A 3rd reminder',
         message: 'A 3rd message',
         detail: 'Yet more details',
-        lateMessage: 'Yet another late message',
-        lateDetail: 'Some more late details',
-        timeframes: [5],
-        category: 3
-      },
-      {
-        id: 4,
-        name: 'A 4th reminder',
-        message: 'A 4th message',
-        detail: 'Yet more details',
         lateMessage: '',
         lateDetail: '',
         timeframes: [5],
@@ -264,15 +256,15 @@ describe('BaseReminders Controller', function() {
     var req = {
       body: {
         name: 'We changed the category',
-        message: 'A 3rd message',
-        detail: 'Yet more details',
-        lateMessage: 'Yet another late message',
+        message: 'Another message',
+        detail: 'Some more details',
+        lateMessage: 'Another late message',
         lateDetail: 'Some more late details',
-        timeframes: [5],
-        category: 4
+        timeframes: [3, 4, 5],
+        category: 3
       },
       params: {
-        id: 3
+        id: 2
       }
     };
 
@@ -296,32 +288,12 @@ describe('BaseReminders Controller', function() {
       },
       {
         id: 2,
-        name: 'Another reminder',
+        name: 'We changed the category',
         message: 'Another message',
         detail: 'Some more details',
         lateMessage: 'Another late message',
         lateDetail: 'Some more late details',
         timeframes: [3, 4, 5],
-        category: 2
-      },
-      {
-        id: 3,
-        name: 'We changed the category',
-        message: 'A 3rd message',
-        detail: 'Yet more details',
-        lateMessage: 'Yet another late message',
-        lateDetail: 'Some more late details',
-        timeframes: [5],
-        category: 4
-      },
-      {
-        id: 4,
-        name: 'A 4th reminder',
-        message: 'A 4th message',
-        detail: 'Yet more details',
-        lateMessage: '',
-        lateDetail: '',
-        timeframes: [5],
         category: 3
       }
     ]));
@@ -354,26 +326,6 @@ describe('BaseReminders Controller', function() {
         lateDetail: 'Some more late details',
         timeframes: [3, 4, 5],
         category: 2
-      },
-      {
-        id: 3,
-        name: 'We changed the category',
-        message: 'A 3rd message',
-        detail: 'Yet more details',
-        lateMessage: 'Yet another late message',
-        lateDetail: 'Some more late details',
-        timeframes: [5],
-        category: 4
-      },
-      {
-        id: 4,
-        name: 'A 4th reminder',
-        message: 'A 4th message',
-        detail: 'Yet more details',
-        lateMessage: '',
-        lateDetail: '',
-        timeframes: [5],
-        category: 3
       }
     ]));
 
@@ -401,7 +353,7 @@ describe('BaseReminders Controller', function() {
     assert.ok(res.status.calledWith(422));
     assert.ok(res.send.calledWith({
       status: 422,
-      message: 'The following fields are required: name, message, detail, timeframes, category'
+      errors: ['name is required']
     }));
 
 
@@ -412,12 +364,15 @@ describe('BaseReminders Controller', function() {
 
     var req = {
       body: {
-        message: 'A 3rd message',
-        detail: 'Yet more details',
-        lateMessage: 'Yet another late message',
-        lateDetail: 'Some more late details',
+        message: 'The message',
+        detail: 'The details',
+        lateMessage: 'The late message',
+        lateDetail: 'The late details',
         timeframes: [5],
         category: 4
+      },
+      params: {
+        id: 2
       }
     };
 
@@ -430,10 +385,160 @@ describe('BaseReminders Controller', function() {
     assert.ok(res.status.calledWith(422));
     assert.ok(res.send.calledWith({
       status: 422,
-      message: 'The following fields are required: name, message, detail, timeframes, category'
+      errors: ['name is required']
     }));
 
+  });
 
+  it('should return a 422 if timeframes is something other than an array on a post/put request', function() {
+
+    var req = {
+      body: {
+        name: 'The reminder',
+        message: 'The message',
+        detail: 'The details',
+        lateMessage: 'The late message',
+        lateDetail: 'The late details',
+        timeframes: '5, 3',
+        category: 4
+      },
+      params: {
+        id: 2
+      }
+    };
+
+    var res = {
+      status: sinon.spy(),
+      send: sinon.spy()
+    };
+
+    baseRemindersController.post(req, res);
+    assert.ok(res.status.calledWith(422));
+    assert.ok(res.send.calledWith({
+      status: 422,
+      errors: ['timeframes must be an array of timeframe IDs']
+    }));
+
+    baseRemindersController.put(req, res);
+    assert.ok(res.status.calledWith(422));
+    assert.ok(res.send.calledWith({
+      status: 422,
+      errors: ['timeframes must be an array of timeframe IDs']
+    }));
+
+  });
+
+  it('should return a 422 if timeframes is an empty array on a post/put request', function() {
+
+    var req = {
+      body: {
+        name: 'The reminder',
+        message: 'The message',
+        detail: 'The details',
+        lateMessage: 'The late message',
+        lateDetail: 'The late details',
+        timeframes: [],
+        category: 4
+      },
+      params: {
+        id: 2
+      }
+    };
+
+    var res = {
+      status: sinon.spy(),
+      send: sinon.spy()
+    };
+
+    baseRemindersController.post(req, res);
+    assert.ok(res.status.calledWith(422));
+    assert.ok(res.send.calledWith({
+      status: 422,
+      errors: ['timeframes must be an array of timeframe IDs']
+    }));
+
+    baseRemindersController.put(req, res);
+    assert.ok(res.status.calledWith(422));
+    assert.ok(res.send.calledWith({
+      status: 422,
+      errors: ['timeframes must be an array of timeframe IDs']
+    }));
+
+  });
+
+  it('should return a 422 if timeframes array is not all numbers on a post/put request', function() {
+
+    var req = {
+      body: {
+        name: 'The reminder',
+        message: 'The message',
+        detail: 'The details',
+        lateMessage: 'The late message',
+        lateDetail: 'The late details',
+        timeframes: ['foo', 3],
+        category: 4
+      },
+      params: {
+        id: 2
+      }
+    };
+
+    var res = {
+      status: sinon.spy(),
+      send: sinon.spy()
+    };
+
+    baseRemindersController.post(req, res);
+    assert.ok(res.status.calledWith(422));
+    assert.ok(res.send.calledWith({
+      status: 422,
+      errors: ['timeframes must be an array of timeframe IDs']
+    }));
+
+    baseRemindersController.put(req, res);
+    assert.ok(res.status.calledWith(422));
+    assert.ok(res.send.calledWith({
+      status: 422,
+      errors: ['timeframes must be an array of timeframe IDs']
+    }));
+
+  });
+
+  it('should return a 422 if category is not a number', function() {
+
+    var req = {
+      body: {
+        name: 'The reminder',
+        message: 'The message',
+        detail: 'The details',
+        lateMessage: 'The late message',
+        lateDetail: 'The late details',
+        timeframes: [2, 3],
+        category: 'foo'
+      },
+      params: {
+        id: 2
+      }
+    };
+
+    var res = {
+      status: sinon.spy(),
+      send: sinon.spy()
+    };
+
+    baseRemindersController.post(req, res);
+    assert.ok(res.status.calledWith(422));
+    assert.ok(res.send.calledWith({
+      status: 422,
+      errors: ['category must be a category ID']
+    }));
+
+    baseRemindersController.put(req, res);
+    assert.ok(res.status.calledWith(422));
+    assert.ok(res.send.calledWith({
+      status: 422,
+      errors: ['category must be a category ID']
+    }));
 
   });
 

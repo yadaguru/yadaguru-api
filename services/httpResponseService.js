@@ -1,36 +1,40 @@
+var validator = require('validator');
+
 var httpResponseService = function() {
 
-  var _assembleMessage = function(prefix, fields) {
+  var validateRequest = function(data, rules) {
 
-    var message = prefix;
+    var fields = Object.keys(rules);
+    var invalidFields = [];
+
     fields.forEach(function(field) {
-      message += field + ', ';
+      if (rules[field].required && typeof data[field] === 'undefined') {
+        invalidFields.push(field + ' is required');
+      } else if (typeof rules[field].validate === 'function' && data[field] && !rules[field].validate(data[field], validator, data)) {
+        if (typeof rules[field].message === 'string') {
+          invalidFields.push(rules[field].message);
+        } else {
+          invalidFields.push(field + ' is not valid');
+        }
+      }
     });
 
-    return message.slice(0, -2);
+    return invalidFields;
 
   };
 
-  var hasRequiredFields = function(data, requiredFields) {
-
-    return requiredFields.every(function(requiredField) {
-      return typeof data[requiredField] !== 'undefined'
-    });
-
-  };
-
-  var getMissingFieldsResponse = function(requiredFields) {
+  var assembleErrorResponse = function(errorCode, errors) {
 
     return {
-      status: 422,
-      message: _assembleMessage('The following fields are required: ', requiredFields)
+      status: errorCode,
+      errors: errors
     }
 
   };
 
   return {
-    hasRequiredFields: hasRequiredFields,
-    getMissingFieldsResponse: getMissingFieldsResponse
+    validateRequest: validateRequest,
+    assembleErrorResponse: assembleErrorResponse
   }
 
 };
