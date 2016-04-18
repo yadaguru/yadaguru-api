@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var timeframesService = require('../services/timeframesService');
 var httpResponseService = require('../services/httpResponseService');
-var timeframesController = require('../controllers/timeframesController')(timeframesService, httpResponseService);
+var timeframesController = require('../controllers/timeframesController')(timeframesService, httpResponseService());
 
 var routes = function() {
 

@@ -2,7 +2,8 @@
 
 var assert = require('assert');
 var sinon = require('sinon');
-var httpMocks = require('node-mocks-http');
+
+var httpResponseService = require('../../services/httpResponseService');
 
 var mockTestDates = [
   {
@@ -22,13 +23,14 @@ var mockTestDates = [
 var mockTestDatesService = {
 
   create: function(data) {
-    mockTestDates.push({
+    var _mockTestDates = JSON.parse(JSON.stringify(mockTestDates));
+    _mockTestDates.push({
       id: 3,
       test: data.test,
       registrationDate: data.registrationDate,
       adminDate: data.adminDate
     });
-    return mockTestDates;
+    return _mockTestDates;
   },
   findAll: function() {
     return mockTestDates;
@@ -37,11 +39,12 @@ var mockTestDatesService = {
     return [mockTestDates[id - 1]];
   },
   update: function(id, data) {
-    var mockTestDate = mockTestDates[id - 1];
+    var _mockTestDates = JSON.parse(JSON.stringify(mockTestDates));
+    var mockTestDate = _mockTestDates[id - 1];
     mockTestDate.test = data.test;
     mockTestDate.registrationDate = data.registrationDate;
     mockTestDate.adminDate = data.adminDate;
-    return mockTestDates;
+    return _mockTestDates;
   },
   destroy: function(id) {
     mockTestDates.splice(id - 1, 1);
@@ -50,7 +53,7 @@ var mockTestDatesService = {
 
 };
 
-var testDatesController = require('../../controllers/testDatesController.js')(mockTestDatesService);
+var testDatesController = require('../../controllers/testDatesController.js')(mockTestDatesService, httpResponseService());
 
 describe('Test Dates Controller', function() {
 
@@ -152,12 +155,12 @@ describe('Test Dates Controller', function() {
 
     var req = {
       body: {
-        test: 3,
+        test: 2,
         registrationDate: '2016-07-01',
         adminDate: '2016-08-01'
       },
       params: {
-        id: 3
+        id: 2
       }
     };
 
@@ -178,12 +181,6 @@ describe('Test Dates Controller', function() {
       {
         id: 2,
         test: 2,
-        registrationDate: '2016-03-01',
-        adminDate: '2016-04-01'
-      },
-      {
-        id: 3,
-        test: 3,
         registrationDate: '2016-07-01',
         adminDate: '2016-08-01'
       }
@@ -213,14 +210,156 @@ describe('Test Dates Controller', function() {
         test: 2,
         registrationDate: '2016-03-01',
         adminDate: '2016-04-01'
-      },
-      {
-        id: 3,
-        test: 3,
-        registrationDate: '2016-07-01',
-        adminDate: '2016-08-01'
       }
     ]));
+
+  });
+
+  it('should 422 error if required fields are not provided', function() {
+
+    var req = {
+      body: {},
+      params: {
+        id: 1
+      }
+    };
+
+    var res = {
+      status: sinon.spy(),
+      send: sinon.spy()
+    };
+
+    testDatesController.post(req, res);
+    assert.ok(res.status.calledWith(422));
+    assert.ok(res.send.calledWith(
+      {
+        status: 422,
+        errors: ['test is required', 'registrationDate is required', 'adminDate is required']
+      }
+    ));
+
+    testDatesController.put(req, res);
+    assert.ok(res.status.calledWith(422));
+    assert.ok(res.send.calledWith(
+      {
+        status: 422,
+        errors: ['test is required', 'registrationDate is required', 'adminDate is required']
+      }
+    ));
+
+  });
+
+  it('should 422 error if test field is not a number', function() {
+
+    var req = {
+      body: {
+        test: 'SAT',
+        registrationDate: '2016-01-01',
+        adminDate: '2016-02-02'
+      },
+      params: {
+        id: 1
+      }
+    };
+
+    var res = {
+      status: sinon.spy(),
+      send: sinon.spy()
+    };
+
+    testDatesController.post(req, res);
+    assert.ok(res.status.calledWith(422));
+    assert.ok(res.send.calledWith(
+      {
+        status: 422,
+        errors: ['test must be a test ID']
+      }
+    ));
+
+    testDatesController.put(req, res);
+    assert.ok(res.status.calledWith(422));
+    assert.ok(res.send.calledWith(
+      {
+        status: 422,
+        errors: ['test must be a test ID']
+      }
+    ));
+
+  });
+
+  it('should 422 error if registrationDate field is not an ISO8601 date', function() {
+
+    var req = {
+      body: {
+        test: 1,
+        registrationDate: '1/1/2016',
+        adminDate: '2016-02-02'
+      },
+      params: {
+        id: 1
+      }
+    };
+
+    var res = {
+      status: sinon.spy(),
+      send: sinon.spy()
+    };
+
+    testDatesController.post(req, res);
+    assert.ok(res.status.calledWith(422));
+    assert.ok(res.send.calledWith(
+      {
+        status: 422,
+        errors: ['registrationDate must be an ISO8601 formatted date']
+      }
+    ));
+
+    testDatesController.put(req, res);
+    assert.ok(res.status.calledWith(422));
+    assert.ok(res.send.calledWith(
+      {
+        status: 422,
+        errors: ['registrationDate must be an ISO8601 formatted date']
+      }
+    ));
+
+  });
+
+  it('should 422 error if adminDate field is not an ISO8601 date', function() {
+
+    var req = {
+      body: {
+        test: 1,
+        registrationDate: '2016-01-01',
+        adminDate: 'February 2, 2016'
+      },
+      params: {
+        id: 1
+      }
+    };
+
+    var res = {
+      status: sinon.spy(),
+      send: sinon.spy()
+    };
+
+    testDatesController.post(req, res);
+    assert.ok(res.status.calledWith(422));
+    assert.ok(res.send.calledWith(
+      {
+        status: 422,
+        errors: ['adminDate must be an ISO8601 formatted date']
+      }
+    ));
+
+    testDatesController.put(req, res);
+    assert.ok(res.status.calledWith(422));
+    assert.ok(res.send.calledWith(
+      {
+        status: 422,
+        errors: ['adminDate must be an ISO8601 formatted date']
+      }
+    ));
 
   });
 

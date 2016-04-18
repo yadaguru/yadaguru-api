@@ -1,7 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var testDatesService = require('../services/testDatesService');
-var testDatesController = require('../controllers/testDatesController')(testDatesService);
+var httpResponseService = require('../services/httpResponseService');
+var testDatesController = require('../controllers/testDatesController')(testDatesService, httpResponseService());
 
 var routes = function() {
 
