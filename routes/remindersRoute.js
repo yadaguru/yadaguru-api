@@ -1,7 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var remindersService = require('../services/remindersService');
-var remindersController = require('../controllers/remindersController')(remindersService);
+var httpResponseService = require('../services/httpResponseService');
+var remindersController = require('../controllers/remindersController')(remindersService, httpResponseService());
 
 var routes = function() {
   router.route('/')

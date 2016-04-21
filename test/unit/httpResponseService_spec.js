@@ -120,7 +120,18 @@ describe('httpResponseService.validateRequest', function() {
     var invalidData = httpResponseService.validateRequest(data, rules);
     assert.lengthOf(invalidData, 0);
 
-  })
+  });
+
+  it('can ignore required fields if passed true for third parameter', function() {
+
+    var data = {
+      myInt: '42'
+    };
+
+    var invalidData = httpResponseService.validateRequest(data, rules, true);
+    assert.lengthOf(invalidData, 0);
+
+  });
 
 });
 
@@ -137,5 +148,26 @@ describe('httpResponseService.assembleErrorResponse', function() {
   });
 
 });
+
+describe('httpResponseService.assemble404Response', function() {
+
+  it('should return an object containing the a 404 code and an array with an error stating the missing resource & od', function() {
+
+    var response = httpResponseService.assemble404Response('category', 1);
+    assert.equal(response.status, 404);
+    assert.equal(response.errors[0], 'category with id of 1 does not exist');
+
+  });
+
+  it('it will pluralize the message if passed true for the third parameter', function() {
+
+    var response = httpResponseService.assemble404Response('categories', 1, true);
+    assert.equal(response.status, 404);
+    assert.equal(response.errors[0], 'categories with id of 1 do not exist');
+
+  });
+
+});
+
 
 

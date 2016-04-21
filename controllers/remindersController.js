@@ -1,5 +1,8 @@
-var remindersController = function(remindersService) {
+var remindersController = function(remindersService, httpResponseService) {
 
+  /**
+   * GET /api/reminders
+   */
   var getByUserId = function(req, res) {
 
     // TODO get user id from token
@@ -11,6 +14,9 @@ var remindersController = function(remindersService) {
     res.send(reminders);
   };
 
+  /**
+   * GET /api/reminders/{reminderId}
+   */
   var getByIdAndUserId = function(req, res) {
 
     // TODO get user id from token
@@ -20,10 +26,19 @@ var remindersController = function(remindersService) {
     // Should return null if the reminder is not assigned to the user
     var reminder = remindersService.findByIdAndUserId(reminderId, userId);
 
-    res.status(200);
-    res.send(reminder);
+    if (reminder) {
+      res.status(200);
+      res.send(reminder);
+    } else {
+      res.status(404);
+      res.send(httpResponseService.assemble404Response('reminder', reminderId));
+    }
+
   };
 
+  /**
+   * GET /api/reminders/schools/{schoolId}
+   */
   var getByUserIdAndSchoolId = function(req, res) {
 
     // TODO get user id from token

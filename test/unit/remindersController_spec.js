@@ -2,9 +2,10 @@
 
 var assert = require('assert');
 var sinon = require('sinon');
-var httpMocks = require('node-mocks-http');
 
-var mockUserRemindersList = [{
+var httpResponseService = require('../../services/httpResponseService');
+
+var mockUserReminders = [{
   "timeframe": "ASAP",
   "due_date": "2020-03-11",
   "reminders": [{
@@ -15,17 +16,18 @@ var mockUserRemindersList = [{
     "lateMessage": "Short late reminder message",
     "lateDetail": "Detailed late reminder message"
   }]
+}, {
+  "timeframe": "By Next Week",
+  "due_date": "2020-03-18",
+  "reminders": [{
+    "id": "2",
+    "name": "Test Reminder Number 2",
+    "message": "Short reminder message",
+    "detail": "Detailed reminder message",
+    "lateMessage": "Short late reminder message",
+    "lateDetail": "Detailed late reminder message"
+  }]
 }];
-
-var mockReminder = {
-  "id": "2",
-  "timeframe": "By 2/1/2017",
-  "name": "Test Reminder Number 2",
-  "message": "Short reminder message",
-  "detail": "Detailed reminder message",
-  "lateMessage": "Short late reminder message",
-  "lateDetail": "Detailed late reminder message"
-};
 
 var mockSchoolRemindersList = [{
   "school": "School name",
@@ -45,18 +47,22 @@ var mockSchoolRemindersList = [{
 }];
 
 var mockRemindersService = {
-  findByUserId: function(req, res) {
-    return mockUserRemindersList;
+  findByUserId: function(userId) {
+    return mockUserReminders;
   },
-  findByIdAndUserId: function(req, res) {
-    return mockReminder;
+  findByIdAndUserId: function(reminderId, userId) {
+    var mockUserReminder = mockUserReminders[reminderId - 1];
+    if (mockUserReminder) {
+      return [mockUserReminder];
+    }
+    return false;
   },
-  findByUserIdAndSchoolId: function(req, res) {
+  findByUserIdAndSchoolId: function(userId, schoolId) {
     return mockSchoolRemindersList
   }
-}
+};
 
-var remindersController = require('../../controllers/remindersController.js')(mockRemindersService);
+var remindersController = require('../../controllers/remindersController.js')(mockRemindersService, httpResponseService());
 
 describe('Reminders Controller', function() {
 
@@ -70,11 +76,11 @@ describe('Reminders Controller', function() {
 
     remindersController.getByUserId(req, res);
     assert.ok(res.status.calledWith(200));
-    assert.ok(res.send.calledWith(mockUserRemindersList));
+    assert.ok(res.send.calledWith(mockUserReminders));
   });
 
   it('should return a specific reminder (if it is assigned to user in token)', function() {
-    var req = {params: {notificationId: 2}};
+    var req = {params: {reminderId: 2}};
 
     var res = {
       status: sinon.spy(),
@@ -83,7 +89,7 @@ describe('Reminders Controller', function() {
 
     remindersController.getByIdAndUserId(req, res);
     assert.ok(res.status.calledWith(200));
-    assert.ok(res.send.calledWith(mockReminder));
+    assert.ok(res.send.calledWith([mockUserReminders[1]]));
   });
 
   it('should return a list of reminders for a user and a specific school', function() {
@@ -98,4 +104,27 @@ describe('Reminders Controller', function() {
     assert.ok(res.status.calledWith(200));
     assert.ok(res.send.calledWith(mockSchoolRemindersList));
   });
+
+  it('should return a 404 if reminderId is not found on getByIdAndUserId', function() {
+
+    var req = {
+      params: {
+        reminderId: 3
+      }
+    };
+
+    var res = {
+      status: sinon.spy(),
+      send: sinon.spy()
+    };
+
+    remindersController.getByIdAndUserId(req, res);
+    assert.ok(res.status.calledWith(404));
+    assert.ok(res.send.calledWith({
+      status: 404,
+      errors: ['reminder with id of 3 does not exist']
+    }));
+
+  })
+
 });

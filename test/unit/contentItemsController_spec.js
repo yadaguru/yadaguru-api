@@ -32,8 +32,15 @@ var mockContentItemService = {
   findAll: function() {
     return mockContentItems;
   },
-  findOne: function(id) {
-    return [mockContentItems[id - 1]];
+  findById: function(id) {
+    var mockContentItem = mockContentItems[id - 1];
+    if (mockContentItem) {
+      return [mockContentItem];
+    }
+    return false;
+  },
+  exists: function(id) {
+    return typeof mockContentItems[id - 1] !== 'undefined';
   },
   update: function(id, data) {
     var _mockContentItems = JSON.parse(JSON.stringify(mockContentItems));
@@ -42,7 +49,7 @@ var mockContentItemService = {
     mockContentItem.content = data.content;
     return _mockContentItems;
   },
-  destroy: function(id) {
+  remove: function(id) {
     var _mockContentItems = JSON.parse(JSON.stringify(mockContentItems));
     _mockContentItems.splice(id - 1, 1);
     return _mockContentItems;
@@ -54,7 +61,7 @@ var contentItemsController = require('../../controllers/contentItemsController.j
 
 describe('ContentItems Controller', function() {
 
-  it('should return an array of all ContentItems when calling getAll', function() {
+  it('should return an array of all ContentItems when calling get', function() {
 
     var req = {};
 
@@ -63,7 +70,7 @@ describe('ContentItems Controller', function() {
       send: sinon.spy()
     };
 
-    contentItemsController.getAll(req, res);
+    contentItemsController.get(req, res);
     assert.ok(res.status.calledWith(200));
     assert.ok(res.send.calledWith([
       {
@@ -80,11 +87,11 @@ describe('ContentItems Controller', function() {
 
   });
 
-  it('should return an array of one matching ContentItems when calling getOne with an id', function() {
+  it('should return an array of one matching ContentItems when calling getById with an id', function() {
 
     var req = {
       params: {
-        id: 1
+        contentItemId: 1
       }
     };
 
@@ -93,7 +100,7 @@ describe('ContentItems Controller', function() {
       send: sinon.spy()
     };
 
-    contentItemsController.getOne(req, res);
+    contentItemsController.getById(req, res);
     assert.ok(res.status.calledWith(200));
     assert.ok(res.send.calledWith([
       {
@@ -149,7 +156,7 @@ describe('ContentItems Controller', function() {
         content: 'The 2nd Item'
       },
       params: {
-        id: 2
+        contentItemId: 2
       }
     };
 
@@ -158,7 +165,7 @@ describe('ContentItems Controller', function() {
       send: sinon.spy()
     };
 
-    contentItemsController.put(req, res);
+    contentItemsController.putOnId(req, res);
     assert.ok(res.status.calledWith(200));
     assert.ok(res.send.calledWith([
       {
@@ -179,7 +186,7 @@ describe('ContentItems Controller', function() {
 
     var req = {
       params: {
-        id: 1
+        contentItemId: 1
       }
     };
 
@@ -188,7 +195,7 @@ describe('ContentItems Controller', function() {
       send: sinon.spy()
     };
 
-    contentItemsController.del(req, res);
+    contentItemsController.remove(req, res);
     assert.ok(res.status.calledWith(200));
     assert.ok(res.send.calledWith([
       {
@@ -205,7 +212,7 @@ describe('ContentItems Controller', function() {
     var req = {
       body: {},
       params: {
-        id: 1
+        contentItemId: 1
       }
     };
 
@@ -220,6 +227,46 @@ describe('ContentItems Controller', function() {
       status: 422,
       errors: ['name is required', 'content is required']
     }))
+
+
+  });
+  it('should return a 404 if ID does not exist on a put, get, or delete request', function() {
+
+    var req = {
+      params: {
+        contentItemId: 3
+      },
+      body: {
+        name: '2nd Item',
+        content: 'The 2nd Item'
+      }
+    };
+
+    var res = {
+      status: sinon.spy(),
+      send: sinon.spy()
+    };
+
+    contentItemsController.getById(req, res);
+    assert.ok(res.status.calledWith(404));
+    assert.ok(res.send.calledWith({
+      status: 404,
+      errors: ['contentItem with id of 3 does not exist']
+    }));
+
+    contentItemsController.putOnId(req, res);
+    assert.ok(res.status.calledWith(404));
+    assert.ok(res.send.calledWith({
+      status: 404,
+      errors: ['contentItem with id of 3 does not exist']
+    }));
+
+    contentItemsController.remove(req, res);
+    assert.ok(res.status.calledWith(404));
+    assert.ok(res.send.calledWith({
+      status: 404,
+      errors: ['contentItem with id of 3 does not exist']
+    }));
 
   });
 

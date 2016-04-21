@@ -6,7 +6,7 @@ var schoolsController = function(schoolsService, httpResponseService) {
     },
     dueDate: {
       required: true,
-      message: 'dueDate must be an ISO8601 formmated date',
+      message: 'dueDate must be an ISO8601 formatted date',
       validate: function(value, validator) {
         return validator.isISO8601(value);
       }
@@ -26,7 +26,7 @@ var schoolsController = function(schoolsService, httpResponseService) {
   var get = function(req, res) {
 
     // TODO get user ID from header token
-    var userId = '';
+    var userId = 1;
 
     var schools = schoolsService.findByUserId(userId);
 
@@ -40,8 +40,7 @@ var schoolsController = function(schoolsService, httpResponseService) {
   var getById = function(req, res) {
 
     // TODO get user ID from header token
-    var userId = '';
-
+    var userId = 1;
     var schoolId = req.params.schoolId;
 
     var school = schoolsService.findByIdAndUserId(schoolId, userId);
@@ -51,7 +50,7 @@ var schoolsController = function(schoolsService, httpResponseService) {
       res.send(school);
     } else {
       res.status(404);
-      res.send('School ID not found');
+      res.send(httpResponseService.assemble404Response('school', schoolId));
     }
   };
 
@@ -72,14 +71,14 @@ var schoolsController = function(schoolsService, httpResponseService) {
     // TODO get user ID from header token
     var userId = '';
 
-    var tempSchool = {
+    var newSchool = {
       userId: userId,
       name: req.body.name,
       dueDate: req.body.dueDate,
       isActive: req.body.isActive
     };
 
-    var schools = schoolsService.create(tempSchool);
+    var schools = schoolsService.create(newSchool);
 
     res.status(200);
     res.send(schools);
@@ -90,48 +89,40 @@ var schoolsController = function(schoolsService, httpResponseService) {
    */
   var put = function(req, res) {
 
-    // TODO get user ID from header token
-    var userId = '';
+    var status;
 
-    var schools = req.body.schools;
-
-    var tempSchool = {};
-    var tempSchools = [];
-
-    // Update each school in request list
-    for (var i = 0; i < schools.length; i++) {
-
-      var errors = httpResponseService.validateRequest(schools[i], _fieldRules);
-
-      if (errors.length > 0) {
-        var status = 422;
-        res.status(status);
-        res.send(httpResponseService.assembleErrorResponse(status, errors));
-        return;
-      }
-
-      tempSchool = schoolsService.findByIdAndUserId(schools[i].schoolId, userId);
-
-      // Make sure this school exists
-      if (tempSchool) {
-
-        tempSchool.name = schools[i].name;
-        tempSchool.dueDate = schools[i].dueDate;
-        tempSchool.isActive = schools[i].isActive;
-        tempSchools.push(schoolsService.update(tempSchool));
-
-      } else {
-
-        // the school does not exist, or is not assigned to this user
-        res.status(404);
-        res.send('School with ID' + schools[i].schoolId + ' not found for this user.');
-        break;
-      }
+    if (Object.keys(req.body).length === 0) {
+      status = 422;
+      res.status(status);
+      res.send(httpResponseService.assembleErrorResponse(status, ['at least one valid field is required']))
+      return;
     }
 
+    var errors = httpResponseService.validateRequest(req.body, _fieldRules, true);
 
-    res.status(200);
-    res.send(tempSchools);
+    if (errors.length > 0) {
+      status = 422;
+      res.status(status);
+      res.send(httpResponseService.assembleErrorResponse(status, errors));
+      return;
+    }
+
+    // TODO get user ID from header token
+    var userId = 1;
+
+    var updatedSchools;
+    var userSchools = schoolsService.findByUserId(userId);
+
+    if (userSchools.length > 0) {
+      for (var i = 0; i < userSchools.length; i++) {
+        updatedSchools = schoolsService.update(userSchools[i].id, userId, req.body);
+      }
+      res.status(200);
+      res.send(updatedSchools);
+    } else {
+      res.status(404);
+      res.send(httpResponseService.assemble404Response('schools for user', userId, true));
+    }
 
   };
 
@@ -140,40 +131,37 @@ var schoolsController = function(schoolsService, httpResponseService) {
    */
   var putOnId = function(req, res) {
 
-    var errors = httpResponseService.validateRequest(req.body, _fieldRules);
+    var status;
+
+    if (Object.keys(req.body).length === 0) {
+      status = 422;
+      res.status(status);
+      res.send(httpResponseService.assembleErrorResponse(status, ['at least one valid field is required']))
+      return;
+    }
+
+    var errors = httpResponseService.validateRequest(req.body, _fieldRules, true);
 
     if (errors.length > 0) {
-      var status = 422;
+      status = 422;
       res.status(status);
       res.send(httpResponseService.assembleErrorResponse(status, errors));
       return;
     }
 
     // TODO get user ID from header token
-    var userId = '';
-
+    var userId = 1;
     var schoolId = req.params.schoolId;
 
-    var tempSchool = schoolsService.findByIdAndUserId(schoolId, userId);
-
-    // Make sure this school exists
-    if (tempSchool) {
-
-      tempSchool.name = req.body.name;
-      tempSchool.dueDate = req.body.dueDate;
-      tempSchool.isActive = req.body.isActive;
-
-      var schools = schoolsService.update(tempSchool);
-
+    if (schoolsService.exists(schoolId, userId)) {
+      var schools = schoolsService.update(schoolId, userId, req.body);
       res.status(200);
       res.send(schools);
-
     } else {
-
-      // the school does not exist, or is not assigned to this user
       res.status(404);
-      res.send('School ID not found');
+      res.send(httpResponseService.assemble404Response('school', schoolId));
     }
+
 
   };
 
@@ -183,23 +171,18 @@ var schoolsController = function(schoolsService, httpResponseService) {
   var remove = function(req, res) {
 
     // TODO get user ID from header token
-    var userId = '';
-
+    var userId = 1;
     var schoolId = req.params.schoolId;
 
-    var isReal = schoolsService.exists(schoolId, userId);
-
-    if (isReal) {
-
-      schoolsService.remove(schoolId);
+    if (schoolsService.exists(schoolId, userId)) {
+      var schools = schoolsService.remove(schoolId, userId);
       res.status(200);
-
+      res.send(schools);
     } else {
-
-      // the school does not exist, or is not assigned to this user
       res.status(404);
-      res.send('School ID not found');
+      res.send(httpResponseService.assemble404Response('school', schoolId));
     }
+
   };
 
   return {

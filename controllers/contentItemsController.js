@@ -20,7 +20,10 @@ var contentItemsController = function(contentItemsService, httpResponseService) 
     }
   };
 
-  var getAll = function(req, res) {
+  /**
+   * GET /api/content-items
+   */
+  var get = function(req, res) {
 
     var contentItems = contentItemsService.findAll();
 
@@ -29,16 +32,28 @@ var contentItemsController = function(contentItemsService, httpResponseService) 
 
   };
 
-  var getOne = function(req, res) {
+  /**
+   * GET /api/content-items/{contentItemId}
+   */
+  var getById = function(req, res) {
 
-    var contentItem = contentItemsService.findOne(req.params.id);
+    var id = req.params.contentItemId;
+    var contentItem = contentItemsService.findById(id);
 
-    res.status(200);
-    res.send(contentItem);
+    if (contentItem) {
+      res.status(200);
+      res.send(contentItem);
+    } else {
+      res.status(404);
+      res.send(httpResponseService.assemble404Response('contentItem', id));
+    }
 
   };
 
 
+  /**
+   * POST /api/content-items
+   */
   var post = function(req, res) {
 
     var errors = httpResponseService.validateRequest(req.body, _fieldRules);
@@ -62,7 +77,10 @@ var contentItemsController = function(contentItemsService, httpResponseService) 
 
   };
 
-  var put = function(req, res) {
+  /**
+   * PUT /api/content-items/{contentItemId}
+   */
+  var putOnId = function(req, res) {
 
     var errors = httpResponseService.validateRequest(req.body, _fieldRules);
 
@@ -77,29 +95,44 @@ var contentItemsController = function(contentItemsService, httpResponseService) 
       name: req.body.name,
       content: req.body.content
     };
+    var id = req.params.contentItemId;
 
-    var contentItems = contentItemsService.update(req.params.id, updatedContentItem);
+    if (contentItemsService.exists(id)) {
+      var contentItems = contentItemsService.update(id, updatedContentItem);
+      res.status(200);
+      res.send(contentItems);
+    } else {
+      res.status(404);
+      res.send(httpResponseService.assemble404Response('contentItem', id));
+    }
 
-    res.status(200);
-    res.send(contentItems);
 
   };
 
-  var del = function(req, res) {
+  /**
+   * DELETE /api/content-items/{contentItemId}
+   */
+  var remove = function(req, res) {
 
-    var contentItems = contentItemsService.destroy(req.params.id);
+    var id = req.params.contentItemId;
 
-    res.status(200);
-    res.send(contentItems);
+    if (contentItemsService.exists(id)) {
+      var contentItems = contentItemsService.remove(id);
+      res.status(200);
+      res.send(contentItems);
+    } else {
+      res.status(404);
+      res.send(httpResponseService.assemble404Response('contentItem', id));
+    }
 
   };
 
   return {
-    getAll: getAll,
-    getOne: getOne,
+    get: get,
+    getById: getById,
     post: post,
-    put: put,
-    del: del
+    putOnId: putOnId,
+    remove: remove
   }
 
 };

@@ -47,8 +47,15 @@ var mockBaseReminderService = {
   findAll: function() {
     return mockBaseReminders;
   },
-  findOne: function(id) {
-    return [mockBaseReminders[id - 1]];
+  findById: function(id) {
+    var mockBaseReminder = mockBaseReminders[id - 1];
+    if (mockBaseReminder) {
+      return [mockBaseReminder];
+    }
+    return false;
+  },
+  exists: function(id) {
+    return typeof mockBaseReminders[id - 1] !== 'undefined';
   },
   update: function(id, data) {
     var _mockBaseReminders = JSON.parse(JSON.stringify(mockBaseReminders));
@@ -63,7 +70,7 @@ var mockBaseReminderService = {
     _mockBaseReminders[id - 1] = mockBaseReminder;
     return _mockBaseReminders;
   },
-  destroy: function(id) {
+  remove: function(id) {
     var _mockBaseReminders = JSON.parse(JSON.stringify(mockBaseReminders));
     _mockBaseReminders.splice(id - 1, 1);
     return _mockBaseReminders;
@@ -75,7 +82,7 @@ var baseRemindersController = require('../../controllers/baseRemindersController
 
 describe('BaseReminders Controller', function() {
 
-  it('should return an array of all BaseReminders when calling getAll', function() {
+  it('should return an array of all BaseReminders when calling get', function() {
 
     var req = {};
 
@@ -84,7 +91,7 @@ describe('BaseReminders Controller', function() {
       send: sinon.spy()
     };
 
-    baseRemindersController.getAll(req, res);
+    baseRemindersController.get(req, res);
     assert.ok(res.status.calledWith(200));
     assert.ok(res.send.calledWith([
       {
@@ -111,11 +118,11 @@ describe('BaseReminders Controller', function() {
 
   });
 
-  it('should return an array of one matching BaseReminders when calling getOne with an id', function() {
+  it('should return an array of one matching BaseReminders when calling getById with an id', function() {
 
     var req = {
       params: {
-        id: 1
+        baseReminderId: 1
       }
     };
 
@@ -124,7 +131,7 @@ describe('BaseReminders Controller', function() {
       send: sinon.spy()
     };
 
-    baseRemindersController.getOne(req, res);
+    baseRemindersController.getById(req, res);
     assert.ok(res.status.calledWith(200));
     assert.ok(res.send.calledWith([
       {
@@ -264,7 +271,7 @@ describe('BaseReminders Controller', function() {
         category: 3
       },
       params: {
-        id: 2
+        baseReminderId: 2
       }
     };
 
@@ -273,7 +280,7 @@ describe('BaseReminders Controller', function() {
       send: sinon.spy()
     };
 
-    baseRemindersController.put(req, res);
+    baseRemindersController.putOnId(req, res);
     assert.ok(res.status.calledWith(200));
     assert.ok(res.send.calledWith([
       {
@@ -305,7 +312,7 @@ describe('BaseReminders Controller', function() {
 
     var req = {
       params: {
-        id: 1
+        baseReminderId: 1
       }
     };
 
@@ -314,7 +321,7 @@ describe('BaseReminders Controller', function() {
       send: sinon.spy()
     };
 
-    baseRemindersController.del(req, res);
+    baseRemindersController.remove(req, res);
     assert.ok(res.status.calledWith(200));
     assert.ok(res.send.calledWith([
       {
@@ -360,7 +367,7 @@ describe('BaseReminders Controller', function() {
 
   });
 
-  it('should return a 422 error with a message if not all required fields are provided on a put request', function() {
+  it('should return a 422 error with a message if not all required fields are provided on a putOnId request', function() {
 
     var req = {
       body: {
@@ -372,7 +379,7 @@ describe('BaseReminders Controller', function() {
         category: 4
       },
       params: {
-        id: 2
+        baseReminderId: 2
       }
     };
 
@@ -381,7 +388,7 @@ describe('BaseReminders Controller', function() {
       send: sinon.spy()
     };
 
-    baseRemindersController.put(req, res);
+    baseRemindersController.putOnId(req, res);
     assert.ok(res.status.calledWith(422));
     assert.ok(res.send.calledWith({
       status: 422,
@@ -390,7 +397,7 @@ describe('BaseReminders Controller', function() {
 
   });
 
-  it('should return a 422 if timeframes is something other than an array on a post/put request', function() {
+  it('should return a 422 if timeframes is something other than an array on a post/putOnId request', function() {
 
     var req = {
       body: {
@@ -403,7 +410,7 @@ describe('BaseReminders Controller', function() {
         category: 4
       },
       params: {
-        id: 2
+        baseReminderId: 2
       }
     };
 
@@ -419,7 +426,7 @@ describe('BaseReminders Controller', function() {
       errors: ['timeframes must be an array of timeframe IDs']
     }));
 
-    baseRemindersController.put(req, res);
+    baseRemindersController.putOnId(req, res);
     assert.ok(res.status.calledWith(422));
     assert.ok(res.send.calledWith({
       status: 422,
@@ -428,7 +435,7 @@ describe('BaseReminders Controller', function() {
 
   });
 
-  it('should return a 422 if timeframes is an empty array on a post/put request', function() {
+  it('should return a 422 if timeframes is an empty array on a post/putOnId request', function() {
 
     var req = {
       body: {
@@ -441,7 +448,7 @@ describe('BaseReminders Controller', function() {
         category: 4
       },
       params: {
-        id: 2
+        baseReminderId: 2
       }
     };
 
@@ -457,7 +464,7 @@ describe('BaseReminders Controller', function() {
       errors: ['timeframes must be an array of timeframe IDs']
     }));
 
-    baseRemindersController.put(req, res);
+    baseRemindersController.putOnId(req, res);
     assert.ok(res.status.calledWith(422));
     assert.ok(res.send.calledWith({
       status: 422,
@@ -466,7 +473,7 @@ describe('BaseReminders Controller', function() {
 
   });
 
-  it('should return a 422 if timeframes array is not all numbers on a post/put request', function() {
+  it('should return a 422 if timeframes array is not all numbers on a post/putOnId request', function() {
 
     var req = {
       body: {
@@ -479,7 +486,7 @@ describe('BaseReminders Controller', function() {
         category: 4
       },
       params: {
-        id: 2
+        baseReminderId: 2
       }
     };
 
@@ -495,7 +502,7 @@ describe('BaseReminders Controller', function() {
       errors: ['timeframes must be an array of timeframe IDs']
     }));
 
-    baseRemindersController.put(req, res);
+    baseRemindersController.putOnId(req, res);
     assert.ok(res.status.calledWith(422));
     assert.ok(res.send.calledWith({
       status: 422,
@@ -517,7 +524,7 @@ describe('BaseReminders Controller', function() {
         category: 'foo'
       },
       params: {
-        id: 2
+        baseReminderId: 2
       }
     };
 
@@ -533,11 +540,86 @@ describe('BaseReminders Controller', function() {
       errors: ['category must be a category ID']
     }));
 
-    baseRemindersController.put(req, res);
+    baseRemindersController.putOnId(req, res);
     assert.ok(res.status.calledWith(422));
     assert.ok(res.send.calledWith({
       status: 422,
       errors: ['category must be a category ID']
+    }));
+
+  });
+
+  it('should return a 404 if ID does not exist on a getById request', function() {
+
+    var req = {
+      params: {
+        baseReminderId: 3
+      }
+    };
+
+    var res = {
+      status: sinon.spy(),
+      send: sinon.spy()
+    };
+
+    baseRemindersController.getById(req, res);
+    assert.ok(res.status.calledWith(404));
+    assert.ok(res.send.calledWith({
+      status: 404,
+      errors: ['baseReminder with id of 3 does not exist']
+    }));
+
+  });
+
+  it('should return a 404 if ID does not exist on a putOnId request', function() {
+
+    var req = {
+      body: {
+        name: 'The reminder',
+        message: 'The message',
+        detail: 'The details',
+        lateMessage: 'The late message',
+        lateDetail: 'The late details',
+        timeframes: [2, 3],
+        category: 3
+      },
+      params: {
+        baseReminderId: 3
+      }
+    };
+
+    var res = {
+      status: sinon.spy(),
+      send: sinon.spy()
+    };
+
+    baseRemindersController.putOnId(req, res);
+    assert.ok(res.status.calledWith(404));
+    assert.ok(res.send.calledWith({
+      status: 404,
+      errors: ['baseReminder with id of 3 does not exist']
+    }));
+
+  });
+
+  it('should return a 404 if ID does not exist on a remove request', function() {
+
+    var req = {
+      params: {
+        baseReminderId: 3
+      }
+    };
+
+    var res = {
+      status: sinon.spy(),
+      send: sinon.spy()
+    };
+
+    baseRemindersController.remove(req, res);
+    assert.ok(res.status.calledWith(404));
+    assert.ok(res.send.calledWith({
+      status: 404,
+      errors: ['baseReminder with id of 3 does not exist']
     }));
 
   });

@@ -19,15 +19,22 @@ var mockCategoryService = {
   findAll: function() {
     return mockCategories;
   },
-  findOne: function(id) {
-    return [mockCategories[id - 1]];
+  findById: function(id) {
+    var mockCategory = mockCategories[id - 1];
+    if (mockCategory) {
+      return [mockCategory];
+    }
+    return false;
+  },
+  exists: function(id) {
+    return typeof mockCategories[id - 1] !== 'undefined';
   },
   update: function(id, data) {
     var _mockCategories = JSON.parse(JSON.stringify(mockCategories));
     _mockCategories[id - 1].name = data.name;
     return _mockCategories;
   },
-  destroy: function(id) {
+  remove: function(id) {
     var _mockCategories = JSON.parse(JSON.stringify(mockCategories));
     _mockCategories.splice(id - 1, 1);
     return _mockCategories;
@@ -39,7 +46,7 @@ var categoriesController = require('../../controllers/categoriesController.js')(
 
 describe('Categories Controller', function() {
 
-  it('should return an array of all categories when calling getAll', function() {
+  it('should return an array of all categories when calling get', function() {
 
     var req = {};
 
@@ -48,7 +55,7 @@ describe('Categories Controller', function() {
       send: sinon.spy()
     };
 
-    categoriesController.getAll(req, res);
+    categoriesController.get(req, res);
     assert.ok(res.status.calledWith(200));
     assert.ok(res.send.calledWith([
       {id: 1, name: 'Foo'},
@@ -61,7 +68,7 @@ describe('Categories Controller', function() {
 
     var req = {
       params: {
-        id: 1
+        categoryId: 1
       }
     };
 
@@ -70,7 +77,7 @@ describe('Categories Controller', function() {
       send: sinon.spy()
     };
 
-    categoriesController.getOne(req, res);
+    categoriesController.getById(req, res);
     assert.ok(res.status.calledWith(200));
     assert.ok(res.send.calledWith([{id: 1, name: 'Foo'}]));
 
@@ -106,7 +113,7 @@ describe('Categories Controller', function() {
         name: 'Fizz'
       },
       params: {
-        id: 1
+        categoryId: 1
       }
     };
 
@@ -115,7 +122,7 @@ describe('Categories Controller', function() {
       send: sinon.spy()
     };
 
-    categoriesController.put(req, res);
+    categoriesController.putOnId(req, res);
     assert.ok(res.status.calledWith(200));
     assert.ok(res.send.calledWith([
       {id: 1, name: 'Fizz'},
@@ -129,7 +136,7 @@ describe('Categories Controller', function() {
 
     var req = {
       params: {
-        id: 1
+        categoryId: 1
       }
     };
 
@@ -138,11 +145,73 @@ describe('Categories Controller', function() {
       send: sinon.spy()
     };
 
-    categoriesController.del(req, res);
+    categoriesController.remove(req, res);
     assert.ok(res.status.calledWith(200));
     assert.ok(res.send.calledWith([
       {id: 2, name: 'Bar'}
     ]));
+
+  });
+
+  it('should return a 422 error with a message if required fields are missing on a post/put request', function() {
+
+    var req = {
+      params: {
+        categoryId: 1
+      },
+      body: {}
+    };
+
+    var res = {
+      status: sinon.spy(),
+      send: sinon.spy()
+    };
+
+    categoriesController.post(req, res);
+    assert.ok(res.status.calledWith(422));
+    assert.ok(res.send.calledWith({
+      status: 422,
+      errors: ['name is required']
+    }))
+
+  });
+
+  it('should return a 404 if ID does not exist on a put, get, or delete request', function() {
+
+    var req = {
+      params: {
+        categoryId: 3
+      },
+      body: {
+        name: 'foo'
+      }
+    };
+
+    var res = {
+      status: sinon.spy(),
+      send: sinon.spy()
+    };
+
+    categoriesController.getById(req, res);
+    assert.ok(res.status.calledWith(404));
+    assert.ok(res.send.calledWith({
+      status: 404,
+      errors: ['category with id of 3 does not exist']
+    }));
+
+    categoriesController.putOnId(req, res);
+    assert.ok(res.status.calledWith(404));
+    assert.ok(res.send.calledWith({
+      status: 404,
+      errors: ['category with id of 3 does not exist']
+    }));
+
+    categoriesController.remove(req, res);
+    assert.ok(res.status.calledWith(404));
+    assert.ok(res.send.calledWith({
+      status: 404,
+      errors: ['category with id of 3 does not exist']
+    }));
 
   });
 

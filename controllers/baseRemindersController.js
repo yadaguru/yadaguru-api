@@ -49,7 +49,10 @@ var baseRemindersController = function(baseRemindersService, httpResponseService
   };
 
 
-  var getAll = function(req, res) {
+  /**
+   * GET /api/base-reminders/
+   */
+  var get = function(req, res) {
 
     var baseReminders = baseRemindersService.findAll();
 
@@ -58,16 +61,28 @@ var baseRemindersController = function(baseRemindersService, httpResponseService
 
   };
 
-  var getOne = function(req, res) {
+  /**
+   * GET /api/base-reminders/{baseReminderId}
+   */
+  var getById = function(req, res) {
 
-    var baseReminder = baseRemindersService.findOne(req.params.id);
+    var id = req.params.baseReminderId;
+    var baseReminder = baseRemindersService.findById(id);
 
-    res.status(200);
-    res.send(baseReminder);
+    if (baseReminder) {
+      res.status(200);
+      res.send(baseReminder);
+    } else {
+      res.status(404);
+      res.send(httpResponseService.assemble404Response('baseReminder', id));
+    }
 
   };
 
 
+  /**
+   * POST /api/base-reminders/
+   */
   var post = function(req, res) {
 
     var errors = httpResponseService.validateRequest(req.body, _fieldRules);
@@ -95,7 +110,10 @@ var baseRemindersController = function(baseRemindersService, httpResponseService
 
   };
 
-  var put = function(req, res) {
+  /**
+   * PUT /api/baseReminders/{baseReminderId}
+   */
+  var putOnId = function(req, res) {
 
     var errors = httpResponseService.validateRequest(req.body, _fieldRules);
 
@@ -115,29 +133,44 @@ var baseRemindersController = function(baseRemindersService, httpResponseService
       timeframes: req.body.timeframes,
       category: req.body.category
     };
+    var id = req.params.baseReminderId;
 
-    var baseReminders = baseRemindersService.update(req.params.id, updatedBaseReminder);
-
-    res.status(200);
-    res.send(baseReminders);
+    if (baseRemindersService.exists(id)) {
+      var baseReminders = baseRemindersService.update(id, updatedBaseReminder);
+      res.status(200);
+      res.send(baseReminders);
+    } else {
+      res.status(404);
+      res.send(httpResponseService.assemble404Response('baseReminder', id));
+    }
 
   };
 
-  var del = function(req, res) {
+  /**
+   * DELETE /api/baseReminders/{baseReminderId}
+   */
+  var remove = function(req, res) {
 
-    var baseReminders = baseRemindersService.destroy(req.params.id);
+    var id = req.params.baseReminderId;
 
-    res.status(200);
-    res.send(baseReminders);
+    if (baseRemindersService.exists(id)) {
+      var baseReminders = baseRemindersService.remove(req.params.id);
+      res.status(200);
+      res.send(baseReminders);
+    } else {
+      res.status(404);
+      res.send(httpResponseService.assemble404Response('baseReminder', id));
+    }
+
 
   };
 
   return {
-    getAll: getAll,
-    getOne: getOne,
+    get: get,
+    getById: getById,
     post: post,
-    put: put,
-    del: del
+    putOnId: putOnId,
+    remove: remove
   }
 
 };

@@ -17,7 +17,10 @@ var categoriesController = function(categoriesService, httpResponseService) {
     }
   };
 
-  var getAll = function(req, res) {
+  /**
+   * GET /api/categories
+   */
+  var get = function(req, res) {
 
     var categories = categoriesService.findAll();
 
@@ -26,16 +29,27 @@ var categoriesController = function(categoriesService, httpResponseService) {
 
   };
 
-  var getOne = function(req, res) {
+  /**
+   * GET /api/categories/{categoryId}
+   */
+  var getById = function(req, res) {
 
-    var category = categoriesService.findOne(req.params.id);
+    var id = req.params.categoryId;
+    var category = categoriesService.findById(id);
 
-    res.status(200);
-    res.send(category);
+    if (category) {
+      res.status(200);
+      res.send(category);
+    } else {
+      res.status(404);
+      res.send(httpResponseService.assemble404Response('category', id));
+    }
 
   };
 
-
+  /**
+   * POST /api/categories/
+   */
   var post = function(req, res) {
 
     var errors = httpResponseService.validateRequest(req.body, _fieldRules);
@@ -58,7 +72,10 @@ var categoriesController = function(categoriesService, httpResponseService) {
 
   };
 
-  var put = function(req, res) {
+  /**
+   * PUT /api/categories/{categoryId}
+   */
+  var putOnId = function(req, res) {
 
     var errors = httpResponseService.validateRequest(req.body, _fieldRules);
 
@@ -72,29 +89,46 @@ var categoriesController = function(categoriesService, httpResponseService) {
     var updatedCategory = {
       name: req.body.name
     };
+    var id = req.params.categoryId;
 
-    var categories = categoriesService.update(req.params.id, updatedCategory);
+    if (categoriesService.exists(id)) {
+      var categories = categoriesService.update(id, updatedCategory);
+      res.status(200);
+      res.send(categories);
+    } else {
+      res.status(404);
+      res.send(httpResponseService.assemble404Response('category', id));
+    }
 
-    res.status(200);
-    res.send(categories);
 
   };
 
-  var del = function(req, res) {
+  /**
+   * DELETE /api/categories/{categoryId}
+   */
+  var remove = function(req, res) {
 
-    var categories = categoriesService.destroy(req.params.id);
+    var id = req.params.categoryId;
 
-    res.status(200);
-    res.send(categories);
+
+    if (categoriesService.exists(id)) {
+      var categories = categoriesService.remove(req.params.categoryId);
+      res.status(200);
+      res.send(categories);
+    } else {
+      res.status(404);
+      res.send(httpResponseService.assemble404Response('category', id));
+    }
+
 
   };
 
   return {
-    getAll: getAll,
-    getOne: getOne,
+    get: get,
+    getById: getById,
     post: post,
-    put: put,
-    del: del
+    putOnId: putOnId,
+    remove: remove
   }
 
 };

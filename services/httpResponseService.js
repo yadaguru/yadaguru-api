@@ -2,13 +2,13 @@ var validator = require('validator');
 
 var httpResponseService = function() {
 
-  var validateRequest = function(data, rules) {
+  var validateRequest = function(data, rules, ignoreRequired) {
 
     var fields = Object.keys(rules);
     var invalidFields = [];
 
     fields.forEach(function(field) {
-      if (rules[field].required && typeof data[field] === 'undefined') {
+      if (!ignoreRequired && rules[field].required && typeof data[field] === 'undefined') {
         invalidFields.push(field + ' is required');
       } else if (typeof rules[field].validate === 'function' && data[field] && !rules[field].validate(data[field], validator, data)) {
         if (typeof rules[field].message === 'string') {
@@ -32,9 +32,18 @@ var httpResponseService = function() {
 
   };
 
+  var assemble404Response = function(resource, id, plural) {
+
+    var does = plural ? 'do' : 'does';
+
+    return assembleErrorResponse(404, [resource + ' with id of ' + id + ' ' + does + ' not exist']);
+
+  };
+
   return {
     validateRequest: validateRequest,
-    assembleErrorResponse: assembleErrorResponse
+    assembleErrorResponse: assembleErrorResponse,
+    assemble404Response: assemble404Response
   }
 
 };
