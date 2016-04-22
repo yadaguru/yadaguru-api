@@ -8,7 +8,7 @@
   },
   "main": "./server/server.js",
   "scripts": {
-    "test": "mocha --recursive",
+    "test": " npm install && mocha --recursive",
     "start": "node ./server/server.js"
   },
   "author": "",
