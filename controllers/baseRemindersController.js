@@ -162,7 +162,6 @@ var baseRemindersController = function(baseRemindersService, httpResponseService
       res.send(httpResponseService.assemble404Response('baseReminder', id));
     }
 
-
   };
 
   return {
