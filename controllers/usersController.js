@@ -21,7 +21,7 @@ var usersController = function(usersService) {
   /*
    * PUT /users/:userId
    */
-  var put = function(req, res) {
+  var putOnId = function(req, res) {
 
   	var userId = req.params.userId;
     var phoneNumber = req.body.phoneNumber;
@@ -61,8 +61,8 @@ var usersController = function(usersService) {
 
   return {
     post : post,
-    put : put,
-    remove : remove
+    putOnId : putOnId,
+    removeById : removeById
   };
 };
 

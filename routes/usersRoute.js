@@ -9,7 +9,10 @@ var routes = function() {
     .post(usersController.post);
 
   router.route('/:userId')
-    .put(usersController.post);
+    .put(usersController.putOnId);
+
+  router.route('/:userId')
+    .delete(usersController.removeById);
 
   return router;
 };
