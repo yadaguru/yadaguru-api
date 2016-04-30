@@ -23,7 +23,7 @@ var usersController = function(usersService) {
    */
   var putOnId = function(req, res) {
 
-  	var userId = req.params.userId;
+    var userId = req.params.userId;
     var phoneNumber = req.body.phoneNumber;
     var confirmCode = req.body.confirmCode;
     var personalCode = req.body.personalCode;
@@ -36,7 +36,7 @@ var usersController = function(usersService) {
       } else {
         // What should be returned on a put?
         res.status(200);
-        res.send({id: userId});
+        res.send({id: data.userId});
       }
     });
   };
@@ -44,7 +44,7 @@ var usersController = function(usersService) {
   /*
    * DELETE /users/:userId
    */
-  var remove = function(req, res) {
+  var removeById = function(req, res) {
 
   	var userId = req.params.userId;
 
