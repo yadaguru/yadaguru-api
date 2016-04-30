@@ -29,10 +29,16 @@ var usersController = function(usersService) {
     var personalCode = req.body.personalCode;
     var sponsorCode = req.body.sponsorCode;
 
-    var user = usersService.update(userId, phoneNumber, confirmCode, personalCode, sponsorCode);
-
-    res.status(200);
-    res.send({id: user});
+    var user = usersService.update(userId, phoneNumber, confirmCode, personalCode, sponsorCode, function (error, data) {
+      if (error) {
+        res.status(error.status);
+        res.send({error: error.message});
+      } else {
+        // What should be returned on a put?
+        res.status(200);
+        res.send({id: userId});
+      }
+    });
   };
 
   /*
