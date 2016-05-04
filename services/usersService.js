@@ -1,18 +1,30 @@
 var usersService = function(database) {
 
   var create = function(phoneNumber, callback) {
-    phoneNumber = phoneNumber.replace(/\D+/g, "");
-    var phoneNumberRegex = /^\d{10}$/;
-
-    if (phoneNumberRegex.test(phoneNumber)) {
-      callback(null, { userId: 9 });
+    phoneNumber = sanitizePhoneNumber(phoneNumber);
+    if (isPhoneNumber(phoneNumber)) {
+      database.membership.register([phoneNumber], function(err, data) {
+        if (err) {
+          console.log(err);
+          callback({ status: 500, message: 'Internal server error occurred' }, null);
+        } else if (data.success) {
+          callback(null, { userId: data.new_id});
+        } else {
+          callback({ status: 409, message: data.message }, null);
+        }
+      });
     } else {
-      var error = {
-        status: 400,
-        message: 'Invalid Phone Number'
-      }
-      callback(error, null);
+      callback({ status: 400, message: 'Invalid Phone Number: Must be 10 digits' }, null);
     }
+  };
+
+  var sanitizePhoneNumber = function(phoneNumber) {
+    return phoneNumber.replace(/\D+/g, "");
+  };
+
+  var isPhoneNumber = function(phoneNumber) {
+    var phoneNumberRegex = /^\d{10}$/;
+    return phoneNumberRegex.test(phoneNumber);
   };
 
   return {
