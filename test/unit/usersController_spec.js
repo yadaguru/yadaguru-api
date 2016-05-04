@@ -2,16 +2,13 @@
 
 var assert = require('assert');
 var sinon = require('sinon');
-var httpMocks = require('node-mocks-http');
 
 var fakeUserId = 7;
-
 var mockUserService = {};
-
 var usersController = require('../../controllers/usersController.js')(mockUserService);
 
-describe('User Controller', function() {
-  it('should return user id when userService returns data', function() {
+describe('Users Controller', function() {
+  it('should return user id in response when userService returns data', function() {
 
     mockUserService.create = function(phoneNumber, callback) {
       var data = {};
@@ -35,7 +32,7 @@ describe('User Controller', function() {
     assert.ok(res.send.calledWith({id: fakeUserId}));
   });
 
-  it('should return error when userService returns error', function() {
+  it('should return error in response when userService returns error', function() {
 
     var errorMessage = 'Some helpful message hopefully';
 
@@ -62,9 +59,7 @@ describe('User Controller', function() {
     assert.ok(res.send.calledWith({error: errorMessage}));
   });
 
-  it('should return a user id on successful PUT', function() {
-
-    var errorMessage = 'Some helpful message hopefully';
+  it('should return a user id in response on successful PUT', function() {
 
     mockUserService.update = function(userId, phoneNumber, confirmCode, personalCode, sponsorCode, callback) {
       var data = {};
