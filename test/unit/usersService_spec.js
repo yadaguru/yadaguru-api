@@ -17,7 +17,7 @@ describe('Users Service', function() {
       data.success = true;
       data.new_id = fakeUserId;
       data.message = 'Successfully registered';
-      callback(null, data);
+      callback(null, [data]);
     };
   });
 
@@ -44,7 +44,7 @@ describe('Users Service', function() {
       var data = {};
       data.success = false;
       data.message = 'Phone number exists';
-      callback(null, data);
+      callback(null, [data]);
     };
 
     var callbackSpy = sinon.spy();

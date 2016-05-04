@@ -3,6 +3,6 @@ node_modules/*
 .settings/*
 npm-debug.log
 .idea/*
-sql/dist/
+sql/dist/yadaguru.sql
 empty/*git
 .vagrant

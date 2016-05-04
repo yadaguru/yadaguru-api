@@ -4,8 +4,8 @@ var usersService = function(database) {
     phoneNumber = sanitizePhoneNumber(phoneNumber);
     if (isPhoneNumber(phoneNumber)) {
       database.membership.register([phoneNumber], function(err, data) {
+        data = data[0];
         if (err) {
-          console.log(err);
           callback({ status: 500, message: 'Internal server error occurred' }, null);
         } else if (data.success) {
           callback(null, { userId: data.new_id});

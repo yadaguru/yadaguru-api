@@ -1,9 +1,7 @@
 var express = require('express');
 var router = express.Router();
-var usersService = require('../services/usersService');
-var usersController = require('../controllers/usersController')(userService);
 
-var routes = function() {
+var routes = function(usersController) {
 
   router.route('/')
     .post(usersController.post);

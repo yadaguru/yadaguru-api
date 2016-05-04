@@ -4,7 +4,7 @@ var gulp             = require('gulp'),
     paths            = require('../paths'),
     distFile         = paths.sqlDistFile,
     sql              = require('../../sql'),
-    connectionString = 'postgres://yadaguru:yadaguru@localhost:15432/yadaguru'; // TODO: Move to env variable
+    connectionString = 'postgres://yadaguru:yadaguru@localhost:5432/yadaguru'; // TODO: Move to env variable
 
 gulp.task('build-sql', function() {
   fs.writeFileSync(distFile, sql.getSql());
