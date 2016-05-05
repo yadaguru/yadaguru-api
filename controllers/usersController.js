@@ -1,4 +1,6 @@
-var usersController = function(usersService) {
+var usersService = require('../services/usersService');
+
+var usersController = function() {
 
   /*
    * POST /users/
@@ -6,7 +8,6 @@ var usersController = function(usersService) {
   var post = function(req, res) {
 
     var phoneNumber = req.body.phoneNumber;
-
     usersService.create(phoneNumber, function(error, data) {
       if (error) {
         res.status(error.status);
@@ -66,4 +67,4 @@ var usersController = function(usersService) {
   };
 };
 
-module.exports = usersController;
+module.exports = usersController();

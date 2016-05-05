@@ -1,5 +1,7 @@
-'use strict';
+// Inner libraries
+var app = require('../../app.js');
 
+// Testing libraries
 var assert = require('assert');
 var sinon = require('sinon');
 
@@ -8,17 +10,28 @@ describe('Users Service', function() {
   var fakeUserId = 9;
 
   var mockDatabase = {};
-  mockDatabase.membership = {};
 
-  var usersService = require('../../services/usersService.js')(mockDatabase);
+  var usersService;
+
   beforeEach(function() {
-    mockDatabase.membership.register = function(argList, callback) {
-      var data = {};
-      data.success = true;
-      data.new_id = fakeUserId;
-      data.message = 'Successfully registered';
-      callback(null, [data]);
+    mockDatabase.membership = {
+      register: function(argList, callback) {
+        var data = {};
+        data.success = true;
+        data.new_id = fakeUserId;
+        data.message = 'Successfully registered';
+        callback(null, [data]);
+      }
     };
+
+    sinon.stub(app, 'get').withArgs('db').returns(mockDatabase);
+
+    // Unit under test
+    usersService = require('../../services/usersService.js');
+  });
+
+  afterEach(function() {
+    app.get.restore();
   });
 
   it('should return userId if phone_number is valid', function() {

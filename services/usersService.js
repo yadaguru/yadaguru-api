@@ -1,9 +1,11 @@
-var usersService = function(database) {
+var app = require('../app.js');
+
+var usersService = function() {
 
   var create = function(phoneNumber, callback) {
     phoneNumber = sanitizePhoneNumber(phoneNumber);
     if (isPhoneNumber(phoneNumber)) {
-      database.membership.register([phoneNumber], function(err, data) {
+      app.get('db').membership.register([phoneNumber], function(err, data) {
         data = data[0];
         if (err) {
           callback({ status: 500, message: 'Internal server error occurred' }, null);
@@ -18,6 +20,10 @@ var usersService = function(database) {
     }
   };
 
+  var update = function() {
+    return;
+  };
+
   var sanitizePhoneNumber = function(phoneNumber) {
     return phoneNumber.replace(/\D+/g, "");
   };
@@ -28,8 +34,9 @@ var usersService = function(database) {
   };
 
   return {
-    create : create
+    create : create,
+    update: update
   };
 };
 
-module.exports = usersService;
+module.exports = usersService();

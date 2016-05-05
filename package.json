@@ -6,10 +6,10 @@
     "type": "git",
     "url": "git://github.com/yadaguru/yadaguru-app.git"
   },
-  "main": "./server/server.js",
+  "main": "./app.js",
   "scripts": {
-    "test": " npm install && mocha --recursive",
-    "start": "node ./server/server.js"
+    "test": "mocha --recursive",
+    "start": "node ./app.js"
   },
   "author": "",
   "license": "ISC",

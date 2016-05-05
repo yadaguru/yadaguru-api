@@ -1,7 +1,8 @@
 var express = require('express');
 var router = express.Router();
+var usersController = require('../controllers/usersController');
 
-var routes = function(usersController) {
+var routes = function() {
 
   router.route('/')
     .post(usersController.post);
@@ -15,4 +16,4 @@ var routes = function(usersController) {
   return router;
 };
 
-module.exports = routes;
+module.exports = routes();

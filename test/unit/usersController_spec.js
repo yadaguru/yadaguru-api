@@ -1,20 +1,31 @@
-'use strict';
+// Inner libraries
+var usersService = require('../../services/usersService');
 
+// Testing libraries
 var assert = require('assert');
 var sinon = require('sinon');
 
-var fakeUserId = 7;
-var mockUserService = {};
-var usersController = require('../../controllers/usersController.js')(mockUserService);
-
 describe('Users Controller', function() {
+
+  var fakeUserId = 7;
+
+  var usersController;
+
+  beforeEach(function() {
+    // Unit under test
+    usersController = require('../../controllers/usersController.js');
+  });
+
+  afterEach(function() {
+  });
+
   it('should return user id in response when userService returns data', function() {
 
-    mockUserService.create = function(phoneNumber, callback) {
+    sinon.stub(usersService, 'create', function(phoneNumber, callback) {
       var data = {};
       data.userId = fakeUserId;
       callback(null, data);
-    };
+    });
 
     var req = {
       body: {
@@ -30,18 +41,20 @@ describe('Users Controller', function() {
     usersController.post(req, res);
     assert.ok(res.status.calledWith(200));
     assert.ok(res.send.calledWith({id: fakeUserId}));
+
+    usersService.create.restore();
   });
 
   it('should return error in response when userService returns error', function() {
 
     var errorMessage = 'Some helpful message hopefully';
 
-    mockUserService.create = function(phoneNumber, callback) {
+    sinon.stub(usersService, 'create', function(phoneNumber, callback) {
       var error = {};
       error.status = 500;
       error.message = errorMessage;
       callback(error, null);
-    };
+    });
 
     var req = {
       body: {
@@ -57,15 +70,17 @@ describe('Users Controller', function() {
     usersController.post(req, res);
     assert.ok(res.status.calledWith(500));
     assert.ok(res.send.calledWith({error: errorMessage}));
+
+    usersService.create.restore();
   });
 
   it('should return a user id in response on successful PUT', function() {
 
-    mockUserService.update = function(userId, phoneNumber, confirmCode, personalCode, sponsorCode, callback) {
+    sinon.stub(usersService, 'update', function(userId, phoneNumber, confirmCode, personalCode, sponsorCode, callback) {
       var data = {};
       data.userId = fakeUserId;
       callback(null, data);
-    };
+    });
 
     var req = {
       params: { userId: fakeUserId},
@@ -85,5 +100,7 @@ describe('Users Controller', function() {
     usersController.putOnId(req, res);
     assert.ok(res.status.calledWith(200));
     assert.ok(res.send.calledWith({id: fakeUserId}));
+
+    usersService.update.restore();
   });
 });

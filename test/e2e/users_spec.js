@@ -1,5 +1,5 @@
 var request = require('supertest');
-var app = require('../../server.js');
+var app = require('../../app.js');
 
 describe('POST /api/users', function() {
   it('should respond with user id when phone number is valid', function(done) {
