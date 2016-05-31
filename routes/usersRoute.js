@@ -8,9 +8,7 @@ var routes = function() {
     .post(usersController.post);
 
   router.route('/:userId')
-    .put(usersController.putOnId);
-
-  router.route('/:userId')
+    .put(usersController.putOnId)
     .delete(usersController.removeById);
 
   return router;
