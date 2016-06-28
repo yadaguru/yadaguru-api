@@ -18,10 +18,9 @@ Run `gulp serve` to serve the api at http://localhost:8080. While the task is ru
 
 ##Testing
 Tests are run with mocha. It is recommended that on windows you use `set NODE_ENV=TEST&& mocha` or on linux/mac `export NODE_ENV=TEST&& mocha` to run the tests. You can also use a local version of mocha with `node node_modules/mocha/bin/mocha` if you would prefer to omit mocha from a global install. Setting the NODE_ENV prevents potential corruption of the local database.
-
-Client tests are run with karma, mocha, chai-sinon, phantomjs, and coverage. To run the tests use `npm run test-client`. This test will watch for changes by default.
+Run all tests by running `npm test`.
 
 ##Contributing
 
  * Please fork the repo, checkout the `development` and create a feature branch from there.
- * Please make all PR against the `development` branch. 
+ * Please make all PR against the `development` branch.
