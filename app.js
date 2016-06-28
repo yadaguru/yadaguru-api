@@ -1,7 +1,7 @@
 var express = require('express');
 var massive = require('massive');
 var bodyParser = require('body-parser');
-var connectionString = 'postgres://postgres:postgres@localhost:5432/yadaguru'; // TODO: Move to ENV variable with file backup
+var connectionString = 'postgres://yadaguru:yadaguru@localhost:15432/yadaguru'; // TODO: Move to ENV variable with file backup
 
 var app = module.exports = express();
 

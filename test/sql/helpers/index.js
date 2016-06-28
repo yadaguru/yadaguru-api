@@ -1,6 +1,6 @@
 var massive          = require('massive'),
     sql              = require('../../../sql'),
-    connectionString = 'postgres://postgres:postgres@localhost:5432/yadaguru';
+    connectionString = 'postgres://yadaguru:yadaguru@localhost:15432/yadaguru';
 
 var Helpers = function(){
   this.db={};
