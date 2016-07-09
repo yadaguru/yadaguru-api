@@ -72,5 +72,20 @@ describe('/api/users', function() {
           done();
         });
     });
+
+    it('should respond with error phone number field is not present', function(done) {
+      var json = { foo: 'bar' };
+
+      request(app)
+        .post('/api/users')
+        .type('json')
+        .send(json)
+        .expect(400)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.error.text.should.be.equal('Missing Fields: phoneNumber');
+          done();
+        });
+    });
   });
 });

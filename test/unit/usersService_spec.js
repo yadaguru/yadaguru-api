@@ -76,4 +76,14 @@ describe('Users Service', function() {
     newUser.should.be.rejectedWith(ApiError, 'Resource already exists').notify(done);
   });
 
+  it('should return an error if phone number is not supplied', function(done) {
+    var newUser = usersService.create({foo: 'bar'});
+    newUser.should.be.rejectedWith(ApiError, 'Missing Fields: phoneNumber').notify(done);
+  });
+
+  it('should return an error if no data is supplied', function (done) {
+    var newUser = usersService.create();
+    newUser.should.be.rejectedWith(ApiError, 'No data supplied').notify(done);
+  });
+
 });

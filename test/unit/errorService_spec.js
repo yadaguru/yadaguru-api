@@ -20,9 +20,9 @@ describe('The ApiError', function() {
     apiError.should.have.property('status', 404);
   });
 
-  it('should allow passing in an array for the message', function() {
-    var apiError = new ApiError(['foo', 'bar', 'bazz']);
-    apiError.should.have.property('message', 'foo, bar, bazz');
+  it('should allow passing in an array of fields', function() {
+    var apiError = new ApiError('Missing fields', 400, ['foo', 'bar', 'bazz']);
+    apiError.should.have.property('message', 'Missing fields foo bar bazz');
   });
 
 });
@@ -41,10 +41,15 @@ describe('The makeError method', function() {
     apiError.should.have.property('status', 400);
   });
 
-  it('should return a 400 error and a generic message if calle with no arguments', function() {
+  it('should return a 400 error and a generic message if called with no arguments', function() {
     var apiError = Errors.makeError();
     apiError.should.have.property('message', 'Unspecified DataError');
     apiError.should.have.property('status', 400);
   });
+
+  it('should handle an array of fields for the third parameter and include them in the message', function() {
+    var apiError = Errors.makeError('Missing fields:', 400, ['foo', 'bar', 'bazz']);
+    apiError.should.have.property('message', 'Missing fields: foo bar bazz');
+  })
 
 });

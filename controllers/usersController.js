@@ -6,8 +6,7 @@ var usersController = function() {
    */
   var post = function(req, res) {
 
-    var phoneNumber = req.body.phoneNumber;
-    return usersService.create({phoneNumber: phoneNumber}).then(function(data) {
+    return usersService.create(req.body).then(function(data) {
       res.status(200);
       res.send(data);
     }).catch(function(ApiError) {

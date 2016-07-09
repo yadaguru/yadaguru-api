@@ -1,27 +1,24 @@
 var errorService = function() {
 
-  var ApiError = function(message, status) {
+  var ApiError = function(message, status, fields) {
     this.name = 'ApiError';
-
-    if (Array.isArray(message)) {
-      this.message = message.reduce(function(fullMessage, messagePart) {
-        return fullMessage + messagePart + ', ';
-      }, '').slice(0, -2);
-    } else {
-      this.message = message || 'Unspecified DataError';
-    }
-
+    this.message = message || 'Unspecified DataError';
     this.status = status || 400;
+
+    if (Array.isArray(fields)) {
+      fields.unshift(this.message);
+      this.message = fields.join(' ');
+    }
   };
   ApiError.prototype = Object.create(Error.prototype);
   ApiError.prototype.constructor = ApiError;
 
-  var makeError = function(errorName) {
+  var makeError = function(errorName, status, fields) {
     switch(errorName) {
       case 'SequelizeUniqueConstraintError':
         return new ApiError('Resource already exists', 409);
       default:
-        return new ApiError(errorName, 400);
+        return new ApiError(errorName, status, fields);
     }
   };
 
