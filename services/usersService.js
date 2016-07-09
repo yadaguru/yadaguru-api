@@ -1,27 +1,25 @@
-var app = require('../app.js');
+var models = require('../models');
+var Promise = require('bluebird');
+var errorService = require('./errorService');
 
 var usersService = function() {
 
-  var create = function(phoneNumber, callback) {
-    phoneNumber = sanitizePhoneNumber(phoneNumber);
+  var User = models.User;
+
+  var create = function(values) {
+    var phoneNumber = sanitizePhoneNumber(values.phoneNumber);
     if (isPhoneNumber(phoneNumber)) {
-      app.get('db').membership.register([phoneNumber], function(err, data) {
-        data = data[0];
-        if (err) {
-          callback({ status: 500, message: 'Internal server error occurred' }, null);
-        } else if (data.success) {
-          callback(null, { userId: data.new_id});
-        } else {
-          callback({ status: 409, message: data.message }, null);
-        }
+      return User.create({phoneNumber: phoneNumber}).then(function(resp) {
+        return Promise.resolve(resp.dataValues);
+      }, function(error) {
+        return Promise.reject(errorService.makeError(error.name));
       });
-    } else {
-      callback({ status: 400, message: 'Invalid Phone Number: Must be 10 digits' }, null);
     }
+    return Promise.reject(new errorService.makeError('Invalid Phone Number: Must be 10 digits'));
   };
 
   var update = function() {
-    return;
+
   };
 
   var sanitizePhoneNumber = function(phoneNumber) {

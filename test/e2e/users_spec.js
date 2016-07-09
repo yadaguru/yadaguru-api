@@ -1,19 +1,21 @@
 var request = require('supertest');
-var assert = require('chai').assert;
+var chai = require('chai');
+chai.should();
 var app = require('../../app.js');
-var membership = app.get('db').membership;
+var config = require('../../config')[process.env.DEPLOY_MODE];
+var models = require('../../models');
 
 describe('/api/users', function() {
-  beforeEach(function(done) {
-    membership.users.destroy({}, function(err) {
-      if (err) return done(err);
-      done();
-    });
-  });
-  
   describe('POST', function() {
+
+    before(function(done) {
+      models.sequelize.sync(config.dbSyncOptions).then(function() {
+        done();
+      });
+    });
+
     it('should respond with user id when phone number is valid', function(done) {
-      var json = { phoneNumber: '1111111111' };
+      var json = { phoneNumber: '1234567890' };
 
       request(app)
         .post('/api/users')
@@ -22,52 +24,51 @@ describe('/api/users', function() {
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-          assert.property(res.body, 'id');
+          res.body.should.have.property('id');
+          res.body.should.have.property('phoneNumber', '1234567890');
           done();
         });
     });
     it('should respond with error when phone number already exists', function(done) {
-      var json = { phoneNumber: '1111111111' };
-      
-      membership.register([json.phoneNumber], function() {
-        request(app)
-          .post('/api/users')
-          .type('json')
-          .send(json)
-          .expect(409) //TODO: Check for SOME id numeric returned & message
-          .end(function(err, res) {
-            if (err) return done(err);
-            assert.equal(res.body.error, 'Phone number exists');
-            done();
-          });
-      });
-    });
-    it('should respond with error when phone number is not ten digits', function(done) {
-      var json = { phoneNumber: '12345678901' }
-      
+      var json = { phoneNumber: '1234567890' };
+
       request(app)
         .post('/api/users')
         .type('json')
         .send(json)
-        .expect(400) //TODO: Check for SOME id numeric returned & message
+        .expect(409)
         .end(function(err, res) {
           if (err) return done(err);
-          assert.equal(res.body.error, 'Invalid Phone Number: Must be 10 digits');
+          res.error.text.should.be.equal('Resource already exists');
           done();
         });
     });
-    
-    it('should respond with error when phone number contains letters', function(done) {
-      var json = { phoneNumber: '123456e890' }
-      
+    it('should respond with error when phone number is not ten digits', function(done) {
+      var json = { phoneNumber: '12345678901' };
+
       request(app)
         .post('/api/users')
         .type('json')
         .send(json)
-        .expect(400) //TODO: Check for SOME id numeric returned & message
+        .expect(400)
         .end(function(err, res) {
           if (err) return done(err);
-          assert.equal(res.body.error, 'Invalid Phone Number: Must be 10 digits');
+          res.error.text.should.be.equal('Invalid Phone Number: Must be 10 digits');
+          done();
+        });
+    });
+
+    it('should respond with error when phone number contains letters', function(done) {
+      var json = { phoneNumber: '123456e890' }
+
+      request(app)
+        .post('/api/users')
+        .type('json')
+        .send(json)
+        .expect(400)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.error.text.should.be.equal('Invalid Phone Number: Must be 10 digits');
           done();
         });
     });

@@ -1,15 +1,13 @@
 var express = require('express');
-var massive = require('massive');
+var config = require('./config')[process.env.DEPLOY_MODE];
+var models = require('./models');
 var bodyParser = require('body-parser');
-var connectionString = 'postgres://yadaguru:yadaguru@localhost:15432/yadaguru'; // TODO: Move to ENV variable with file backup
 
 var app = module.exports = express();
 
-// connect to Massive and get DB, loading tables, functions, ect
-var massiveInstance = massive.connectSync({ connectionString : connectionString });
-
-// Set a reference to the massive instance on app
-app.set('db', massiveInstance);
+if (process.env.DEPLOY_MODE !== 'TEST') {
+  models.sequelize.sync(config.dbSyncOptions);
+}
 
 var router = express.Router();
 

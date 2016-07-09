@@ -1,67 +1,79 @@
-// Inner libraries
-var app = require('../../app.js');
-
-// Testing libraries
-var assert = require('assert');
 var sinon = require('sinon');
+var chai = require('chai');
+var chaiAsPromised = require('chai-as-promised');
+var sinonChai = require('sinon-chai');
+chai.use(chaiAsPromised);
+chai.use(sinonChai);
+chai.should();
+var Promise = require('bluebird');
+var ApiError = require('../../services/errorService').ApiError;
+var Sequelize = require('sequelize');
+var SequelizeUniqueConstraintError = Sequelize.UniqueConstraintError;
+
+var usersService = require('../../services/usersService');
+var User = require('../../models').User;
 
 describe('Users Service', function() {
 
-  var fakeUserId = 9;
+  var stub;
 
-  var mockDatabase = {};
+  var makeNewUserObject = function(phoneNumber) {
+    return {
+      id: '1',
+      phoneNumber: phoneNumber,
+      confirmCode: '',
+      confirmCodeExpires: '',
+      sponsorCode: ''
+    }
+  };
 
-  var usersService;
-
-  beforeEach(function() {
-    mockDatabase.membership = {
-      register: function(argList, callback) {
-        var data = {};
-        data.success = true;
-        data.new_id = fakeUserId;
-        data.message = 'Successfully registered';
-        callback(null, [data]);
-      }
-    };
-
-    sinon.stub(app, 'get').withArgs('db').returns(mockDatabase);
-
-    // Unit under test
-    usersService = require('../../services/usersService.js');
+  before(function() {
+    stub = sinon.stub(User, 'create');
   });
 
-  afterEach(function() {
-    app.get.restore();
+  after(function() {
+    stub.restore();
   });
 
-  it('should return userId if phone_number is valid', function() {
-    var callbackSpy = sinon.spy();
-    usersService.create('1234567890', callbackSpy);
-    assert.ok(callbackSpy.calledWith(null, { userId: fakeUserId }));
+  it('should return userId if phone_number is valid', function(done) {
+    var validPhoneNumber = '1234567890';
+    var newUserObject = makeNewUserObject(validPhoneNumber);
+    stub.withArgs({phoneNumber: validPhoneNumber})
+      .returns(Promise.resolve({dataValues: newUserObject}));
+
+    var newUser = usersService.create({phoneNumber: validPhoneNumber});
+    newUser.should.eventually.deep.equal(newUserObject).notify(done);
   });
 
-  it('should accept phone numbers with formatting', function() {
-    var callbackSpy = sinon.spy();
-    usersService.create('(123) 456-7890', callbackSpy);
-    assert.ok(callbackSpy.calledWith(null, { userId: fakeUserId }));
+  it('should accept phone numbers with formatting', function(done) {
+    var formattedNumber = '123-456-7890';
+    var validPhoneNumber = '1234567890';
+    var newUserObject = makeNewUserObject(validPhoneNumber);
+    stub.withArgs({phoneNumber: formattedNumber})
+      .returns(Promise.resolve({dataValues: newUserObject}));
+
+    var newUser = usersService.create({phoneNumber: formattedNumber});
+    newUser.should.eventually.deep.equal(newUserObject).notify(done);
   });
 
-  it('should return error if phone_number is invalid', function() {
-    var callbackSpy = sinon.spy();
-    usersService.create('not_a_number', callbackSpy);
-    assert.ok(callbackSpy.calledWith({ status: 400, message: 'Invalid Phone Number: Must be 10 digits' }, null));
+  it('should return an error if phone number is invalid', function(done) {
+    var invalidNumber = 'abcdefghijk';
+
+    var newUser = usersService.create({phoneNumber: invalidNumber});
+    newUser.should.be.rejectedWith(ApiError, 'Invalid Phone Number: Must be 10 digits').notify(done);
   });
 
-  it('should return 409 with message if phone number exists', function() {
-    mockDatabase.membership.register = function(argList, callback) {
-      var data = {};
-      data.success = false;
-      data.message = 'Phone number exists';
-      callback(null, [data]);
-    };
+  it('should return an error if phone number already exists', function(done) {
+    var existingNumber = '1234567890';
+    stub.withArgs({phoneNumber: existingNumber})
+      .returns(Promise.reject(new SequelizeUniqueConstraintError({
+        errors: [{
+          message: 'phoneNumber must be unique'
+        }]
+      })));
 
-    var callbackSpy = sinon.spy();
-    usersService.create('(123) 456-7890', callbackSpy);
-    assert.ok(callbackSpy.calledWith({ status: 409, message: 'Phone number exists' }, null));
+    var newUser = usersService.create({phoneNumber: existingNumber});
+    newUser.should.be.rejectedWith(ApiError, 'Resource already exists').notify(done);
   });
+
 });

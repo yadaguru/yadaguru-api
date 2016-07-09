@@ -1,106 +1,80 @@
-// Inner libraries
+var sinon = require('sinon');
+var chai = require('chai');
+var chaiAsPromised = require('chai-as-promised');
+var sinonChai = require('sinon-chai');
+chai.use(chaiAsPromised);
+chai.use(sinonChai);
+chai.should();
+var Promise = require('bluebird');
+var ApiError = require('../../services/errorService').ApiError;
+
+var usersController = require('../../controllers/usersController');
 var usersService = require('../../services/usersService');
 
-// Testing libraries
-var assert = require('assert');
-var sinon = require('sinon');
 
 describe('Users Controller', function() {
 
-  var fakeUserId = 7;
+  var req, res, stub;
 
-  var usersController;
+  req = {
+    body: {
+      phoneNumber: '1234567890'
+    }
+  };
+
 
   beforeEach(function() {
-    // Unit under test
-    usersController = require('../../controllers/usersController.js');
+
+    res = {
+      status: sinon.spy(),
+      send: sinon.spy()
+    };
+
+    stub = sinon.stub(usersService, 'create');
   });
 
   afterEach(function() {
+    res.send.reset();
+    res.status.reset();
+    stub.restore();
   });
 
-  it('should return user id in response when userService returns data', function() {
+  it('should respond with new user object and 200 status on success', function(done) {
 
-    sinon.stub(usersService, 'create', function(phoneNumber, callback) {
-      var data = {};
-      data.userId = fakeUserId;
-      callback(null, data);
-    });
-
-    var req = {
-      body: {
-        phoneNumber: '1234567890'
-      }
+    var successfulCreateResponse = {
+      id: '1',
+      phoneNumber: req.body.phoneNumber,
+      confirmCode: '',
+      confirmCodeExpires: '',
+      sponsorCode: ''
     };
 
-    var res = {
-      status: sinon.spy(),
-      send: sinon.spy()
-    };
+    stub.returns(Promise.resolve(successfulCreateResponse));
 
     usersController.post(req, res);
-    assert.ok(res.status.calledWith(200));
-    assert.ok(res.send.calledWith({id: fakeUserId}));
 
-    usersService.create.restore();
+    process.nextTick(function() {
+      res.send.should.have.been.calledWith(successfulCreateResponse);
+      res.status.should.have.been.calledWith(200);
+      done();
+    })
+
   });
 
-  it('should return error in response when userService returns error', function() {
+  it('should respond with error message and 400 status on failure', function(done) {
 
-    var errorMessage = 'Some helpful message hopefully';
+    var error = new ApiError();
 
-    sinon.stub(usersService, 'create', function(phoneNumber, callback) {
-      var error = {};
-      error.status = 500;
-      error.message = errorMessage;
-      callback(error, null);
-    });
-
-    var req = {
-      body: {
-        phoneNumber: 'this is not a phone number but that does not matter'
-      }
-    };
-
-    var res = {
-      status: sinon.spy(),
-      send: sinon.spy()
-    };
+    stub.returns(Promise.reject(error));
 
     usersController.post(req, res);
-    assert.ok(res.status.calledWith(500));
-    assert.ok(res.send.calledWith({error: errorMessage}));
 
-    usersService.create.restore();
+    process.nextTick(function() {
+      res.send.should.have.been.calledWith(error.message);
+      res.status.should.have.been.calledWith(error.status);
+      done();
+    })
+
   });
 
-  it('should return a user id in response on successful PUT', function() {
-
-    sinon.stub(usersService, 'update', function(userId, phoneNumber, confirmCode, personalCode, sponsorCode, callback) {
-      var data = {};
-      data.userId = fakeUserId;
-      callback(null, data);
-    });
-
-    var req = {
-      params: { userId: fakeUserId},
-      body: {
-        phoneNumber: 'this is not a phone number but that does not matter',
-        confirmCode: 'Some cool confirmation code',
-        personalCode: 'A bit too personal of a code',
-        sponsorCode: 'I approve of this request'
-      }
-    };
-
-    var res = {
-      status: sinon.spy(),
-      send: sinon.spy()
-    };
-
-    usersController.putOnId(req, res);
-    assert.ok(res.status.calledWith(200));
-    assert.ok(res.send.calledWith({id: fakeUserId}));
-
-    usersService.update.restore();
-  });
 });
