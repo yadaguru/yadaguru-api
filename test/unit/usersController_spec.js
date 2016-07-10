@@ -15,13 +15,7 @@ var usersService = require('../../services/usersService');
 describe('Users Controller', function() {
 
   describe('GET requests', function() {
-    var req, res, stub;
-
-    req = {
-      params: {
-        id: 1
-      }
-    };
+    var res, findById, findAll;
 
     beforeEach(function() {
 
@@ -30,16 +24,23 @@ describe('Users Controller', function() {
         send: sinon.spy()
       };
 
-      stub = sinon.stub(usersService, 'findById');
+      findById = sinon.stub(usersService, 'findById');
+      findAll = sinon.stub(usersService, 'findAll');
     });
 
     afterEach(function() {
       res.send.reset();
       res.status.reset();
-      stub.restore();
+      findById.restore();
+      findAll.restore();
     });
 
     it('should respond with the matching user object and 200 status on success', function(done) {
+      var req = {
+        params: {
+          id: 1
+        }
+      };
 
       var user = {
         id: '1',
@@ -49,7 +50,9 @@ describe('Users Controller', function() {
         sponsorCode: ''
       };
 
-      stub.returns(Promise.resolve(user));
+      findById
+        .withArgs(1)
+        .returns(Promise.resolve(user));
 
       usersController.getById(req, res);
 
@@ -61,11 +64,46 @@ describe('Users Controller', function() {
 
     });
 
+    it('should respond with an array of all users and a 200 status on success', function(done) {
+      var req = {};
+
+      var users = [{
+        id: '1',
+        phoneNumber: '1234567890',
+        confirmCode: '123456',
+        confirmCodeExpires: '',
+        sponsorCode: ''
+      }, {
+        id: '2',
+        phoneNumber: '9876543210',
+        confirmCode: '654321',
+        confirmCodeExpires: '',
+        sponsorCode: ''
+      }];
+
+      findAll.returns(Promise.resolve(users));
+
+      usersController.getAll(req, res);
+
+      process.nextTick(function() {
+        res.send.should.have.been.calledWith(users);
+        res.status.should.have.been.calledWith(200);
+        done();
+      })
+    });
+
     it('should respond with error message and 404 status if user is missing', function(done) {
+      var req = {
+        params: {
+          id: 3
+        }
+      };
 
       var error = new ApiError();
 
-      stub.returns(Promise.reject(error));
+      findById
+        .withArgs(3)
+        .returns(Promise.reject(error));
 
       usersController.getById(req, res);
 

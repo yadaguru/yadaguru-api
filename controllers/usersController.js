@@ -3,6 +3,19 @@ var usersController = function() {
   var usersService = require('../services/usersService');
 
   /**
+   * GET /users/
+   */
+  var getAll = function(req, res) {
+    return usersService.findAll().then(function(data) {
+      res.status(200);
+      res.send(data);
+    }).catch(function(ApiError) {
+      res.status(ApiError.status);
+      res.send(ApiError.message);
+    })
+  }
+
+  /**
    * GET /users/:id
    */
   var getById = function(req, res) {
@@ -49,6 +62,7 @@ var usersController = function() {
   };
 
   return {
+    getAll: getAll,
     getById: getById,
     post : post,
     putOnId : putOnId,

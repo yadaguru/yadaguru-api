@@ -5,6 +5,7 @@ var usersController = require('../controllers/usersController');
 var routes = function() {
 
   router.route('/')
+    .get(usersController.getAll)
     .post(usersController.post);
 
   router.route('/:id')

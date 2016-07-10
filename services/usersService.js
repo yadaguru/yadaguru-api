@@ -8,6 +8,14 @@ var usersService = function() {
   var User = models.User;
   var requiredFields = ['phoneNumber'];
 
+  var findAll = function() {
+    return User.findAll().then(function(users) {
+      return Promise.resolve(users.map(function(user) {
+        return user.dataValues;
+      }));
+    });
+  };
+
   var _findById = function(id) {
     return User.findById(id).then(function(user) {
       if (!user) {
@@ -21,7 +29,9 @@ var usersService = function() {
     if (!id) {
       return Promise.reject(makeError('No user id specified'));
     }
-    return _findById(id);
+    return _findById(id).then(function(resp) {
+      return Promise.resolve(resp.dataValues);
+    });
   };
 
 
@@ -74,6 +84,7 @@ var usersService = function() {
   };
 
   return {
+    findAll: findAll,
     findById: findById,
     create : create,
     update: update

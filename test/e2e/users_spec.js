@@ -26,6 +26,17 @@ describe('/api/users', function() {
       })
     });
 
+    it('should respond with all users', function(done) {
+      request(app)
+        .get('/api/users')
+        .expect(200)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.should.have.lengthOf(2);
+          done();
+        });
+    });
+
     it('should respond with requested user object', function(done) {
       request(app)
         .get('/api/users/1')

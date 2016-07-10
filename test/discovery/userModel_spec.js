@@ -70,6 +70,24 @@ describe('The User model', function() {
     })
   });
 
+  describe('findAll method', function() {
+    before(function(done) {
+      models.sequelize.sync(config.dbSyncOptions).then(function() {
+        User.create({phoneNumber: '1234567890'}).then(function() {
+          User.create({phoneNumber: '9876543210'}).then(function() {
+            done();
+          });
+        });
+      });
+    });
+
+    it('should return an array of all users', function(done) {
+      User.findAll()
+        .should.eventually.have.lengthOf(2)
+        .notify(done);
+    });
+  });
+
   describe('update instance method', function() {
     it('should update the supplied field', function(done) {
       var user = User.findById(1);

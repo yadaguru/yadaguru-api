@@ -16,6 +16,44 @@ var User = require('../../models').User;
 
 describe('Users Service', function() {
 
+  describe('findAll method', function() {
+    var findAll;
+
+    var users = [{
+      dataValues: {
+        id: '1',
+        phoneNumber: '1234567890',
+        confirmCode: '123456',
+        confirmCodeExpires: '',
+        sponsorCode: ''
+      }
+    }, {
+      dataValues: {
+        id: '2',
+        phoneNumber: '9876543210',
+        confirmCode: '654321',
+        confirmCodeExpires: '',
+        sponsorCode: ''
+      }
+    }];
+
+    before(function() {
+      findAll = sinon.stub(User, 'findAll');
+    });
+
+    after(function() {
+      findAll.restore();
+    });
+
+    it ('should return an array of all users', function(done) {
+      findAll.withArgs()
+        .returns(Promise.resolve(users));
+      usersService.findAll().should.eventually.have.lengthOf(2)
+        .notify(done);
+    });
+
+  });
+
   describe('findById method', function() {
     var findById;
 
@@ -37,7 +75,7 @@ describe('Users Service', function() {
 
     it('return object associated with supplied user id', function(done) {
       findById.withArgs(1)
-        .returns(Promise.resolve(user));
+        .returns(Promise.resolve({dataValues: user}));
 
       usersService.findById(1).should.eventually.deep.equal(user).notify(done);
     });
