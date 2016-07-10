@@ -8,6 +8,7 @@ var routes = function() {
     .post(usersController.post);
 
   router.route('/:id')
+    .get(usersController.getById)
     .put(usersController.putOnId)
     .delete(usersController.removeById);
 

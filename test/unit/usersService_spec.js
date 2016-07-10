@@ -16,6 +16,44 @@ var User = require('../../models').User;
 
 describe('Users Service', function() {
 
+  describe('findById method', function() {
+    var findById;
+
+    var user = {
+      id: '1',
+      phoneNumber: '1234567890',
+      confirmCode: '123456',
+      confirmCodeExpires: '',
+      sponsorCode: ''
+    };
+
+    before(function() {
+      findById = sinon.stub(User, 'findById');
+    });
+
+    after(function() {
+      findById.restore();
+    });
+
+    it('return object associated with supplied user id', function(done) {
+      findById.withArgs(1)
+        .returns(Promise.resolve(user));
+
+      usersService.findById(1).should.eventually.deep.equal(user).notify(done);
+    });
+
+    it('should fail if there is no user id supplied', function(done) {
+      usersService.findById().should.be.rejectedWith(ApiError, 'No user id specified').notify(done);
+    });
+
+    it('should fail if user does not exist', function(done) {
+      findById.withArgs(2)
+        .returns(Promise.resolve(null));
+
+      usersService.findById(2).should.be.rejectedWith(ApiError, 'User not found').notify(done);
+    });
+
+  });
   describe('Create method', function() {
     var stub;
 

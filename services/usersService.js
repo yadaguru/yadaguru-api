@@ -8,6 +8,23 @@ var usersService = function() {
   var User = models.User;
   var requiredFields = ['phoneNumber'];
 
+  var _findById = function(id) {
+    return User.findById(id).then(function(user) {
+      if (!user) {
+        return Promise.reject(makeError('User not found', 404));
+      }
+      return user;
+    });
+  };
+
+  var findById = function(id) {
+    if (!id) {
+      return Promise.reject(makeError('No user id specified'));
+    }
+    return _findById(id);
+  };
+
+
   var create = function(values) {
 
     if (!values) {
@@ -38,10 +55,7 @@ var usersService = function() {
       return Promise.reject(makeError('No user id specified', 400));
     }
 
-    return User.findById(id).then(function(user) {
-      if (!user) {
-        return Promise.reject(makeError('User not found', 404));
-      }
+    return _findById(id).then(function(user) {
       return user.update(values).then(function(resp) {
         return Promise.resolve(resp.dataValues);
       }, function(error) {
@@ -60,6 +74,7 @@ var usersService = function() {
   };
 
   return {
+    findById: findById,
     create : create,
     update: update
   };

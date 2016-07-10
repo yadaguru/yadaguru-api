@@ -7,6 +7,51 @@ var models = require('../../models');
 var User = models.User;
 
 describe('/api/users', function() {
+  describe('GET', function() {
+    var users = [{
+      phoneNumber: '1234567890',
+      confirmCode: '123456'
+    }, {
+      phoneNumber: '9876543210',
+      confirmCode: '654321'
+    }];
+
+    before(function(done) {
+      models.sequelize.sync(config.dbSyncOptions).then(function() {
+        User.create(users[0]).then(function() {
+          User.create(users[1]).then(function() {
+            done();
+          })
+        })
+      })
+    });
+
+    it('should respond with requested user object', function(done) {
+      request(app)
+        .get('/api/users/1')
+        .expect(200)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.should.have.property('id', 1);
+          res.body.should.have.property('phoneNumber', users[0].phoneNumber);
+          res.body.should.have.property('confirmCode', users[0].confirmCode);
+          done();
+        });
+    });
+
+    it('should respond with a 404 if the user object does not exist', function(done) {
+      request(app)
+        .get('/api/users/3')
+        .expect(404)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.error.text.should.equal('User not found');
+          done();
+        })
+    })
+  });
+
+
   describe('POST', function() {
 
     before(function(done) {
@@ -89,6 +134,7 @@ describe('/api/users', function() {
         });
     });
   });
+
   describe('PUT', function() {
 
     before(function(done) {

@@ -14,6 +14,71 @@ var usersService = require('../../services/usersService');
 
 describe('Users Controller', function() {
 
+  describe('GET requests', function() {
+    var req, res, stub;
+
+    req = {
+      params: {
+        id: 1
+      }
+    };
+
+    beforeEach(function() {
+
+      res = {
+        status: sinon.spy(),
+        send: sinon.spy()
+      };
+
+      stub = sinon.stub(usersService, 'findById');
+    });
+
+    afterEach(function() {
+      res.send.reset();
+      res.status.reset();
+      stub.restore();
+    });
+
+    it('should respond with the matching user object and 200 status on success', function(done) {
+
+      var user = {
+        id: '1',
+        phoneNumber: '1234567890',
+        confirmCode: '123456',
+        confirmCodeExpires: '',
+        sponsorCode: ''
+      };
+
+      stub.returns(Promise.resolve(user));
+
+      usersController.getById(req, res);
+
+      process.nextTick(function() {
+        res.send.should.have.been.calledWith(user);
+        res.status.should.have.been.calledWith(200);
+        done();
+      })
+
+    });
+
+    it('should respond with error message and 404 status if user is missing', function(done) {
+
+      var error = new ApiError();
+
+      stub.returns(Promise.reject(error));
+
+      usersController.getById(req, res);
+
+      process.nextTick(function() {
+        res.send.should.have.been.calledWith(error.message);
+        res.status.should.have.been.calledWith(error.status);
+        done();
+      })
+
+    });
+
+  });
+
   describe('POST requests', function() {
     var req, res, stub;
 

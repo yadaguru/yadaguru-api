@@ -11,13 +11,13 @@ describe('The User model', function() {
 
   var phoneNumber = '1234567890';
 
-  before(function(done) {
-    models.sequelize.sync(config.dbSyncOptions).then(function() {
-      done();
-    });
-  });
-
   describe('create method', function() {
+    before(function(done) {
+      models.sequelize.sync(config.dbSyncOptions).then(function() {
+        done();
+      });
+    });
+
     it('should create a new user given a phone number and return the new user', function(done) {
       User.create({phoneNumber: phoneNumber}).should.eventually.have.deep.property(
         'dataValues.phoneNumber', phoneNumber).notify(done);
@@ -51,6 +51,14 @@ describe('The User model', function() {
   });
 
   describe('findById method', function() {
+    before(function(done) {
+      models.sequelize.sync(config.dbSyncOptions).then(function() {
+        User.create({phoneNumber: phoneNumber}).then(function() {
+          done();
+        });
+      });
+    });
+
     it('should return the user with id 1', function(done) {
       var user = User.findById(1);
       user.should.eventually.have.deep.property('id', 1).notify(done);
