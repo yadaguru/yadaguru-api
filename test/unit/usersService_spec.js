@@ -9,81 +9,179 @@ var Promise = require('bluebird');
 var ApiError = require('../../services/errorService').ApiError;
 var Sequelize = require('sequelize');
 var SequelizeUniqueConstraintError = Sequelize.UniqueConstraintError;
+var SequelizeValidationError = Sequelize.ValidationError;
 
 var usersService = require('../../services/usersService');
 var User = require('../../models').User;
 
 describe('Users Service', function() {
 
-  var stub;
+  describe('Create method', function() {
+    var stub;
 
-  var makeNewUserObject = function(phoneNumber) {
-    return {
+    var makeNewUserObject = function(phoneNumber) {
+      return {
+        id: '1',
+        phoneNumber: phoneNumber,
+        confirmCode: '',
+        confirmCodeExpires: '',
+        sponsorCode: ''
+      }
+    };
+
+    before(function() {
+      stub = sinon.stub(User, 'create');
+    });
+
+    after(function() {
+      stub.restore();
+    });
+
+    it('should return userId if phone_number is valid', function(done) {
+      var validPhoneNumber = '1234567890';
+      var newUserObject = makeNewUserObject(validPhoneNumber);
+      stub.withArgs({phoneNumber: validPhoneNumber})
+        .returns(Promise.resolve({dataValues: newUserObject}));
+
+      var newUser = usersService.create({phoneNumber: validPhoneNumber});
+      newUser.should.eventually.deep.equal(newUserObject).notify(done);
+    });
+
+    it('should accept phone numbers with formatting', function(done) {
+      var formattedNumber = '123-456-7890';
+      var validPhoneNumber = '1234567890';
+      var newUserObject = makeNewUserObject(validPhoneNumber);
+      stub.withArgs({phoneNumber: formattedNumber})
+        .returns(Promise.resolve({dataValues: newUserObject}));
+
+      var newUser = usersService.create({phoneNumber: formattedNumber});
+      newUser.should.eventually.deep.equal(newUserObject).notify(done);
+    });
+
+    it('should return an error if phone number is invalid', function(done) {
+      var invalidNumber = 'abcdefghijk';
+
+      var newUser = usersService.create({phoneNumber: invalidNumber});
+      newUser.should.be.rejectedWith(ApiError, 'Invalid Phone Number: Must be 10 digits').notify(done);
+    });
+
+    it('should return an error if phone number already exists', function(done) {
+      var existingNumber = '1234567890';
+      stub.withArgs({phoneNumber: existingNumber})
+        .returns(Promise.reject(new SequelizeUniqueConstraintError({
+          errors: [{
+            message: 'phoneNumber must be unique'
+          }]
+        })));
+
+      var newUser = usersService.create({phoneNumber: existingNumber});
+      newUser.should.be.rejectedWith(ApiError, 'Resource already exists').notify(done);
+    });
+
+    it('should return an error if phone number is not supplied', function(done) {
+      var newUser = usersService.create({foo: 'bar'});
+      newUser.should.be.rejectedWith(ApiError, 'Missing Fields: phoneNumber').notify(done);
+    });
+
+    it('should return an error if no data is supplied', function (done) {
+      var newUser = usersService.create();
+      newUser.should.be.rejectedWith(ApiError, 'No data supplied').notify(done);
+    });
+  });
+
+  describe('Update method', function() {
+    var findById, update, user;
+
+    var updatedUser = {
       id: '1',
-      phoneNumber: phoneNumber,
-      confirmCode: '',
+      phoneNumber: '1234567890',
+      confirmCode: '123456',
       confirmCodeExpires: '',
       sponsorCode: ''
-    }
-  };
+    };
 
-  before(function() {
-    stub = sinon.stub(User, 'create');
-  });
+    before(function() {
+      findById = sinon.stub(User, 'findById');
+      user = {update: function(values) {}};
+      update = sinon.stub(user, 'update');
+    });
 
-  after(function() {
-    stub.restore();
-  });
+    after(function() {
+      findById.restore();
+    });
 
-  it('should return userId if phone_number is valid', function(done) {
-    var validPhoneNumber = '1234567890';
-    var newUserObject = makeNewUserObject(validPhoneNumber);
-    stub.withArgs({phoneNumber: validPhoneNumber})
-      .returns(Promise.resolve({dataValues: newUserObject}));
+    it('should update a field and return the updated object', function(done) {
+      var updateData = {
+        confirmCode: '123456'
+      };
 
-    var newUser = usersService.create({phoneNumber: validPhoneNumber});
-    newUser.should.eventually.deep.equal(newUserObject).notify(done);
-  });
+      findById.withArgs(1)
+        .returns(Promise.resolve(user));
+      update.withArgs(updateData)
+        .returns(Promise.resolve({dataValues: updatedUser}));
 
-  it('should accept phone numbers with formatting', function(done) {
-    var formattedNumber = '123-456-7890';
-    var validPhoneNumber = '1234567890';
-    var newUserObject = makeNewUserObject(validPhoneNumber);
-    stub.withArgs({phoneNumber: formattedNumber})
-      .returns(Promise.resolve({dataValues: newUserObject}));
+      usersService.update(1, updateData).should.eventually.deep.equal(updatedUser).notify(done);
+    });
 
-    var newUser = usersService.create({phoneNumber: formattedNumber});
-    newUser.should.eventually.deep.equal(newUserObject).notify(done);
-  });
+    it('should not complain if there are extra fields', function(done) {
+      var updateData = {
+        confirmCode: '123456',
+        foo: 'bar'
+      };
 
-  it('should return an error if phone number is invalid', function(done) {
-    var invalidNumber = 'abcdefghijk';
+      findById.withArgs(1)
+        .returns(Promise.resolve(user));
+      update.withArgs(updateData)
+        .returns(Promise.resolve({dataValues: updatedUser}));
 
-    var newUser = usersService.create({phoneNumber: invalidNumber});
-    newUser.should.be.rejectedWith(ApiError, 'Invalid Phone Number: Must be 10 digits').notify(done);
-  });
+      usersService.update(1, updateData).should.eventually.deep.equal(updatedUser).notify(done);
+    });
 
-  it('should return an error if phone number already exists', function(done) {
-    var existingNumber = '1234567890';
-    stub.withArgs({phoneNumber: existingNumber})
-      .returns(Promise.reject(new SequelizeUniqueConstraintError({
-        errors: [{
-          message: 'phoneNumber must be unique'
-        }]
-      })));
+    it('should handle validation errors', function(done) {
+      var updateData = {
+        confirmCode: '123'
+      };
 
-    var newUser = usersService.create({phoneNumber: existingNumber});
-    newUser.should.be.rejectedWith(ApiError, 'Resource already exists').notify(done);
-  });
+      findById.withArgs(1)
+        .returns(Promise.resolve(user));
+      update.withArgs(updateData)
+        .returns(Promise.reject(new SequelizeValidationError('Validation error: Validation len failed')));
 
-  it('should return an error if phone number is not supplied', function(done) {
-    var newUser = usersService.create({foo: 'bar'});
-    newUser.should.be.rejectedWith(ApiError, 'Missing Fields: phoneNumber').notify(done);
-  });
+      usersService.update(1, updateData).should.be.rejectedWith(ApiError, 'SequelizeValidationError').notify(done);
+    });
 
-  it('should return an error if no data is supplied', function (done) {
-    var newUser = usersService.create();
-    newUser.should.be.rejectedWith(ApiError, 'No data supplied').notify(done);
+    it('should fail if there is no data supplied', function(done) {
+      usersService.update(1).should.be.rejectedWith(ApiError, 'No data supplied').notify(done);
+    });
+
+    it('should return back the unmodified object if empty object is supplied', function(done) {
+      findById.withArgs(1)
+        .returns(Promise.resolve(user));
+      update.withArgs({})
+        .returns(Promise.resolve({dataValues: updatedUser}));
+
+      usersService.update(1, {}).should.eventually.deep.equal(updatedUser).notify(done);
+    });
+
+    it('should fail if there is no user id supplied', function(done) {
+      var updateData = {
+        confirmCode: '123456'
+      };
+
+      usersService.update(null, updateData).should.be.rejectedWith(ApiError, 'No user id specified').notify(done);
+    });
+
+    it('should fail if user does not exist', function(done) {
+      var updateData = {
+        confirmCode: '123456'
+      };
+
+      findById.withArgs(2)
+        .returns(Promise.resolve(null));
+
+      usersService.update(2, updateData).should.be.rejectedWith(ApiError, 'User not found').notify(done);
+    });
+
   });
 
 });

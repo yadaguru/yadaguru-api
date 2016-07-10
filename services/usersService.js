@@ -29,8 +29,25 @@ var usersService = function() {
     return Promise.reject(new makeError('Invalid Phone Number: Must be 10 digits'));
   };
 
-  var update = function() {
+  var update = function(id, values) {
+    if (!values) {
+      return Promise.reject(makeError('No data supplied', 400));
+    }
 
+    if (!id) {
+      return Promise.reject(makeError('No user id specified', 400));
+    }
+
+    return User.findById(id).then(function(user) {
+      if (!user) {
+        return Promise.reject(makeError('User not found', 404));
+      }
+      return user.update(values).then(function(resp) {
+        return Promise.resolve(resp.dataValues);
+      }, function(error) {
+        return Promise.reject(makeError(error.name));
+      })
+    });
   };
 
   var sanitizePhoneNumber = function(phoneNumber) {

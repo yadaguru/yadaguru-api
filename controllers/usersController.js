@@ -21,6 +21,14 @@ var usersController = function() {
    */
   var putOnId = function(req, res) {
 
+    return usersService.update(req.params.id, req.body).then(function(data) {
+      res.status(200);
+      res.send(data);
+    }).catch(function(ApiError) {
+      res.status(ApiError.status);
+      res.send(ApiError.message);
+    })
+
   };
 
   /*
