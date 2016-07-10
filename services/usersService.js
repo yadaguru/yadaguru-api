@@ -30,7 +30,7 @@ var usersService = function() {
       return Promise.reject(makeError('No user id specified'));
     }
     return _findById(id).then(function(resp) {
-      return Promise.resolve(resp.dataValues);
+      return Promise.resolve([resp.dataValues]);
     });
   };
 
@@ -48,7 +48,7 @@ var usersService = function() {
     var phoneNumber = sanitizePhoneNumber(values.phoneNumber);
     if (isPhoneNumber(phoneNumber)) {
       return User.create({phoneNumber: phoneNumber}).then(function(resp) {
-        return Promise.resolve(resp.dataValues);
+        return Promise.resolve([resp.dataValues]);
       }, function(error) {
         return Promise.reject(makeError(error.name));
       });
@@ -67,7 +67,7 @@ var usersService = function() {
 
     return _findById(id).then(function(user) {
       return user.update(values).then(function(resp) {
-        return Promise.resolve(resp.dataValues);
+        return Promise.resolve([resp.dataValues]);
       }, function(error) {
         return Promise.reject(makeError(error.name));
       })

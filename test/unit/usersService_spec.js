@@ -77,7 +77,7 @@ describe('Users Service', function() {
       findById.withArgs(1)
         .returns(Promise.resolve({dataValues: user}));
 
-      usersService.findById(1).should.eventually.deep.equal(user).notify(done);
+      usersService.findById(1).should.eventually.deep.equal([user]).notify(done);
     });
 
     it('should fail if there is no user id supplied', function(done) {
@@ -120,7 +120,7 @@ describe('Users Service', function() {
         .returns(Promise.resolve({dataValues: newUserObject}));
 
       var newUser = usersService.create({phoneNumber: validPhoneNumber});
-      newUser.should.eventually.deep.equal(newUserObject).notify(done);
+      newUser.should.eventually.deep.equal([newUserObject]).notify(done);
     });
 
     it('should accept phone numbers with formatting', function(done) {
@@ -131,7 +131,7 @@ describe('Users Service', function() {
         .returns(Promise.resolve({dataValues: newUserObject}));
 
       var newUser = usersService.create({phoneNumber: formattedNumber});
-      newUser.should.eventually.deep.equal(newUserObject).notify(done);
+      newUser.should.eventually.deep.equal([newUserObject]).notify(done);
     });
 
     it('should return an error if phone number is invalid', function(done) {
@@ -196,7 +196,7 @@ describe('Users Service', function() {
       update.withArgs(updateData)
         .returns(Promise.resolve({dataValues: updatedUser}));
 
-      usersService.update(1, updateData).should.eventually.deep.equal(updatedUser).notify(done);
+      usersService.update(1, updateData).should.eventually.deep.equal([updatedUser]).notify(done);
     });
 
     it('should not complain if there are extra fields', function(done) {
@@ -210,7 +210,7 @@ describe('Users Service', function() {
       update.withArgs(updateData)
         .returns(Promise.resolve({dataValues: updatedUser}));
 
-      usersService.update(1, updateData).should.eventually.deep.equal(updatedUser).notify(done);
+      usersService.update(1, updateData).should.eventually.deep.equal([updatedUser]).notify(done);
     });
 
     it('should handle validation errors', function(done) {
@@ -236,7 +236,7 @@ describe('Users Service', function() {
       update.withArgs({})
         .returns(Promise.resolve({dataValues: updatedUser}));
 
-      usersService.update(1, {}).should.eventually.deep.equal(updatedUser).notify(done);
+      usersService.update(1, {}).should.eventually.deep.equal([updatedUser]).notify(done);
     });
 
     it('should fail if there is no user id supplied', function(done) {

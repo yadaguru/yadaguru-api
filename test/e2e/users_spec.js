@@ -33,6 +33,8 @@ describe('/api/users', function() {
         .end(function(err, res) {
           if (err) return done(err);
           res.body.should.have.lengthOf(2);
+          res.body[0].should.have.property('phoneNumber', '1234567890');
+          res.body[1].should.have.property('phoneNumber', '9876543210');
           done();
         });
     });
@@ -43,9 +45,9 @@ describe('/api/users', function() {
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body.should.have.property('id', 1);
-          res.body.should.have.property('phoneNumber', users[0].phoneNumber);
-          res.body.should.have.property('confirmCode', users[0].confirmCode);
+          res.body[0].should.have.property('id', 1);
+          res.body[0].should.have.property('phoneNumber', users[0].phoneNumber);
+          res.body[0].should.have.property('confirmCode', users[0].confirmCode);
           done();
         });
     });
@@ -81,8 +83,8 @@ describe('/api/users', function() {
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body.should.have.property('id');
-          res.body.should.have.property('phoneNumber', '1234567890');
+          res.body[0].should.have.property('id');
+          res.body[0].should.have.property('phoneNumber', '1234567890');
           done();
         });
     });
@@ -166,9 +168,9 @@ describe('/api/users', function() {
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body.should.have.property('id', 1);
-          res.body.should.have.property('phoneNumber', '1234567890');
-          res.body.should.have.property('confirmCode', '123456');
+          res.body[0].should.have.property('id', 1);
+          res.body[0].should.have.property('phoneNumber', '1234567890');
+          res.body[0].should.have.property('confirmCode', '123456');
           done();
         });
     });
@@ -214,9 +216,9 @@ describe('/api/users', function() {
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body.should.have.property('id', 1);
-          res.body.should.have.property('phoneNumber', '1234567890');
-          res.body.should.have.property('confirmCode', '123456');
+          res.body[0].should.have.property('id', 1);
+          res.body[0].should.have.property('phoneNumber', '1234567890');
+          res.body[0].should.have.property('confirmCode', '123456');
           done();
         });
     });
