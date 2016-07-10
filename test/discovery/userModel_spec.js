@@ -121,6 +121,28 @@ describe('The User model', function() {
       })
     });
 
+    describe('destroy method', function() {
+      before(function(done) {
+        models.sequelize.sync(config.dbSyncOptions).then(function() {
+          User.create({phoneNumber: '1234567890'}).then(function() {
+            done();
+          });
+        });
+      });
+
+      it('returns the number of deleted records on destroy', function(done) {
+        User.destroy({where: {id: 1}})
+          .should.eventually.equal(1)
+          .notify(done);
+      });
+
+      it('no record', function(done) {
+        User.destroy({where: {id: 2}})
+          .should.eventually.equal(0)
+          .notify(done);
+      });
+    });
+
   });
 
 });

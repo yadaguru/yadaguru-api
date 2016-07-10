@@ -58,7 +58,13 @@ var usersController = function() {
    * DELETE /users/:id
    */
   var removeById = function(req, res) {
-
+    return usersService.destroy(req.params.id).then(function(data) {
+      res.status(200);
+      res.send(data);
+    }).catch(function(ApiError) {
+      res.status(ApiError.status);
+      res.send(ApiError.message);
+    })
   };
 
   return {

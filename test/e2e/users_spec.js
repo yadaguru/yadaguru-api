@@ -223,4 +223,38 @@ describe('/api/users', function() {
         });
     });
   });
+
+  describe('DELETE', function() {
+
+    before(function(done) {
+      models.sequelize.sync(config.dbSyncOptions).then(function() {
+        User.create({phoneNumber: '1234567890'}).then(function() {
+          done();
+        })
+      });
+    });
+
+    it('should respond with the deleted user id on successful delete', function(done) {
+      request(app)
+        .delete('/api/users/1')
+        .expect(200)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.should.deep.equal([{id: '1'}]);
+          done();
+        });
+    });
+
+    it('should respond with a 404 if the user does not exist', function(done) {
+      request(app)
+        .delete('/api/users/2')
+        .expect(404)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.error.text.should.be.equal('User not found');
+          done();
+        });
+    });
+
+  });
 });

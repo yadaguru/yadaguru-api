@@ -252,4 +252,58 @@ describe('Users Controller', function() {
 
   });
 
+  describe('DELETE requests', function(done) {
+    var req, res, stub;
+
+    beforeEach(function() {
+
+      res = {
+        status: sinon.spy(),
+        send: sinon.spy()
+      };
+
+      stub = sinon.stub(usersService, 'destroy');
+    });
+
+    afterEach(function() {
+      res.send.reset();
+      res.status.reset();
+      stub.restore();
+    });
+
+    it('should respond with the deleted user id and 200 status on success', function(done) {
+
+      req = {
+        params: 1
+      };
+
+      stub.returns(Promise.resolve([{id: 1}]));
+
+      usersController.removeById(req, res);
+
+      process.nextTick(function() {
+        res.send.should.have.been.calledWith([{id: 1}]);
+        res.status.should.have.been.calledWith(200);
+        done();
+      })
+
+    });
+
+    it('should respond with error message and 400 status on failure', function(done) {
+
+      var error = new ApiError();
+
+      stub.returns(Promise.reject(error));
+
+      usersController.removeById(req, res);
+
+      process.nextTick(function() {
+        res.send.should.have.been.calledWith(error.message);
+        res.status.should.have.been.calledWith(error.status);
+        done();
+      })
+
+    });
+  })
+
 });

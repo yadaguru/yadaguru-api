@@ -74,6 +74,19 @@ var usersService = function() {
     });
   };
 
+  var destroy = function(id) {
+    if (!id) {
+      return Promise.reject(makeError('No user id specified', 400));
+    }
+
+    return User.destroy({where: {id: id}}).then(function(resp) {
+      if (resp === 0) {
+        return Promise.reject(makeError('User not found', 404));
+      }
+      return Promise.resolve([{id: id}]);
+    })
+  };
+
   var sanitizePhoneNumber = function(phoneNumber) {
     return phoneNumber.replace(/\D+/g, "");
   };
@@ -87,7 +100,8 @@ var usersService = function() {
     findAll: findAll,
     findById: findById,
     create : create,
-    update: update
+    update: update,
+    destroy: destroy
   };
 };
 

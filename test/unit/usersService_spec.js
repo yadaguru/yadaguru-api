@@ -260,4 +260,41 @@ describe('Users Service', function() {
 
   });
 
+  describe('Destroy method', function() {
+    var destroy;
+
+    before(function() {
+      destroy = sinon.stub(User, 'destroy');
+    });
+
+    after(function() {
+      destroy.restore();
+    });
+
+    it('should return the id of the deleted record', function(done) {
+      destroy.withArgs({where: {id: 1}})
+        .returns(Promise.resolve(1));
+
+      usersService.destroy(1)
+        .should.eventually.deep.equal([{id: 1}])
+        .notify(done);
+    });
+
+    it('should return an error if no user ID is specified', function(done) {
+      usersService.destroy()
+        .should.be.rejectedWith(ApiError, 'No user id specified')
+        .notify(done);
+    });
+
+    it('should return an error if the record does not exist', function(done) {
+      destroy.withArgs({where: {id: 2}})
+        .returns(Promise.reject(new ApiError('user not found')));
+
+      usersService.destroy(2)
+        .should.be.rejectedWith(ApiError, 'user not found')
+        .notify(done);
+    });
+
+  })
+
 });
