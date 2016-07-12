@@ -1,9 +1,5 @@
 #!/bin/sh -e
 
-# Edit the following to change the name of the database user that will be created:
-APP_DB_USER=yadaguru
-APP_DB_PASS=yadaguru
-
 # Edit the following to change the name of the database that is created (defaults to the user name)
 APP_DB_NAME=yadaguru
 
@@ -41,22 +37,16 @@ provision_db () {
 cat << EOF | su - postgres -c psql
 -- Drop existing DBs and user
 DROP DATABASE IF EXISTS $APP_DB_NAME;
-DROP DATABASE IF EXISTS ${APP_DB_NAME}test;
-DROP USER IF EXISTS $APP_DB_USER;
-
--- Create the database user:
-CREATE USER $APP_DB_USER WITH PASSWORD '$APP_DB_PASS';
-
-ALTER USER $APP_DB_USER WITH SUPERUSER;
+DROP DATABASE IF EXISTS ${APP_DB_NAME}_test;
 
 -- Create the database:
-CREATE DATABASE $APP_DB_NAME WITH OWNER=$APP_DB_USER
+CREATE DATABASE $APP_DB_NAME WITH OWNER=postgres
                                   LC_COLLATE='en_US.utf8'
                                   LC_CTYPE='en_US.utf8'
                                   ENCODING='UTF8'
                                   TEMPLATE=template0;
 -- Create test database:
-CREATE DATABASE ${APP_DB_NAME}test WITH OWNER=$APP_DB_USER
+CREATE DATABASE ${APP_DB_NAME}_test WITH OWNER=postgres
                                         LC_COLLATE='en_US.utf8'
                                         LC_CTYPE='en_US.utf8'
                                         ENCODING='UTF8'
