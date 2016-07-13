@@ -85,5 +85,32 @@ Run individual tests by changing into the test directory and running `NODE_ENV=t
 Below is a list of the main project files and folders and their role in the app
 
 ```
-/config
-  
+/config - Configuration files
+/controllers - A controller file for each resource, responsible for communicating with the router and the database
+/migrations - Migration files that build/seed the database when you run 'sequelize db:migrate'
+/models - Files defining the data model for each resource. These map to specific tables in the database
+/routes - Define routes for each resource
+/test
+  /e2e - End-to-end tests
+  /unit - Unit tests
+README.md - this file
+Vagrantfile - Instructions for creating the Vagrant box
+app.js - Instantiates the database, all routes, and the http server
+bootstrap.sh - Script used for provisioning the database
+customSanitizers.js - functions for sanitizing request data
+customValidations.js - functions for validating request data
+index.js - The main entry point for the app. Instantiates app.js and starts the http server
+package.json - A list of all dependencies
+```
+
+##Contributing
+We need all the help we can get! We have tasks for various levels of experience. Check out our issues page, or even better,
+our [Waffle.io](https://waffle.io/yadaguru/yadaguru-api) board to see what you can help with.
+
+When making a contribution, create a branch off of master. When you have completed the feature, written tests, and the tests
+pass, create a pull request against the master branch.
+
+If you need any help setting up, you can find us in the [CodeForPhilly Slack Team](https://codeforphilly.slack.com/messages/yadaguru/)
+in the #yadaguru channel. Feel free to reach out for help there.
+
+Thank  you for your help! Happy Coding!!
