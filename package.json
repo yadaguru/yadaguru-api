@@ -4,7 +4,7 @@
   "description": "",
   "repository": {
     "type": "git",
-    "url": "git://github.com/yadaguru/yadaguru-app.git"
+    "url": "git://github.com/yadaguru/yadaguru-api.git"
   },
   "main": "./app.js",
   "scripts": {
@@ -14,7 +14,6 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "bluebird": "^3.4.1",
     "chai": "^3.5.0",
     "chai-as-promised": "^5.3.0",
     "eslint": "^2.9.0",
@@ -30,6 +29,7 @@
     "yargs": "^3.10.0"
   },
   "dependencies": {
+    "bluebird": "^3.4.1",
     "body-parser": "^1.15.0",
     "express": "^4.12.3",
     "express-session": "^1.11.2",
