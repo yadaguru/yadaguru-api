@@ -1,9 +1,5 @@
 #!/bin/sh -e
 
-# Edit the following to change the name of the database user that will be created:
-APP_DB_USER=yadaguru
-APP_DB_PASS=yadaguru
-
 # Edit the following to change the name of the database that is created (defaults to the user name)
 APP_DB_NAME=yadaguru
 
@@ -37,12 +33,35 @@ print_db_usage () {
   echo "  PGUSER=$APP_DB_USER PGPASSWORD=$APP_DB_PASS psql -h localhost -p 15432 $APP_DB_NAME"
 }
 
+provision_db () {
+cat << EOF | su - postgres -c psql
+-- Drop existing DBs and user
+DROP DATABASE IF EXISTS $APP_DB_NAME;
+DROP DATABASE IF EXISTS ${APP_DB_NAME}_test;
+
+-- Create the database:
+CREATE DATABASE $APP_DB_NAME WITH OWNER=postgres
+                                  LC_COLLATE='en_US.utf8'
+                                  LC_CTYPE='en_US.utf8'
+                                  ENCODING='UTF8'
+                                  TEMPLATE=template0;
+-- Create test database:
+CREATE DATABASE ${APP_DB_NAME}_test WITH OWNER=postgres
+                                        LC_COLLATE='en_US.utf8'
+                                        LC_CTYPE='en_US.utf8'
+                                        ENCODING='UTF8'
+                                        TEMPLATE=template0;
+EOF
+
+}
 export DEBIAN_FRONTEND=noninteractive
 
 PROVISIONED_ON=/etc/vm_provision_on_timestamp
 if [ -f "$PROVISIONED_ON" ]
 then
   echo "VM was already provisioned at: $(cat $PROVISIONED_ON)"
+  echo "Reprovisioning Database"
+  provision_db
   echo "To run system updates manually login via 'vagrant ssh' and run 'apt-get update && apt-get upgrade'"
   echo ""
   print_db_usage
@@ -81,19 +100,7 @@ echo "client_encoding = utf8" >> "$PG_CONF"
 # Restart so that all new config is loaded:
 service postgresql restart
 
-cat << EOF | su - postgres -c psql
--- Create the database user:
-CREATE USER $APP_DB_USER WITH PASSWORD '$APP_DB_PASS';
-
-ALTER USER $APP_DB_USER WITH SUPERUSER;
-
--- Create the database:
-CREATE DATABASE $APP_DB_NAME WITH OWNER=$APP_DB_USER
-                                  LC_COLLATE='en_US.utf8'
-                                  LC_CTYPE='en_US.utf8'
-                                  ENCODING='UTF8'
-                                  TEMPLATE=template0;
-EOF
+provision_db
 
 # Tag the provision time:
 date > "$PROVISIONED_ON"

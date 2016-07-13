@@ -5,23 +5,85 @@ Visit our [CodeForPhily project info page](https://codeforphilly.org/projects/co
 
 This is the backend API for Yadaguru
 
-##Local Development Installation
- * Be sure you have installed `node`, `npm`, and `vagrant`
- * Be sure you have gulp and mocha installed globally `npm install -g gulp mocha`
- * `cd` into the project root folder (if you are not already there)
- * Run `npm install` to install the front-end dependencies
- * Run `vagrant up` to bring up the postgres server. On first up, this will provision the server and database.
- * Run `gulp install-sql` to provision the database. This command should also be run whenever changes in the `/sql/` folder are made, or if you just need a clean slate in the DB.
+##Local Development Setup Instructions (Beginner Friendly)
+###Clone this repo
 
-##Serving Locally
-Run `gulp serve` to serve the api at http://localhost:8080. While the task is running server will restart on every file change.
+In the terminal, enter:
+ 
+```
+git clone https://github.com/yadaguru/yadaguru-api.git
+```
 
-##Testing
-Tests are run with mocha. It is recommended that on windows you use `set NODE_ENV=TEST&& mocha` or on linux/mac `export NODE_ENV=TEST&& mocha` to run the tests. You can also use a local version of mocha with `node node_modules/mocha/bin/mocha` if you would prefer to omit mocha from a global install. Setting the NODE_ENV prevents potential corruption of the local database.
+This will download the YadaGuru API code to your machine. [Click here for a git tutorial](https://try.github.io/levels/1/challenges/1)
 
-Client tests are run with karma, mocha, chai-sinon, phantomjs, and coverage. To run the tests use `npm run test-client`. This test will watch for changes by default.
+###Install Development Tools
+On OSX ensure you have the package manager Homebrew installed. You will need Homebrew to install the tools below.
+[Instructions for installing Homebrew on OSX](http://brew.sh/)
 
-##Contributing
+Install Nodejs & NPM. NodeJS is the engine that will run the Javascript code. NPM is a package manager that will allow us to install
+other dependencies.
 
- * Please fork the repo, checkout the `development` and create a feature branch from there.
- * Please make all PR against the `development` branch. 
+OSX:
+
+```
+brew install node
+```
+
+Ubuntu/Debian:
+
+```
+sudo apt-get install nodejs
+sudo apt-get install npm
+```
+
+[Download and install Vagrant](https://www.vagrantup.com/downloads.html), which create a virtual machine for the database.
+
+Install Mocha, the test runner
+
+```
+npm install -g mocha
+```
+
+Install Sequelize-CLI, which will allow you to interact with the database
+
+```
+npm install -g sequelize-cli
+```
+
+###Setup the environment
+
+If you are not already in the project folder, `cd` into it now.
+
+Run `npm install` this will install all of the dependencies needed to run the app
+
+Run `vagrant up`, this will bring up the PostgreSQL database server (this will take a while the first time)
+
+Run `sequelize db:migrate` to setup the database tables.
+
+##Starting the server
+
+Run `npm start` to start the server. You can confirm that it is working with this command:
+
+```
+curl http://localhost:3005/
+```
+
+If all is well, you should get a response of `foobar`.
+
+##Testing the code
+
+Various tools are used for testing. Mocha is the test runner, and Chai (using the BDD-should style) is the testing framework.
+Sinon is used to stubs and spies. Chai-as-promised is used to test asynchronous code.
+
+*It is important to set the correct NODE_ENV value before running tests. This will ensure that the testing database is used*
+
+Run all tests with `NODE_ENV=test npm test`.
+
+Run individual tests by changing into the test directory and running `NODE_ENV=test mocha name_of_test_file.js`.
+
+##Project structure
+Below is a list of the main project files and folders and their role in the app
+
+```
+/config
+  
