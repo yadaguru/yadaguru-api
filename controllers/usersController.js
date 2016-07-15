@@ -1,9 +1,30 @@
-var models = require('./index');
+var models = require('../models/');
 var util = require('util');
+var validators = require('../lib/validators');
+var User = models.User;
 
 var usersController = function() {
 
-  var usersService = require('../services/usersService');
+  var validationSchema = {
+    phoneNumber: {
+      required: true,
+      rules: [{
+        validator: 'isPhoneNumber',
+        message: 'phoneNumber must be a string of 10 digits'
+      }],
+      sanitizers: ['sanitizeDigitString']
+    },
+    confirmCode: {
+      rules: [{
+        validator: 'isSixDigits',
+        message: 'confirmCode must be a string of 6 digits'
+      }],
+      sanitizers: ['sanitizeDigitString']
+    },
+    sponsorCode: {
+      required: false
+    }
+  };
 
   ///**
   // * GET /users/
@@ -35,22 +56,23 @@ var usersController = function() {
    * POST /users
    */
   var post = function(req, res) {
-    req.sanitize('phoneNumber').sanitizePhoneNumber();
-    req.checkBody('phoneNumber', 'Phone Number must be 10 digits').isPhoneNumber();
-    var errors = req.validationErrors();
-    if (errors) {
+    debugger;
+    var validation = validators.sanitizeAndValidateAll(req.body, validationSchema);
+
+    if (!validation.isValid) {
       res.status(400);
-      res.json({errors: errors});
+      res.json(validation.errors);
       return;
     }
 
-    models.User.create({
-      phoneNumber: req.body.phoneNumber
-    }).then(function(user) {
-      res.json(user);
+    User.create({
+      phoneNumber: validation.sanitizedData.phoneNumber
+    }).then(function(resp) {
+      res.status(200);
+      res.json([resp.dataValues]);
     }).catch(function(error) {
       res.status(400);
-      res.json({errors: error.errors});
+      res.json(error);
     });
   };
 
