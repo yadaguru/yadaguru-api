@@ -105,8 +105,8 @@ describe('Validators', function() {
     });
   });
 
-  describe('validateAndSanitize', function() {
-    it('should sanitize values, check validation and return an object with sanitized data if valid', function() {
+  describe('sanitizeAndValidate', function() {
+    it('should sanitize values, check validation for all fields in schema and return an object with sanitized data if valid', function() {
       var requestBody = {
         allCaps: 'FOOBAR',
         number: '42',
@@ -114,7 +114,7 @@ describe('Validators', function() {
         justRequired: 'justRequired'
       };
 
-      var validation = validators.sanitizeAndValidateAll(requestBody, validationSchema);
+      var validation = validators.sanitizeAndValidate(requestBody, validationSchema, true);
       validation.isValid.should.be.true;
       validation.sanitizedData = {
         allCaps: 'FOOBAR',
@@ -124,7 +124,7 @@ describe('Validators', function() {
       }
     });
 
-    it('should sanitize values, check validation, and return an object with errors if invalid', function() {
+    it('should sanitize values, check validation for all fields in schema, and return an object with errors if invalid', function() {
       var requestBody = {
         allCaps: 'FOOBAR',
         number: '42',
@@ -132,7 +132,39 @@ describe('Validators', function() {
         justRequired: 'justRequired'
       };
 
-      var validation = validators.sanitizeAndValidateAll(requestBody, validationSchema);
+      var validation = validators.sanitizeAndValidate(requestBody, validationSchema, true);
+      validation.isValid.should.be.false;
+      validation.errors.should.deep.equal([{
+        field: 'sixDigits',
+        message: 'Must be six digits',
+        value: '1234567'
+      }]);
+    });
+
+    it('should sanitize values, check validation for fields in request and return an object with sanitized data if valid', function() {
+      var requestBody = {
+        allCaps: 'FOOBAR',
+        sixDigits: '123-456',
+        justRequired: 'justRequired'
+      };
+
+      var validation = validators.sanitizeAndValidate(requestBody, validationSchema);
+      validation.isValid.should.be.true;
+      validation.sanitizedData = {
+        allCaps: 'FOOBAR',
+        sixDigits: '123456',
+        justRequired: 'justRequired'
+      }
+    });
+
+    it('should sanitize values, check validation for all fields in request, and return an object with errors if invalid', function() {
+      var requestBody = {
+        allCaps: 'FOOBAR',
+        sixDigits: '123-4567',
+        justRequired: 'justRequired'
+      };
+
+      var validation = validators.sanitizeAndValidate(requestBody, validationSchema, true);
       validation.isValid.should.be.false;
       validation.errors.should.deep.equal([{
         field: 'sixDigits',

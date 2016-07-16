@@ -222,74 +222,110 @@ describe('Users Controller', function() {
     });
   });
 
-  //describe('PUT requests', function() {
-  //  var req, res, stub;
-  //
-  //  req = {
-  //    body: {
-  //      confirmCode: '1234567890'
-  //    },
-  //    params: {
-  //      id: 1
-  //    }
-  //  };
-  //
-  //
-  //  beforeEach(function() {
-  //
-  //    res = {
-  //      status: sinon.spy(),
-  //      send: sinon.spy()
-  //    };
-  //
-  //    stub = sinon.stub(usersService, 'update');
-  //  });
-  //
-  //  afterEach(function() {
-  //    res.send.reset();
-  //    res.status.reset();
-  //    stub.restore();
-  //  });
-  //
-  //  it('should respond with new user object and 200 status on success', function(done) {
-  //
-  //    var successfulUpdateResponse = {
-  //      id: '1',
-  //      phoneNumber: '1234567890',
-  //      confirmCode: req.body.confirmCode,
-  //      confirmCodeExpires: '',
-  //      sponsorCode: ''
-  //    };
-  //
-  //    stub.returns(Promise.resolve(successfulUpdateResponse));
-  //
-  //    usersController.putOnId(req, res);
-  //
-  //    process.nextTick(function() {
-  //      res.send.should.have.been.calledWith(successfulUpdateResponse);
-  //      res.status.should.have.been.calledWith(200);
-  //      done();
-  //    })
-  //
-  //  });
-  //
-  //  it('should respond with error message and 400 status on failure', function(done) {
-  //
-  //    var error = new ApiError();
-  //
-  //    stub.returns(Promise.reject(error));
-  //
-  //    usersController.putOnId(req, res);
-  //
-  //    process.nextTick(function() {
-  //      res.send.should.have.been.calledWith(error.message);
-  //      res.status.should.have.been.calledWith(error.status);
-  //      done();
-  //    })
-  //
-  //  });
-  //
-  //});
+  describe('PUT requests', function() {
+    var req, res, usersController, findById, user, update;
+
+    beforeEach(function() {
+      req = {};
+      res = {
+        status: sinon.spy(),
+        json: sinon.spy()
+      };
+      findById = sinon.stub(User, 'findById');
+      user = {update: function(values) {}};
+      update = sinon.stub(user, 'update');
+      usersController = require('../../controllers/usersController');
+    });
+
+    afterEach(function() {
+      res.status.reset();
+      res.json.reset();
+      findById.restore();
+      update.restore();
+    });
+
+    it('should respond with the updated user object and 200 status on success', function(done) {
+      req.body = {phoneNumber: '1234567890'};
+      req.params = {id: 1};
+      var updatedUser = {
+        id: '1',
+        phoneNumber: req.body.phoneNumber,
+        confirmCode: '',
+        confirmCodeExpires: '',
+        sponsorCode: ''
+      };
+      findById.withArgs(1)
+        .returns(Promise.resolve(user));
+      update.withArgs(req.body)
+        .returns(Promise.resolve({dataValues: updatedUser}));
+
+      usersController.putOnId(req, res);
+
+      process.nextTick(function() {
+        res.json.should.have.been.calledWith([updatedUser]);
+        res.status.should.have.been.calledWith(200);
+        done();
+      })
+    });
+
+    it('should respond with an error and 400 status on if phone number is not formatted correctly', function(done) {
+      req.body = {phoneNumber: '12345abcde'};
+      req.params = {id: 1};
+      var error = {
+        field: 'phoneNumber',
+        message: 'phoneNumber must be a string of 10 digits',
+        value: '12345'
+      };
+      findById.withArgs(1)
+        .returns(Promise.resolve(user));
+
+      usersController.putOnId(req, res);
+
+      process.nextTick(function() {
+        res.json.should.have.been.calledWith([error]);
+        res.status.should.have.been.calledWith(400);
+        done();
+      })
+    });
+
+    it('should respond with an error and 404 status if user does not exist', function(done) {
+      req.body = {phoneNumber: '1234567890'};
+      req.params = {id: 2};
+      var error = {
+        message: 'User does not exist',
+        id: 2
+      };
+      findById.withArgs(2)
+        .returns(Promise.resolve(null));
+
+      usersController.putOnId(req, res);
+
+      process.nextTick(function() {
+        res.json.should.have.been.calledWith([error]);
+        res.status.should.have.been.calledWith(404);
+        done();
+      })
+    });
+
+    it('should handle database errors', function(done) {
+      req.body = {phoneNumber: '1234567890'};
+      req.params = {id: 1};
+      var error = new Error('database error');
+      findById.withArgs(1)
+        .returns(Promise.resolve(user));
+      update.withArgs(req.body)
+        .returns(Promise.reject(error));
+
+      usersController.putOnId(req, res);
+
+      process.nextTick(function() {
+        res.json.should.have.been.calledWith(error);
+        res.status.should.have.been.calledWith(400);
+        done();
+      })
+    });
+  });
+
   //
   //describe('DELETE requests', function(done) {
   //  var req, res, stub;
