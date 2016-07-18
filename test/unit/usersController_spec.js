@@ -326,59 +326,70 @@ describe('Users Controller', function() {
     });
   });
 
-  //
-  //describe('DELETE requests', function(done) {
-  //  var req, res, stub;
-  //
-  //  beforeEach(function() {
-  //
-  //    res = {
-  //      status: sinon.spy(),
-  //      send: sinon.spy()
-  //    };
-  //
-  //    stub = sinon.stub(usersService, 'destroy');
-  //  });
-  //
-  //  afterEach(function() {
-  //    res.send.reset();
-  //    res.status.reset();
-  //    stub.restore();
-  //  });
-  //
-  //  it('should respond with the deleted user id and 200 status on success', function(done) {
-  //
-  //    req = {
-  //      params: 1
-  //    };
-  //
-  //    stub.returns(Promise.resolve([{id: 1}]));
-  //
-  //    usersController.removeById(req, res);
-  //
-  //    process.nextTick(function() {
-  //      res.send.should.have.been.calledWith([{id: 1}]);
-  //      res.status.should.have.been.calledWith(200);
-  //      done();
-  //    })
-  //
-  //  });
-  //
-  //  it('should respond with error message and 400 status on failure', function(done) {
-  //
-  //    var error = new ApiError();
-  //
-  //    stub.returns(Promise.reject(error));
-  //
-  //    usersController.removeById(req, res);
-  //
-  //    process.nextTick(function() {
-  //      res.send.should.have.been.calledWith(error.message);
-  //      res.status.should.have.been.calledWith(error.status);
-  //      done();
-  //    })
-  //
-  //  });
-  //})
+  describe('DELETE requests', function() {
+    var req, res, usersController, destroy;
 
+    beforeEach(function() {
+      req = {};
+      res = {
+        status: sinon.spy(),
+        json: sinon.spy()
+      };
+      destroy = sinon.stub(User, 'destroy');
+      usersController = require('../../controllers/usersController');
+    });
+
+    afterEach(function() {
+      res.status.reset();
+      res.json.reset();
+      destroy.restore();
+    });
+
+    it('should respond with the user ID and 200 status on success', function(done) {
+      req.params = {id: 1};
+      destroy.withArgs({where: {id: 1}})
+        .returns(Promise.resolve(1));
+
+      usersController.removeById(req, res);
+
+      process.nextTick(function() {
+        res.json.should.have.been.calledWith([{deletedId: 1}]);
+        res.status.should.have.been.calledWith(200);
+        done();
+      })
+    });
+
+    it('should respond with an error and 404 status if user does not exist', function(done) {
+      req.params = {id: 2};
+      var error = {
+        message: 'User does not exist',
+        id: 2
+      };
+      destroy.withArgs({where: {id: 2}})
+        .returns(Promise.resolve(0));
+
+      usersController.removeById(req, res);
+
+      process.nextTick(function() {
+        res.json.should.have.been.calledWith([error]);
+        res.status.should.have.been.calledWith(404);
+        done();
+      })
+    });
+
+    it('should handle database errors', function(done) {
+      req.params = {id: 1};
+      var error = new Error('database error');
+      destroy.withArgs({where: {id: 1}})
+        .returns(Promise.reject(error));
+
+      usersController.removeById(req, res);
+
+      process.nextTick(function() {
+        res.json.should.have.been.calledWith(error);
+        res.status.should.have.been.calledWith(400);
+        done();
+      })
+    });
+  });
 });

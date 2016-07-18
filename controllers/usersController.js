@@ -107,25 +107,37 @@ var usersController = function() {
     })
   };
 
-  ///**
-  // * DELETE /users/:id
-  // */
-  //var removeById = function(req, res) {
-  //  return usersService.destroy(req.params.id).then(function(data) {
-  //    res.status(200);
-  //    res.send(data);
-  //  }).catch(function(ApiError) {
-  //    res.status(ApiError.status);
-  //    res.send(ApiError.message);
-  //  })
-  //};
+  /**
+   * DELETE /users/:id
+   */
+  var removeById = function(req, res) {
+    var id = req.params.id;
+
+    User.destroy({where: {id: id}}).then(function(resp) {
+      if (resp === 0) {
+        res.status(404);
+        res.json([{
+          message: 'User does not exist',
+          id: id
+        }]);
+        return;
+      }
+      res.status(200);
+      res.json([{
+        deletedId: id
+      }])
+    }).catch(function(error) {
+      res.status(400);
+      res.json(error);
+    });
+  };
 
   return {
     //getAll: getAll,
     //getById: getById,
     post : post,
     putOnId : putOnId,
-    //removeById : removeById
+    removeById : removeById
   };
 };
 
