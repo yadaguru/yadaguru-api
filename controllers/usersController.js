@@ -26,31 +26,41 @@ var usersController = function() {
     }
   };
 
-  ///**
-  // * GET /users/
-  // */
-  //var getAll = function(req, res) {
-  //  return usersService.findAll().then(function(data) {
-  //    res.status(200);
-  //    res.send(data);
-  //  }).catch(function(ApiError) {
-  //    res.status(ApiError.status);
-  //    res.send(ApiError.message);
-  //  })
-  //};
+  /**
+   * GET /users/
+   */
+  var getAll = function(req, res) {
+    return User.findAll().then(function(users) {
+      res.status(200);
+      res.json(users.map(function(user) {
+        return user.dataValues;
+      }));
+    }).catch(function(error) {
+      res.status(500);
+      res.json(error);
+    })
+  };
 
-  ///**
-  // * GET /users/:id
-  // */
-  //var getById = function(req, res) {
-  //  return usersService.findById(req.params.id).then(function(data) {
-  //    res.status(200);
-  //    res.send(data);
-  //  }).catch(function(ApiError) {
-  //    res.status(ApiError.status);
-  //    res.send(ApiError.message);
-  //  })
-  //};
+  /**
+   * GET /users/:id
+   */
+  var getById = function(req, res) {
+    return User.findById(req.params.id).then(function(user) {
+      if (!user) {
+        res.status(404);
+        res.json({
+          message: 'User does not exist',
+          id: 2
+        });
+        return;
+      }
+      res.status(200);
+      res.json([user.dataValues]);
+    }).catch(function(error) {
+      res.status(500);
+      res.json(error);
+    })
+  };
 
   /**
    * POST /users
@@ -133,8 +143,8 @@ var usersController = function() {
   };
 
   return {
-    //getAll: getAll,
-    //getById: getById,
+    getAll: getAll,
+    getById: getById,
     post : post,
     putOnId : putOnId,
     removeById : removeById

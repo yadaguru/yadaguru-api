@@ -1,3 +1,4 @@
+/* globals describe, beforeEach, it, afterEach */
 var sinon = require('sinon');
 var chai = require('chai');
 var chaiAsPromised = require('chai-as-promised');
@@ -11,28 +12,153 @@ var User = require('../../models').User;
 
 
 describe('Users Controller', function() {
+  describe('GET /users/', function() {
+    var req, res, usersController, findAll;
 
+    beforeEach(function() {
+      req = {};
+      res = {
+        status: sinon.spy(),
+        json: sinon.spy()
+      };
+      findAll = sinon.stub(User, 'findAll');
+      usersController = require('../../controllers/usersController');
+    });
+
+    afterEach(function() {
+      res.status.reset();
+      res.json.reset();
+      findAll.restore();
+    });
+
+    it('should respond with an array of all users and a 200 status', function(done) {
+      var users = [{
+        id: '1',
+        phoneNumber: '1234567890',
+        confirmCode: '',
+        confirmCodeExpires: '',
+        sponsorCode: ''
+      }, {
+        id: '2',
+        phoneNumber: '9876543210',
+        confirmCode: '',
+        confirmCodeExpires: '',
+        sponsorCode: ''
+      }];
+      findAll.returns(Promise.resolve(users.map(
+        function(user) {
+          return {dataValues: user};
+        }
+      )));
+
+      usersController.getAll(req, res);
+
+      process.nextTick(function() {
+        res.json.should.have.been.calledWith(users);
+        res.status.should.have.been.calledWith(200);
+        done();
+      })
+    });
+
+    it('should return an empty array if there are no users', function(done) {
+      findAll.returns(Promise.resolve([]));
+
+      usersController.getAll(req, res);
+
+      process.nextTick(function() {
+        res.json.should.have.been.calledWith([]);
+        res.status.should.have.been.calledWith(200);
+        done();
+      })
+    });
+
+    it('should return an error object and a 500 status on a database error', function(done) {
+      var error = new Error('database error');
+      findAll.returns(Promise.reject(error));
+
+      usersController.getAll(req, res);
+
+      process.nextTick(function() {
+        res.json.should.have.been.calledWith(error);
+        res.status.should.have.been.calledWith(500);
+        done();
+      })
+    });
+  });
+
+  describe('GET /users/:id', function() {
+    var req, res, usersController, findById;
+
+    beforeEach(function() {
+      req = {};
+      res = {
+        status: sinon.spy(),
+        json: sinon.spy()
+      };
+      findById = sinon.stub(User, 'findById');
+      usersController = require('../../controllers/usersController');
+    });
+
+    afterEach(function() {
+      res.status.reset();
+      res.json.reset();
+      findById.restore();
+    });
+
+    it('should respond with an array with the matching user and a 200 status', function(done) {
+      req.params = {id: 1};
+      var user = {
+        id: '1',
+        phoneNumber: '1234567890',
+        confirmCode: '',
+        confirmCodeExpires: '',
+        sponsorCode: ''
+      };
+      findById.withArgs(1)
+        .returns(Promise.resolve({dataValues: user}));
+
+      usersController.getById(req, res);
+
+      process.nextTick(function() {
+        res.json.should.have.been.calledWith([user]);
+        res.status.should.have.been.calledWith(200);
+        done();
+      })
+    });
+
+    it('should an error and a 404 status if the user does not exist', function(done) {
+      req.params = {id: 2};
+      var error = {
+        message: 'User does not exist',
+        id: req.params.id
+      };
+      findById.withArgs(2)
+        .returns(Promise.resolve(null));
+
+      usersController.getById(req, res);
+
+      process.nextTick(function() {
+        res.json.should.have.been.calledWith(error);
+        res.status.should.have.been.calledWith(404);
+        done();
+      })
+    });
+
+    it('should return an error object and a 500 status on a database error', function(done) {
+      req.params = {id: 1};
+      var error = new Error('database error');
+      findById.returns(Promise.reject(error));
+
+      usersController.getById(req, res);
+
+      process.nextTick(function() {
+        res.json.should.have.been.calledWith(error);
+        res.status.should.have.been.calledWith(500);
+        done();
+      })
+    });
+  });
   //describe('GET requests', function() {
-  //  var res, findById, findAll;
-  //
-  //  beforeEach(function() {
-  //
-  //    res = {
-  //      status: sinon.spy(),
-  //      send: sinon.spy()
-  //    };
-  //
-  //    findById = sinon.stub(usersService, 'findById');
-  //    findAll = sinon.stub(usersService, 'findAll');
-  //  });
-  //
-  //  afterEach(function() {
-  //    res.send.reset();
-  //    res.status.reset();
-  //    findById.restore();
-  //    findAll.restore();
-  //  });
-  //
   //  it('should respond with the matching user object and 200 status on success', function(done) {
   //    var req = {
   //      params: {
