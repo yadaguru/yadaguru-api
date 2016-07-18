@@ -12,7 +12,7 @@ var User = require('../../models').User;
 
 
 describe('Users Controller', function() {
-  describe('GET /users/', function() {
+  describe('GET /users', function() {
     var req, res, usersController, findAll;
 
     beforeEach(function() {
@@ -60,7 +60,7 @@ describe('Users Controller', function() {
       })
     });
 
-    it('should return an empty array if there are no users', function(done) {
+    it('should respond with an empty array and a 200 status if there are no users', function(done) {
       findAll.returns(Promise.resolve([]));
 
       usersController.getAll(req, res);
@@ -72,7 +72,7 @@ describe('Users Controller', function() {
       })
     });
 
-    it('should return an error object and a 500 status on a database error', function(done) {
+    it('should respond with an error object and a 500 status on a database error', function(done) {
       var error = new Error('database error');
       findAll.returns(Promise.reject(error));
 
@@ -126,7 +126,7 @@ describe('Users Controller', function() {
       })
     });
 
-    it('should an error and a 404 status if the user does not exist', function(done) {
+    it('should an error object and a 404 status if the user does not exist', function(done) {
       req.params = {id: 2};
       var error = {
         message: 'User does not exist',
@@ -144,7 +144,7 @@ describe('Users Controller', function() {
       })
     });
 
-    it('should return an error object and a 500 status on a database error', function(done) {
+    it('should respond with an error object and a 500 status on a database error', function(done) {
       req.params = {id: 1};
       var error = new Error('database error');
       findById.returns(Promise.reject(error));
@@ -158,90 +158,8 @@ describe('Users Controller', function() {
       })
     });
   });
-  //describe('GET requests', function() {
-  //  it('should respond with the matching user object and 200 status on success', function(done) {
-  //    var req = {
-  //      params: {
-  //        id: 1
-  //      }
-  //    };
-  //
-  //    var user = {
-  //      id: '1',
-  //      phoneNumber: '1234567890',
-  //      confirmCode: '123456',
-  //      confirmCodeExpires: '',
-  //      sponsorCode: ''
-  //    };
-  //
-  //    findById
-  //      .withArgs(1)
-  //      .returns(Promise.resolve(user));
-  //
-  //    usersController.getById(req, res);
-  //
-  //    process.nextTick(function() {
-  //      res.send.should.have.been.calledWith(user);
-  //      res.status.should.have.been.calledWith(200);
-  //      done();
-  //    })
-  //
-  //  });
-  //
-  //  it('should respond with an array of all users and a 200 status on success', function(done) {
-  //    var req = {};
-  //
-  //    var users = [{
-  //      id: '1',
-  //      phoneNumber: '1234567890',
-  //      confirmCode: '123456',
-  //      confirmCodeExpires: '',
-  //      sponsorCode: ''
-  //    }, {
-  //      id: '2',
-  //      phoneNumber: '9876543210',
-  //      confirmCode: '654321',
-  //      confirmCodeExpires: '',
-  //      sponsorCode: ''
-  //    }];
-  //
-  //    findAll.returns(Promise.resolve(users));
-  //
-  //    usersController.getAll(req, res);
-  //
-  //    process.nextTick(function() {
-  //      res.send.should.have.been.calledWith(users);
-  //      res.status.should.have.been.calledWith(200);
-  //      done();
-  //    })
-  //  });
-  //
-  //  it('should respond with error message and 404 status if user is missing', function(done) {
-  //    var req = {
-  //      params: {
-  //        id: 3
-  //      }
-  //    };
-  //
-  //    var error = new ApiError();
-  //
-  //    findById
-  //      .withArgs(3)
-  //      .returns(Promise.reject(error));
-  //
-  //    usersController.getById(req, res);
-  //
-  //    process.nextTick(function() {
-  //      res.send.should.have.been.calledWith(error.message);
-  //      res.status.should.have.been.calledWith(error.status);
-  //      done();
-  //    })
-  //
-  //  });
-  //
-  //});
 
-  describe('POST requests', function() {
+  describe('POST /users', function() {
     var req, res, usersController, UserStub;
 
     beforeEach(function() {
@@ -280,7 +198,7 @@ describe('Users Controller', function() {
       })
     });
 
-    it('should not fail on a formatted phone number', function(done) {
+    it('should respond with a new user object and a 200 status, even if the phone number is formatted', function(done) {
       req.body = {phoneNumber: '(123) 456-7890'};
       var successfulCreateResponse = {
         id: '1',
@@ -333,7 +251,7 @@ describe('Users Controller', function() {
       })
     });
 
-    it('should handle database errors', function(done) {
+    it('should respond with an error and a 500 status on a database error', function(done) {
       req.body = {phoneNumber: '1234567890'};
       var databaseError = new Error('some database error');
       UserStub.returns(Promise.reject(databaseError));
@@ -342,13 +260,13 @@ describe('Users Controller', function() {
 
       process.nextTick(function() {
         res.json.should.have.been.calledWith(databaseError);
-        res.status.should.have.been.calledWith(400);
+        res.status.should.have.been.calledWith(500);
         done();
       })
     });
   });
 
-  describe('PUT requests', function() {
+  describe('PUT /users/:id', function() {
     var req, res, usersController, findById, user, update;
 
     beforeEach(function() {
@@ -433,7 +351,7 @@ describe('Users Controller', function() {
       })
     });
 
-    it('should handle database errors', function(done) {
+    it('should respond with an error and a 500 status on a database error', function(done) {
       req.body = {phoneNumber: '1234567890'};
       req.params = {id: 1};
       var error = new Error('database error');
@@ -446,13 +364,13 @@ describe('Users Controller', function() {
 
       process.nextTick(function() {
         res.json.should.have.been.calledWith(error);
-        res.status.should.have.been.calledWith(400);
+        res.status.should.have.been.calledWith(500);
         done();
       })
     });
   });
 
-  describe('DELETE requests', function() {
+  describe('DELETE /users/:id', function() {
     var req, res, usersController, destroy;
 
     beforeEach(function() {
@@ -503,7 +421,7 @@ describe('Users Controller', function() {
       })
     });
 
-    it('should handle database errors', function(done) {
+    it('should respond with an error and a 500 status on a database error', function(done) {
       req.params = {id: 1};
       var error = new Error('database error');
       destroy.withArgs({where: {id: 1}})
@@ -513,7 +431,7 @@ describe('Users Controller', function() {
 
       process.nextTick(function() {
         res.json.should.have.been.calledWith(error);
-        res.status.should.have.been.calledWith(400);
+        res.status.should.have.been.calledWith(500);
         done();
       })
     });

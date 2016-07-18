@@ -27,7 +27,7 @@ var usersController = function() {
   };
 
   /**
-   * GET /users/
+   * GET /users
    */
   var getAll = function(req, res) {
     return User.findAll().then(function(users) {
@@ -80,7 +80,7 @@ var usersController = function() {
       res.status(200);
       res.json([resp.dataValues]);
     }).catch(function(error) {
-      res.status(400);
+      res.status(500);
       res.json(error);
     });
   };
@@ -111,7 +111,7 @@ var usersController = function() {
         res.status(200);
         res.json([resp.dataValues]);
       }).catch(function(error) {
-        res.status(400);
+        res.status(500);
         res.json(error);
       });
     })
@@ -137,7 +137,7 @@ var usersController = function() {
         deletedId: id
       }])
     }).catch(function(error) {
-      res.status(400);
+      res.status(500);
       res.json(error);
     });
   };
