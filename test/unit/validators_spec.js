@@ -1,6 +1,8 @@
 var chai = require('chai');
 chai.should();
+var should = chai.should();
 
+var ValidationError = require('../../lib/errors');
 var validators = require ('../../lib/validators');
 
 describe('Validators', function() {
@@ -17,7 +19,7 @@ describe('Validators', function() {
       rules: [{
         validator: 'isNumeric',
         message: 'Must be a number'
-      }],
+      }]
     },
     sixDigits: {
       required: false,
@@ -37,7 +39,7 @@ describe('Validators', function() {
   };
 
   describe('validateRequest', function() {
-    it('Should return an object with isValid: true and errors: [] if all validations pass', function() {
+    it('Should return an object with isValid: true if all validations pass', function() {
       var requestBody = {
         allCaps: 'FOOBAR',
         number: '42',
@@ -46,11 +48,11 @@ describe('Validators', function() {
 
       var validation = validators.validateRequest(requestBody, validationSchema);
 
-      validation.errors.should.deep.equal([]);
+      should.not.exist(validation.errors);
       validation.isValid.should.be.true;
     });
 
-    it('should return an object with isValid: false and errors equal to an array of errors', function() {
+    it('should return an object with isValid: false and a ValidationError object', function() {
       var requestBody = {
         allCaps: 'FOOBAR',
         number: 'abc',
@@ -59,22 +61,14 @@ describe('Validators', function() {
 
       var validation = validators.validateRequest(requestBody, validationSchema);
 
-      validation.errors.should.deep.equal([{
-        field: 'number',
-        message: 'Must be a number',
-        value: 'abc'
-      }, {
-        field: 'sixDigits',
-        message: 'Must be six digits',
-        value: '12345'
-      }]);
+      validation.errors.should.be.instanceof(ValidationError.constructor);
       validation.isValid.should.be.false;
 
     });
   });
 
   describe('validateAll', function() {
-    it('should return true and an empty array if all required fields are present and valid', function() {
+    it('should return isValid: true if all required fields are present and valid', function() {
       var requestBody = {
         allCaps: 'FOOBAR',
         number: '123',
@@ -84,7 +78,7 @@ describe('Validators', function() {
 
       var validation = validators.validateRequest(requestBody, validationSchema);
 
-      validation.errors.should.deep.equal([]);
+      should.not.exist(validation.errors);
       validation.isValid.should.be.true;
     });
 
@@ -97,10 +91,7 @@ describe('Validators', function() {
 
       var validation = validators.validateAll(requestBody, validationSchema);
 
-      validation.errors.should.deep.equal([{
-        field: 'justRequired',
-        message: 'justRequired is required'
-      }]);
+      validation.errors.should.be.instanceof(ValidationError.constructor);
       validation.isValid.should.be.false;
     });
   });
@@ -134,11 +125,7 @@ describe('Validators', function() {
 
       var validation = validators.sanitizeAndValidate(requestBody, validationSchema, true);
       validation.isValid.should.be.false;
-      validation.errors.should.deep.equal([{
-        field: 'sixDigits',
-        message: 'Must be six digits',
-        value: '1234567'
-      }]);
+      validation.errors.should.be.instanceof(ValidationError.constructor);
     });
 
     it('should sanitize values, check validation for fields in request and return an object with sanitized data if valid', function() {
@@ -166,11 +153,7 @@ describe('Validators', function() {
 
       var validation = validators.sanitizeAndValidate(requestBody, validationSchema, true);
       validation.isValid.should.be.false;
-      validation.errors.should.deep.equal([{
-        field: 'sixDigits',
-        message: 'Must be six digits',
-        value: '1234567'
-      }]);
+      validation.errors.should.be.instanceof(ValidationError.constructor);
     });
   });
 

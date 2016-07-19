@@ -6,6 +6,7 @@ var sinonChai = require('sinon-chai');
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 chai.should();
+var errors = require('../../lib/errors');
 var Promise = require('bluebird');
 var User = require('../../models').User;
 
@@ -128,10 +129,7 @@ describe('Users Controller', function() {
 
     it('should an error object and a 404 status if the user does not exist', function(done) {
       req.params = {id: 2};
-      var error = {
-        message: 'User does not exist',
-        id: req.params.id
-      };
+      var error = new errors.ResourceNotFoundError('User', req.params.id);
       findById.withArgs(2)
         .returns(Promise.resolve(null));
 
@@ -220,16 +218,16 @@ describe('Users Controller', function() {
 
     it('should respond with an error and 400 status on if phone number is not formatted correctly', function(done) {
       req.body = {phoneNumber: '12345abcde'};
-      var errorResponse = [{
+      var error = new errors.ValidationError([{
         field: 'phoneNumber',
         message: 'phoneNumber must be a string of 10 digits',
         value: '12345'
-      }];
+      }]);
 
       usersController.post(req, res);
 
       process.nextTick(function() {
-        res.json.should.have.been.calledWith(errorResponse);
+        res.json.should.have.been.calledWith(error);
         res.status.should.have.been.calledWith(400);
         done();
       })
@@ -237,15 +235,15 @@ describe('Users Controller', function() {
 
     it('should respond with an error and 400 status on if phone number is missing', function(done) {
       req.body = {foo: 'bar'};
-      var errorResponse = [{
+      var error = new errors.ValidationError([{
         field: 'phoneNumber',
         message: 'phoneNumber is required',
-      }];
+      }]);
 
       usersController.post(req, res);
 
       process.nextTick(function() {
-        res.json.should.have.been.calledWith(errorResponse);
+        res.json.should.have.been.calledWith(error);
         res.status.should.have.been.calledWith(400);
         done();
       })
@@ -315,18 +313,18 @@ describe('Users Controller', function() {
     it('should respond with an error and 400 status on if phone number is not formatted correctly', function(done) {
       req.body = {phoneNumber: '12345abcde'};
       req.params = {id: 1};
-      var error = {
+      var error = new errors.ValidationError([{
         field: 'phoneNumber',
         message: 'phoneNumber must be a string of 10 digits',
         value: '12345'
-      };
+      }]);
       findById.withArgs(1)
         .returns(Promise.resolve(user));
 
       usersController.putOnId(req, res);
 
       process.nextTick(function() {
-        res.json.should.have.been.calledWith([error]);
+        res.json.should.have.been.calledWith(error);
         res.status.should.have.been.calledWith(400);
         done();
       })
@@ -335,17 +333,14 @@ describe('Users Controller', function() {
     it('should respond with an error and 404 status if user does not exist', function(done) {
       req.body = {phoneNumber: '1234567890'};
       req.params = {id: 2};
-      var error = {
-        message: 'User does not exist',
-        id: 2
-      };
+      var error = new errors.ResourceNotFoundError('User', req.params.id);
       findById.withArgs(2)
         .returns(Promise.resolve(null));
 
       usersController.putOnId(req, res);
 
       process.nextTick(function() {
-        res.json.should.have.been.calledWith([error]);
+        res.json.should.have.been.calledWith(error);
         res.status.should.have.been.calledWith(404);
         done();
       })
@@ -405,17 +400,14 @@ describe('Users Controller', function() {
 
     it('should respond with an error and 404 status if user does not exist', function(done) {
       req.params = {id: 2};
-      var error = {
-        message: 'User does not exist',
-        id: 2
-      };
+      var error = new errors.ResourceNotFoundError('User', req.params.id);
       destroy.withArgs({where: {id: 2}})
         .returns(Promise.resolve(0));
 
       usersController.removeById(req, res);
 
       process.nextTick(function() {
-        res.json.should.have.been.calledWith([error]);
+        res.json.should.have.been.calledWith(error);
         res.status.should.have.been.calledWith(404);
         done();
       })

@@ -1,6 +1,7 @@
 var models = require('../models/');
 var util = require('util');
 var validators = require('../lib/validators');
+var errors = require('../lib/errors');
 var User = models.User;
 
 var usersController = function() {
@@ -48,10 +49,7 @@ var usersController = function() {
     return User.findById(req.params.id).then(function(user) {
       if (!user) {
         res.status(404);
-        res.json({
-          message: 'User does not exist',
-          id: 2
-        });
+        res.json(new errors.ResourceNotFoundError('User', req.params.id));
         return;
       }
       res.status(200);
@@ -101,10 +99,7 @@ var usersController = function() {
     User.findById(id).then(function(user) {
       if (!user) {
         res.status(404);
-        res.json([{
-          message: 'User does not exist',
-          id: id
-        }]);
+        res.json(new errors.ResourceNotFoundError('User', id));
         return;
       }
       user.update(validation.sanitizedData).then(function(resp) {
@@ -126,10 +121,7 @@ var usersController = function() {
     User.destroy({where: {id: id}}).then(function(resp) {
       if (resp === 0) {
         res.status(404);
-        res.json([{
-          message: 'User does not exist',
-          id: id
-        }]);
+        res.json(new errors.ResourceNotFoundError('User', id));
         return;
       }
       res.status(200);
