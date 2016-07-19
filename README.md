@@ -77,7 +77,7 @@ Sinon is used to stubs and spies. Chai-as-promised is used to test asynchronous 
 
 *It is important to set the correct NODE_ENV value before running tests. This will ensure that the testing database is used*
 
-Run all tests with `NODE_ENV=test npm test`.
+Run all tests with `npm test`.
 
 Run individual tests by changing into the test directory and running `NODE_ENV=test mocha name_of_test_file.js`.
 
