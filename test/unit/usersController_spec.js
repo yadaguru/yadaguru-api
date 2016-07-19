@@ -220,7 +220,7 @@ describe('Users Controller', function() {
       req.body = {phoneNumber: '12345abcde'};
       var error = new errors.ValidationError([{
         field: 'phoneNumber',
-        message: 'phoneNumber must be a string of 10 digits',
+        message: 'must be a string of 10 digits',
         value: '12345'
       }]);
 
@@ -237,7 +237,7 @@ describe('Users Controller', function() {
       req.body = {foo: 'bar'};
       var error = new errors.ValidationError([{
         field: 'phoneNumber',
-        message: 'phoneNumber is required',
+        message: 'is required'
       }]);
 
       usersController.post(req, res);
@@ -315,7 +315,7 @@ describe('Users Controller', function() {
       req.params = {id: 1};
       var error = new errors.ValidationError([{
         field: 'phoneNumber',
-        message: 'phoneNumber must be a string of 10 digits',
+        message: 'must be a string of 10 digits',
         value: '12345'
       }]);
       findById.withArgs(1)

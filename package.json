@@ -20,7 +20,7 @@
     "sequelize-cli": "^2.4.0",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
-    "supertest": "^1.2.0",
+    "supertest": "^1.2.0"
   },
   "dependencies": {
     "bluebird": "^3.4.1",
