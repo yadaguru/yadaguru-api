@@ -16,28 +16,19 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-as-promised": "^5.3.0",
-    "eslint": "^2.9.0",
-    "gulp": "^3.8.11",
-    "gulp-nodemon": "^2.0.3",
-    "gulp-util": "^3.0.5",
     "mocha": "^2.2.5",
-    "node-mocks-http": "^1.5.2",
     "sequelize-cli": "^2.4.0",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
     "supertest": "^1.2.0",
-    "yargs": "^3.10.0"
   },
   "dependencies": {
     "bluebird": "^3.4.1",
     "body-parser": "^1.15.0",
     "express": "^4.12.3",
-    "express-session": "^1.11.2",
     "pg": "^6.0.1",
     "pg-hstore": "^2.3.2",
-    "require-dir": "^0.3.0",
     "sequelize": "^3.23.4",
-    "underscore": "^1.8.3",
     "validator": "^5.4.0"
   }
 }
