@@ -87,20 +87,19 @@ Below is a list of the main project files and folders and their role in the app
 ```
 /config - Configuration files
 /controllers - A controller file for each resource, responsible for communicating with the router and the database
+/lib - Various module libraries to be imported into other modules.
 /migrations - Migration files that build/seed the database when you run 'sequelize db:migrate'
 /models - Files defining the data model for each resource. These map to specific tables in the database
 /routes - Define routes for each resource
 /test
   /e2e - End-to-end tests
   /unit - Unit tests
-README.md - this file
-Vagrantfile - Instructions for creating the Vagrant box
 app.js - Instantiates the database, all routes, and the http server
 bootstrap.sh - Script used for provisioning the database
-customSanitizers.js - functions for sanitizing request data
-customValidations.js - functions for validating request data
 index.js - The main entry point for the app. Instantiates app.js and starts the http server
 package.json - A list of all dependencies
+README.md - this file
+Vagrantfile - Instructions for creating the Vagrant box
 ```
 
 Thank  you for your help! Happy Coding!!
