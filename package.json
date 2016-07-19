@@ -8,8 +8,8 @@
   },
   "main": "./app.js",
   "scripts": {
-    "test": "DEPLOY_MODE=TEST mocha --recursive",
-    "start": "DEPLOY_MODE=DEV node ./app.js"
+    "test": "NODE_ENV=test mocha --recursive",
+    "start": "NODE_ENV=development node ./index.js"
   },
   "author": "",
   "license": "ISC",

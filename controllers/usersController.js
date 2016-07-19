@@ -11,14 +11,14 @@ var usersController = function() {
       required: true,
       rules: [{
         validator: 'isPhoneNumber',
-        message: 'phoneNumber must be a string of 10 digits'
+        message: 'must be a string of 10 digits'
       }],
       sanitizers: ['sanitizeDigitString']
     },
     confirmCode: {
       rules: [{
         validator: 'isSixDigits',
-        message: 'confirmCode must be a string of 6 digits'
+        message: 'must be a string of 6 digits'
       }],
       sanitizers: ['sanitizeDigitString']
     },

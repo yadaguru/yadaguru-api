@@ -1,10 +1,15 @@
+var env       = process.env.NODE_ENV || 'development';
+if (env !== 'test') {
+  throw new Error('E2E tests should be with NODE_ENV=test in order to prevent data loss to the development database');
+}
+
 var request = require('supertest');
 var chai = require('chai');
 chai.should();
 var app = require('../../app.js');
-var config = require('../../config')[process.env.DEPLOY_MODE];
 var models = require('../../models');
 var User = models.User;
+
 
 describe('/api/users', function() {
   describe('GET', function() {
@@ -17,7 +22,7 @@ describe('/api/users', function() {
     }];
 
     before(function(done) {
-      models.sequelize.sync(config.dbSyncOptions).then(function() {
+      models.sequelize.sync({force: true}).then(function() {
         User.create(users[0]).then(function() {
           User.create(users[1]).then(function() {
             done();
@@ -58,7 +63,7 @@ describe('/api/users', function() {
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
-          res.error.text.should.equal('User not found');
+          res.body.message.should.equal('User with id 3 not found');
           done();
         })
     })
@@ -68,7 +73,7 @@ describe('/api/users', function() {
   describe('POST', function() {
 
     before(function(done) {
-      models.sequelize.sync(config.dbSyncOptions).then(function() {
+      models.sequelize.sync({force: true}).then(function() {
         done();
       });
     });
@@ -95,10 +100,10 @@ describe('/api/users', function() {
         .post('/api/users')
         .type('json')
         .send(json)
-        .expect(409)
+        .expect(500)
         .end(function(err, res) {
           if (err) return done(err);
-          res.error.text.should.be.equal('Resource already exists');
+          res.body.name.should.be.equal('SequelizeUniqueConstraintError');
           done();
         });
     });
@@ -112,7 +117,7 @@ describe('/api/users', function() {
         .expect(400)
         .end(function(err, res) {
           if (err) return done(err);
-          res.error.text.should.be.equal('Invalid Phone Number: Must be 10 digits');
+          res.body.message.should.be.equal('phoneNumber must be a string of 10 digits. ');
           done();
         });
     });
@@ -127,7 +132,7 @@ describe('/api/users', function() {
         .expect(400)
         .end(function(err, res) {
           if (err) return done(err);
-          res.error.text.should.be.equal('Invalid Phone Number: Must be 10 digits');
+          res.body.message.should.be.equal('phoneNumber must be a string of 10 digits. ');
           done();
         });
     });
@@ -142,7 +147,7 @@ describe('/api/users', function() {
         .expect(400)
         .end(function(err, res) {
           if (err) return done(err);
-          res.error.text.should.be.equal('Missing Fields: phoneNumber');
+          res.body.message.should.be.equal('phoneNumber is required. ');
           done();
         });
     });
@@ -151,7 +156,7 @@ describe('/api/users', function() {
   describe('PUT', function() {
 
     before(function(done) {
-      models.sequelize.sync(config.dbSyncOptions).then(function() {
+      models.sequelize.sync({force: true}).then(function() {
         User.create({phoneNumber: '1234567890'}).then(function() {
           done();
         })
@@ -185,7 +190,7 @@ describe('/api/users', function() {
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
-          res.error.text.should.be.equal('User not found');
+          res.body.message.should.be.equal('User with id 2 not found');
           done();
         });
     });
@@ -201,7 +206,7 @@ describe('/api/users', function() {
         .expect(400)
         .end(function(err, res) {
           if (err) return done(err);
-          res.error.text.should.be.equal('SequelizeValidationError');
+          res.body.message.should.be.equal('confirmCode must be a string of 6 digits. ');
           done();
         });
     });
@@ -227,7 +232,7 @@ describe('/api/users', function() {
   describe('DELETE', function() {
 
     before(function(done) {
-      models.sequelize.sync(config.dbSyncOptions).then(function() {
+      models.sequelize.sync({force: true}).then(function() {
         User.create({phoneNumber: '1234567890'}).then(function() {
           done();
         })
@@ -240,7 +245,7 @@ describe('/api/users', function() {
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body.should.deep.equal([{id: '1'}]);
+          res.body.should.deep.equal([{deletedId: '1'}]);
           done();
         });
     });
@@ -251,7 +256,7 @@ describe('/api/users', function() {
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
-          res.error.text.should.be.equal('User not found');
+          res.body.message.should.equal('User with id 2 not found');
           done();
         });
     });

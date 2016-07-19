@@ -2,7 +2,7 @@
 module.exports = function(sequelize, DataTypes) {
   var User = sequelize.define('User', {
     phoneNumber: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       unique: true
     },
     confirmCode: DataTypes.STRING,

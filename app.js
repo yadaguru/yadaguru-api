@@ -3,18 +3,14 @@ var express = require('express');
 var http = require('http');
 var https = require('https');
 var bodyParser = require('body-parser');
-var expressValidator = require('express-validator');
 var env       = process.env.NODE_ENV || 'development';
 var config    = require('./config/config.json')[env];
+var Sequelize = require('sequelize');
 var sequelize;
 
 /* Setup app and configure middleware */
 var app = express();
 app.use(bodyParser.json());
-app.use(expressValidator({
-  customValidators: require('./customValidators'),
-  customSanitizers: require('./customSanitizers')
-}));
 app.use(bodyParser.urlencoded({extended: false}));
 
 /* Setup database connection */
