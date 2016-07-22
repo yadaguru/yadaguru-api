@@ -4,7 +4,7 @@ var validators = require('../lib/validators');
 var errors = require('../lib/errors');
 var Category = models.Category;
 
-var usersController = function() {
+var categoriesController = function() {
 
   var validationSchema = {
     name: {
@@ -16,10 +16,10 @@ var usersController = function() {
    * GET /categories
    */
   var getAll = function(req, res) {
-    return User.findAll().then(function(users) {
+    return Category.findAll().then(function(categories) {
       res.status(200);
-      res.json(users.map(function(user) {
-        return user.dataValues;
+      res.json(categories.map(function(categories) {
+        return categories.dataValues;
       }));
     }).catch(function(error) {
       res.status(500);
@@ -31,14 +31,14 @@ var usersController = function() {
    * GET /categories/:id
    */
   var getById = function(req, res) {
-    return User.findById(req.params.id).then(function(user) {
-      if (!user) {
+    return Category.findById(req.params.id).then(function(category) {
+      if (!category) {
         res.status(404);
-        res.json(new errors.ResourceNotFoundError('User', req.params.id));
+        res.json(new errors.ResourceNotFoundError('Category', req.params.id));
         return;
       }
       res.status(200);
-      res.json([user.dataValues]);
+      res.json([category.dataValues]);
     }).catch(function(error) {
       res.status(500);
       res.json(error);
@@ -57,8 +57,8 @@ var usersController = function() {
       return;
     }
 
-    User.create({
-      phoneNumber: validation.sanitizedData.phoneNumber
+    Category.create({
+      name: validation.sanitizedData.name
     }).then(function(resp) {
       res.status(200);
       res.json([resp.dataValues]);
@@ -81,10 +81,10 @@ var usersController = function() {
       return;
     }
 
-    User.findById(id).then(function(user) {
-      if (!user) {
+    Category.findById(id).then(function(category) {
+      if (!category) {
         res.status(404);
-        res.json(new errors.ResourceNotFoundError('User', id));
+        res.json(new errors.ResourceNotFoundError('Category', id));
         return;
       }
       user.update(validation.sanitizedData).then(function(resp) {
@@ -103,10 +103,10 @@ var usersController = function() {
   var removeById = function(req, res) {
     var id = req.params.id;
 
-    User.destroy({where: {id: id}}).then(function(resp) {
+    Category.destroy({where: {id: id}}).then(function(resp) {
       if (resp === 0) {
         res.status(404);
-        res.json(new errors.ResourceNotFoundError('User', id));
+        res.json(new errors.ResourceNotFoundError('Category', id));
         return;
       }
       res.status(200);
@@ -128,4 +128,4 @@ var usersController = function() {
   };
 };
 
-module.exports = usersController();
+module.exports = categoriesController();
