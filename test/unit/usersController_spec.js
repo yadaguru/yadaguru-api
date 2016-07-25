@@ -326,7 +326,7 @@ describe('Users Controller', function() {
   });
 
   describe('DELETE /users/:id', function() {
-    var req, res, usersController, destroy;
+    var req, res, usersController, findById, user, destroy;
 
     beforeEach(function() {
       req = {};
@@ -334,20 +334,25 @@ describe('Users Controller', function() {
         status: sinon.spy(),
         json: sinon.spy()
       };
-      destroy = sinon.stub(User, 'destroy');
+      findById = sinon.stub(User, 'findById');
+      user = {destroy: function(values) {}};
+      destroy = sinon.stub(user, 'destroy');
       usersController = require('../../controllers/usersController');
     });
 
     afterEach(function() {
       res.status.reset();
       res.json.reset();
+      findById.restore();
       destroy.restore();
     });
 
     it('should respond with the user ID and 200 status on success', function() {
       req.params = {id: 1};
-      destroy.withArgs({where: {id: 1}})
-        .returns(Promise.resolve(1));
+      findById.withArgs(1)
+        .returns(Promise.resolve(user));
+      destroy.withArgs()
+        .returns(Promise.resolve());
 
       return usersController.removeById(req, res).then(function() {
         res.json.should.have.been.calledWith([{deletedId: 1}]);
@@ -358,8 +363,8 @@ describe('Users Controller', function() {
     it('should respond with an error and 404 status if user does not exist', function() {
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('User', req.params.id);
-      destroy.withArgs({where: {id: 2}})
-        .returns(Promise.resolve(0));
+      findById.withArgs(2)
+        .returns(Promise.resolve(null));
 
       return usersController.removeById(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -370,7 +375,9 @@ describe('Users Controller', function() {
     it('should respond with an error and a 500 status on a database error', function() {
       req.params = {id: 1};
       var error = new Error('database error');
-      destroy.withArgs({where: {id: 1}})
+      findById.withArgs(1)
+        .returns(Promise.resolve(user));
+      destroy.withArgs()
         .returns(Promise.reject(error));
 
       return usersController.removeById(req, res).then(function() {

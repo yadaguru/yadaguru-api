@@ -101,7 +101,7 @@ var usersController = function() {
       if (!user) {
         res.status(404);
         res.json(new errors.ResourceNotFoundError('User', id));
-        return;
+        return Promise.resolve();
       }
       return user.update(validation.sanitizedData).then(function(resp) {
         res.status(200);
@@ -119,19 +119,21 @@ var usersController = function() {
   var removeById = function(req, res) {
     var id = req.params.id;
 
-    return User.destroy({where: {id: id}}).then(function(resp) {
-      if (resp === 0) {
+    return User.findById(id).then(function(user) {
+      if (!user) {
         res.status(404);
         res.json(new errors.ResourceNotFoundError('User', id));
         return Promise.resolve();
       }
-      res.status(200);
-      res.json([{
-        deletedId: id
-      }])
-    }).catch(function(error) {
-      res.status(500);
-      res.json(error);
+      return user.destroy().then(function() {
+        res.status(200);
+        res.json([{
+          deletedId: id
+        }])
+      }).catch(function(error) {
+        res.status(500);
+        res.json(error);
+      })
     });
   };
 
