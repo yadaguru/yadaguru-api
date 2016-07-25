@@ -32,7 +32,7 @@ describe('Users Controller', function() {
       findAll.restore();
     });
 
-    it('should respond with an array of all users and a 200 status', function(done) {
+    it('should respond with an array of all users and a 200 status', function() {
       var users = [{
         id: '1',
         phoneNumber: '1234567890',
@@ -52,38 +52,32 @@ describe('Users Controller', function() {
         }
       )));
 
-      usersController.getAll(req, res);
-
-      process.nextTick(function() {
+      return usersController.getAll(req, res).then(function() {
         res.json.should.have.been.calledWith(users);
         res.status.should.have.been.calledWith(200);
-        done();
-      })
+      });
+
     });
 
-    it('should respond with an empty array and a 200 status if there are no users', function(done) {
+    it('should respond with an empty array and a 200 status if there are no users', function() {
       findAll.returns(Promise.resolve([]));
 
-      usersController.getAll(req, res);
-
-      process.nextTick(function() {
+      return usersController.getAll(req, res).then(function() {
         res.json.should.have.been.calledWith([]);
         res.status.should.have.been.calledWith(200);
-        done();
-      })
+      });
+
     });
 
-    it('should respond with an error object and a 500 status on a database error', function(done) {
+    it('should respond with an error object and a 500 status on a database error', function() {
       var error = new Error('database error');
       findAll.returns(Promise.reject(error));
 
-      usersController.getAll(req, res);
-
-      process.nextTick(function() {
+      return usersController.getAll(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
         res.status.should.have.been.calledWith(500);
-        done();
-      })
+      });
+
     });
   });
 
@@ -106,7 +100,7 @@ describe('Users Controller', function() {
       findById.restore();
     });
 
-    it('should respond with an array with the matching user and a 200 status', function(done) {
+    it('should respond with an array with the matching user and a 200 status', function() {
       req.params = {id: 1};
       var user = {
         id: '1',
@@ -118,42 +112,35 @@ describe('Users Controller', function() {
       findById.withArgs(1)
         .returns(Promise.resolve({dataValues: user}));
 
-      usersController.getById(req, res);
-
-      process.nextTick(function() {
+      return usersController.getById(req, res).then(function() {
         res.json.should.have.been.calledWith([user]);
         res.status.should.have.been.calledWith(200);
-        done();
-      })
+      });
     });
 
-    it('should an error object and a 404 status if the user does not exist', function(done) {
+    it('should an error object and a 404 status if the user does not exist', function() {
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('User', req.params.id);
       findById.withArgs(2)
         .returns(Promise.resolve(null));
 
-      usersController.getById(req, res);
-
-      process.nextTick(function() {
+      return usersController.getById(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
         res.status.should.have.been.calledWith(404);
-        done();
-      })
+      });
+
     });
 
-    it('should respond with an error object and a 500 status on a database error', function(done) {
+    it('should respond with an error object and a 500 status on a database error', function() {
       req.params = {id: 1};
       var error = new Error('database error');
       findById.returns(Promise.reject(error));
 
-      usersController.getById(req, res);
-
-      process.nextTick(function() {
+      return usersController.getById(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
         res.status.should.have.been.calledWith(500);
-        done();
-      })
+      });
+
     });
   });
 
@@ -176,7 +163,7 @@ describe('Users Controller', function() {
       UserStub.restore();
     });
 
-    it('should respond with new user object and 200 status on success', function(done) {
+    it('should respond with new user object and 200 status on success', function() {
       req.body = {phoneNumber: '1234567890'};
       var successfulCreateResponse = {
         id: '1',
@@ -187,16 +174,13 @@ describe('Users Controller', function() {
       };
       UserStub.returns(Promise.resolve({dataValues: successfulCreateResponse}));
 
-      usersController.post(req, res);
-
-      process.nextTick(function() {
+      return usersController.post(req, res).then(function() {
         res.json.should.have.been.calledWith([successfulCreateResponse]);
         res.status.should.have.been.calledWith(200);
-        done();
-      })
+      });
     });
 
-    it('should respond with a new user object and a 200 status, even if the phone number is formatted', function(done) {
+    it('should respond with a new user object and a 200 status, even if the phone number is formatted', function() {
       req.body = {phoneNumber: '(123) 456-7890'};
       var successfulCreateResponse = {
         id: '1',
@@ -207,16 +191,13 @@ describe('Users Controller', function() {
       };
       UserStub.returns(Promise.resolve({dataValues: successfulCreateResponse}));
 
-      usersController.post(req, res);
-
-      process.nextTick(function() {
+      return usersController.post(req, res).then(function() {
         res.json.should.have.been.calledWith([successfulCreateResponse]);
         res.status.should.have.been.calledWith(200);
-        done();
-      })
+      });
     });
 
-    it('should respond with an error and 400 status on if phone number is not formatted correctly', function(done) {
+    it('should respond with an error and 400 status on if phone number is not formatted correctly', function() {
       req.body = {phoneNumber: '12345abcde'};
       var error = new errors.ValidationError([{
         field: 'phoneNumber',
@@ -224,43 +205,34 @@ describe('Users Controller', function() {
         value: '12345'
       }]);
 
-      usersController.post(req, res);
-
-      process.nextTick(function() {
+      return usersController.post(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
         res.status.should.have.been.calledWith(400);
-        done();
-      })
+      });
     });
 
-    it('should respond with an error and 400 status on if phone number is missing', function(done) {
+    it('should respond with an error and 400 status on if phone number is missing', function() {
       req.body = {foo: 'bar'};
       var error = new errors.ValidationError([{
         field: 'phoneNumber',
         message: 'is required'
       }]);
 
-      usersController.post(req, res);
-
-      process.nextTick(function() {
+      return usersController.post(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
         res.status.should.have.been.calledWith(400);
-        done();
-      })
+      });
     });
 
-    it('should respond with an error and a 500 status on a database error', function(done) {
+    it('should respond with an error and a 500 status on a database error', function() {
       req.body = {phoneNumber: '1234567890'};
       var databaseError = new Error('some database error');
       UserStub.returns(Promise.reject(databaseError));
 
-      usersController.post(req, res);
-
-      process.nextTick(function() {
+      return usersController.post(req, res).then(function() {
         res.json.should.have.been.calledWith(databaseError);
         res.status.should.have.been.calledWith(500);
-        done();
-      })
+      });
     });
   });
 
@@ -286,7 +258,7 @@ describe('Users Controller', function() {
       update.restore();
     });
 
-    it('should respond with the updated user object and 200 status on success', function(done) {
+    it('should respond with the updated user object and 200 status on success', function() {
       req.body = {phoneNumber: '1234567890'};
       req.params = {id: 1};
       var updatedUser = {
@@ -301,16 +273,13 @@ describe('Users Controller', function() {
       update.withArgs(req.body)
         .returns(Promise.resolve({dataValues: updatedUser}));
 
-      usersController.putOnId(req, res);
-
-      process.nextTick(function() {
+      return usersController.putOnId(req, res).then(function() {
         res.json.should.have.been.calledWith([updatedUser]);
         res.status.should.have.been.calledWith(200);
-        done();
-      })
+      });
     });
 
-    it('should respond with an error and 400 status on if phone number is not formatted correctly', function(done) {
+    it('should respond with an error and 400 status on if phone number is not formatted correctly', function() {
       req.body = {phoneNumber: '12345abcde'};
       req.params = {id: 1};
       var error = new errors.ValidationError([{
@@ -321,32 +290,26 @@ describe('Users Controller', function() {
       findById.withArgs(1)
         .returns(Promise.resolve(user));
 
-      usersController.putOnId(req, res);
-
-      process.nextTick(function() {
+      return usersController.putOnId(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
         res.status.should.have.been.calledWith(400);
-        done();
       })
     });
 
-    it('should respond with an error and 404 status if user does not exist', function(done) {
+    it('should respond with an error and 404 status if user does not exist', function() {
       req.body = {phoneNumber: '1234567890'};
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('User', req.params.id);
       findById.withArgs(2)
         .returns(Promise.resolve(null));
 
-      usersController.putOnId(req, res);
-
-      process.nextTick(function() {
+      return usersController.putOnId(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
         res.status.should.have.been.calledWith(404);
-        done();
       })
     });
 
-    it('should respond with an error and a 500 status on a database error', function(done) {
+    it('should respond with an error and a 500 status on a database error', function() {
       req.body = {phoneNumber: '1234567890'};
       req.params = {id: 1};
       var error = new Error('database error');
@@ -355,12 +318,9 @@ describe('Users Controller', function() {
       update.withArgs(req.body)
         .returns(Promise.reject(error));
 
-      usersController.putOnId(req, res);
-
-      process.nextTick(function() {
+      return usersController.putOnId(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
         res.status.should.have.been.calledWith(500);
-        done();
       })
     });
   });
@@ -384,47 +344,38 @@ describe('Users Controller', function() {
       destroy.restore();
     });
 
-    it('should respond with the user ID and 200 status on success', function(done) {
+    it('should respond with the user ID and 200 status on success', function() {
       req.params = {id: 1};
       destroy.withArgs({where: {id: 1}})
         .returns(Promise.resolve(1));
 
-      usersController.removeById(req, res);
-
-      process.nextTick(function() {
+      return usersController.removeById(req, res).then(function() {
         res.json.should.have.been.calledWith([{deletedId: 1}]);
         res.status.should.have.been.calledWith(200);
-        done();
       })
     });
 
-    it('should respond with an error and 404 status if user does not exist', function(done) {
+    it('should respond with an error and 404 status if user does not exist', function() {
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('User', req.params.id);
       destroy.withArgs({where: {id: 2}})
         .returns(Promise.resolve(0));
 
-      usersController.removeById(req, res);
-
-      process.nextTick(function() {
+      return usersController.removeById(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
         res.status.should.have.been.calledWith(404);
-        done();
       })
     });
 
-    it('should respond with an error and a 500 status on a database error', function(done) {
+    it('should respond with an error and a 500 status on a database error', function() {
       req.params = {id: 1};
       var error = new Error('database error');
       destroy.withArgs({where: {id: 1}})
         .returns(Promise.reject(error));
 
-      usersController.removeById(req, res);
-
-      process.nextTick(function() {
+      return usersController.removeById(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
         res.status.should.have.been.calledWith(500);
-        done();
       })
     });
   });

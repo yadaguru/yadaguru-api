@@ -2,6 +2,7 @@ var models = require('../models/');
 var util = require('util');
 var validators = require('../lib/validators');
 var errors = require('../lib/errors');
+var Promise = require('bluebird');
 var User = models.User;
 
 var usersController = function() {
@@ -69,10 +70,10 @@ var usersController = function() {
     if (!validation.isValid) {
       res.status(400);
       res.json(validation.errors);
-      return;
+      return Promise.resolve();
     }
 
-    User.create({
+    return User.create({
       phoneNumber: validation.sanitizedData.phoneNumber
     }).then(function(resp) {
       res.status(200);
@@ -93,16 +94,16 @@ var usersController = function() {
     if (!validation.isValid) {
       res.status(400);
       res.json(validation.errors);
-      return;
+      return Promise.resolve();
     }
 
-    User.findById(id).then(function(user) {
+    return User.findById(id).then(function(user) {
       if (!user) {
         res.status(404);
         res.json(new errors.ResourceNotFoundError('User', id));
         return;
       }
-      user.update(validation.sanitizedData).then(function(resp) {
+      return user.update(validation.sanitizedData).then(function(resp) {
         res.status(200);
         res.json([resp.dataValues]);
       }).catch(function(error) {
@@ -118,11 +119,11 @@ var usersController = function() {
   var removeById = function(req, res) {
     var id = req.params.id;
 
-    User.destroy({where: {id: id}}).then(function(resp) {
+    return User.destroy({where: {id: id}}).then(function(resp) {
       if (resp === 0) {
         res.status(404);
         res.json(new errors.ResourceNotFoundError('User', id));
-        return;
+        return Promise.resolve();
       }
       res.status(200);
       res.json([{
