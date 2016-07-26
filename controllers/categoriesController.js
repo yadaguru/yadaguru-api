@@ -46,7 +46,7 @@ var categoriesController = function() {
   };
 
   /**
-   * POST /users
+   * POST /categories
    */
   var post = function(req, res) {
     var validation = validators.sanitizeAndValidate(req.body, validationSchema, true);
@@ -69,7 +69,7 @@ var categoriesController = function() {
   };
 
   /**
-   * PUT /users/:id
+   * PUT /categories/:id
    */
   var putOnId = function(req, res) {
     var id = req.params.id;
@@ -98,24 +98,26 @@ var categoriesController = function() {
   };
 
   /**
-   * DELETE /users/:id
+   * DELETE /categories/:id
    */
   var removeById = function(req, res) {
     var id = req.params.id;
 
-    Category.destroy({where: {id: id}}).then(function(resp) {
-      if (resp === 0) {
+    return Category.findById(id).then(function(category) {
+      if (!category) {
         res.status(404);
         res.json(new errors.ResourceNotFoundError('Category', id));
-        return;
+        return Promise.resolve();
       }
-      res.status(200);
-      res.json([{
-        deletedId: id
-      }])
-    }).catch(function(error) {
-      res.status(500);
-      res.json(error);
+      return category.destroy().then(function() {
+        res.status(200);
+        res.json([{
+          deletedId: id
+        }])
+      }).catch(function(error) {
+        res.status(500);
+        res.json(error);
+      })
     });
   };
 
