@@ -1,5 +1,4 @@
 var models = require('../models/');
-var util = require('util');
 var validators = require('../lib/validators');
 var errors = require('../lib/errors');
 var Promise = require('bluebird');

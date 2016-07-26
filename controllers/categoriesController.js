@@ -1,7 +1,7 @@
 var models = require('../models/');
-var util = require('util');
 var validators = require('../lib/validators');
 var errors = require('../lib/errors');
+var Promise = require('bluebird');
 var Category = models.Category;
 
 var categoriesController = function() {
@@ -54,10 +54,10 @@ var categoriesController = function() {
     if (!validation.isValid) {
       res.status(400);
       res.json(validation.errors);
-      return;
+      return Promise.resolve();
     }
 
-    Category.create({
+    return Category.create({
       name: validation.sanitizedData.name
     }).then(function(resp) {
       res.status(200);
@@ -78,16 +78,16 @@ var categoriesController = function() {
     if (!validation.isValid) {
       res.status(400);
       res.json(validation.errors);
-      return;
+      return Promise.resolve();
     }
 
-    Category.findById(id).then(function(category) {
+    return Category.findById(id).then(function(category) {
       if (!category) {
         res.status(404);
         res.json(new errors.ResourceNotFoundError('Category', id));
-        return;
+        return Promise.resolve();
       }
-      user.update(validation.sanitizedData).then(function(resp) {
+      return category.update(validation.sanitizedData).then(function(resp) {
         res.status(200);
         res.json([resp.dataValues]);
       }).catch(function(error) {
