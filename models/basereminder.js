@@ -24,7 +24,8 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     classMethods: {
       associate: function(models) {
-        BaseReminder.belongsTo(models.Category)
+        BaseReminder.belongsTo(models.Category);
+        BaseReminder.belongsToMany(models.Timeframe, {through: 'BaseRemindersTimeframes'});
       }
     }
   });
