@@ -32,7 +32,13 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     classMethods: {
       associate: function(models) {
-        Reminder.belongsTo(models.School, {onDelete: 'cascade'});
+        Reminder.belongsTo(models.School, {
+          onDelete: 'cascade',
+          foreignKey: {
+            name: 'schoolId',
+            allowNull: false
+          }
+        });
       }
     }
   });

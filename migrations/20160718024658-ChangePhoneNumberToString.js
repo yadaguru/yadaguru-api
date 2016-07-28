@@ -3,8 +3,7 @@
 module.exports = {
   up: function (queryInterface, Sequelize) {
     return queryInterface.changeColumn('Users', 'phoneNumber', {
-      type: Sequelize.STRING,
-      unique: true
+      type: Sequelize.STRING
     });
   },
 

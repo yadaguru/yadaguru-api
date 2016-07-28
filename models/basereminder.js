@@ -24,8 +24,17 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     classMethods: {
       associate: function(models) {
-        BaseReminder.belongsTo(models.Category, {onDelete: 'restrict'});
-        BaseReminder.belongsToMany(models.Timeframe, {through: 'BaseRemindersTimeframes', onDelete: 'restrict'});
+        BaseReminder.belongsTo(models.Category, {
+          onDelete: 'restrict',
+          foreignKey: {
+            name: 'categoryId',
+            allowNull: false
+          }
+        });
+        BaseReminder.belongsToMany(models.Timeframe, {
+          through: 'BaseRemindersTimeframes',
+          onDelete: 'restrict'
+        });
       }
     }
   });

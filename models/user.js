@@ -11,7 +11,13 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     classMethods: {
       associate: function(models) {
-        User.hasMany(models.School);
+        User.hasMany(models.School, {
+          onDelete: 'cascade',
+          foreignKey: {
+            name: 'userId',
+            allowNull: false
+          }
+        });
       }
     }
   });

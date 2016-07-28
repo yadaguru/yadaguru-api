@@ -8,7 +8,13 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     classMethods: {
       associate: function(models) {
-        Category.hasMany(models.BaseReminder);
+        Category.hasMany(models.BaseReminder, {
+          onDelete: 'restrict',
+          foreignKey: {
+            name: 'categoryId',
+            allowNull: false
+          }
+        });
       }
     }
   });
