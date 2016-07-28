@@ -18,6 +18,7 @@ module.exports = function(sequelize, DataTypes) {
     classMethods: {
       associate: function(models) {
         School.belongsTo(models.User, {onDelete: 'cascade'});
+        School.hasMany(models.Reminder);
       }
     }
   });
