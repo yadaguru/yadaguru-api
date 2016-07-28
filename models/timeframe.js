@@ -16,7 +16,7 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     classMethods: {
       associate: function(models) {
-        Timeframe.belongsToMany(models.BaseReminder, {through: 'BaseRemindersTimeframes'});
+        Timeframe.belongsToMany(models.BaseReminder, {through: 'BaseRemindersTimeframes', onDelete: 'restrict'});
       }
     }
   });
