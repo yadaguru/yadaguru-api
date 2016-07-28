@@ -1,42 +1,35 @@
 'use strict';
 module.exports = {
   up: function(queryInterface, Sequelize) {
-    return queryInterface.createTable('BaseReminders', {
+    return queryInterface.createTable('Schools', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      userId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'Users',
+          key: 'id'
+        },
+        onUpdate: 'cascade',
+        onDelete: 'cascade'
+      },
       name: {
         allowNull: false,
         type: Sequelize.STRING
       },
-      categoryId: {
+      dueDate: {
         allowNull: false,
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'Categories',
-          key: 'id'
-        },
-        onUpdate: 'cascade',
-        onDelete: 'restrict'
+        type: Sequelize.DATE
       },
-      message: {
+      isActive: {
         allowNull: false,
-        type: Sequelize.TEXT
-      },
-      detail: {
-        allowNull: false,
-        type: Sequelize.TEXT
-      },
-      lateMessage: {
-        allowNull: true,
-        type: Sequelize.TEXT
-      },
-      lateDetail: {
-        allowNull: true,
-        type: Sequelize.TEXT
+        type: Sequelize.BOOLEAN,
+        defaultValue: true
       },
       createdAt: {
         allowNull: false,
@@ -49,6 +42,6 @@ module.exports = {
     });
   },
   down: function(queryInterface, Sequelize) {
-    return queryInterface.dropTable('BaseReminders');
+    return queryInterface.dropTable('Schools');
   }
 };

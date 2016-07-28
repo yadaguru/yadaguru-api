@@ -9,9 +9,6 @@ module.exports = {
   },
 
   down: function (queryInterface, Sequelize) {
-    return queryInterface.changeColumn('Users', 'phoneNumber', {
-      type: Sequelize.INTEGER,
-      unique: true
-    });
+
   }
 };
