@@ -1,7 +1,7 @@
 var schema = {
-  Name: {
+  name: {
     required: true
-  }
+  },
   content: {
     required: true
   }
