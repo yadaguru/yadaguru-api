@@ -182,7 +182,7 @@ describe('/api/base_reminders', function() {
         .expect(400)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body.message.should.be.equal('timeframeIds mube be an array of timeframe IDs. categoryId must be a number');
+          res.body.message.should.be.equal('timeframeIds must be an array of timeframe IDs. categoryId must be a number');
           done();
         });
     });

@@ -188,4 +188,35 @@ describe('Validators', function() {
     });
   })
 
+  describe('isNonEmptyArray', function() {
+    it('should return true on an array with a length greater than 1', function() {
+      validators.validators.isNonEmptyArray([1, 2, 3]).should.be.true;
+    });
+
+    it('should return false an empty array with no members', function() {
+      validators.validators.isNonEmptyArray([]).should.be.false;
+    });
+  })
+
+  describe('isArrayOfNumbers', function() {
+    it('should return true on an array where all members are numbers', function() {
+      validators.validators.isArrayOfNumbers([1, 2, 3]).should.be.true;
+    });
+
+    it('should return false on an array where at least one member is not a number', function() {
+      validators.validators.isArrayOfNumbers([1, '2', 3]).should.be.false;
+      validators.validators.isArrayOfNumbers([1, NaN, 3]).should.be.false;
+    });
+
+    it('should return false on an empty array', function() {
+      validators.validators.isArrayOfNumbers([]).should.be.false;
+    });
+
+    it('should return false on a non-array', function() {
+      validators.validators.isArrayOfNumbers({}).should.be.false;
+      validators.validators.isArrayOfNumbers('1 2').should.be.false;
+      validators.validators.isArrayOfNumbers(3).should.be.false;
+    });
+  })
+
 });

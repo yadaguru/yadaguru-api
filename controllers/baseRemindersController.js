@@ -18,17 +18,14 @@ var schema = {
     required: true,
     rules: [{
       validator: 'isNumeric',
-      message: 'must be a category ID number'
+      message: 'must be a number'
     }]
   },
   timeframeIds: {
     required: true,
     rules: [{
-      validator: 'isNonEmptyArray',
-      message: 'must be a non-empty array'
-    }, {
       validator: 'isArrayOfNumbers',
-      message: 'must be an array of timeframe ID numbers'
+      message: 'must be an array of timeframe IDs'
     }]
   }
 };
