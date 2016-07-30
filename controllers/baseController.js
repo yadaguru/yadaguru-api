@@ -1,21 +1,16 @@
-var models = require('../models');
 var validators = require('../services/validatorService');
 var errors = require('../services/errorService');
 var Promise = require('bluebird');
 
-var resourceControllerFactory = function(model, schema) {
-
-  var Resource = models[model];
+var resourceControllerFactory = function(name, modelService, schema) {
 
   /**
    * GET /resources
    */
   var getAll = function(req, res) {
-    return Resource.findAll().then(function(resources) {
+    return modelService.findAll().then(function(resources) {
       res.status(200);
-      res.json(resources.map(function(resource) {
-        return resource.dataValues;
-      }));
+      res.json(resources);
     }).catch(function(error) {
       res.status(500);
       res.json(error);
@@ -26,14 +21,14 @@ var resourceControllerFactory = function(model, schema) {
    * GET /resources/:id
    */
   var getById = function(req, res) {
-    return Resource.findById(req.params.id).then(function(resource) {
-      if (!resource) {
+    return modelService.findById(req.params.id).then(function(resource) {
+      if (resource.length === 0) {
         res.status(404);
-        res.json(new errors.ResourceNotFoundError(model, req.params.id));
+        res.json(new errors.ResourceNotFoundError(name, req.params.id));
         return;
       }
       res.status(200);
-      res.json([resource.dataValues]);
+      res.json(resource);
     }).catch(function(error) {
       res.status(500);
       res.json(error);
@@ -52,9 +47,9 @@ var resourceControllerFactory = function(model, schema) {
       return Promise.resolve();
     }
 
-    return Resource.create(validation.sanitizedData).then(function(resp) {
+    return modelService.create(validation.sanitizedData).then(function(newResource) {
       res.status(200);
-      res.json([resp.dataValues]);
+      res.json(newResource);
     }).catch(function(error) {
       res.status(500);
       res.json(error);
@@ -74,20 +69,18 @@ var resourceControllerFactory = function(model, schema) {
       return Promise.resolve();
     }
 
-    return Resource.findById(id).then(function(resource) {
-      if (!resource) {
+    return modelService.update(id, validation.sanitizedData).then(function(updatedResource) {
+      if (!updatedResource) {
         res.status(404);
-        res.json(new errors.ResourceNotFoundError(model, id));
-        return Promise.resolve();
+        res.json(new errors.ResourceNotFoundError(name, id));
+        return;
       }
-      return resource.update(validation.sanitizedData).then(function(resp) {
-        res.status(200);
-        res.json([resp.dataValues]);
-      }).catch(function(error) {
-        res.status(500);
-        res.json(error);
-      });
-    })
+      res.status(200);
+      res.json(updatedResource);
+    }).catch(function(error) {
+      res.status(500);
+      res.json(error);
+    });
   };
 
   /**
@@ -96,21 +89,17 @@ var resourceControllerFactory = function(model, schema) {
   var removeById = function(req, res) {
     var id = req.params.id;
 
-    return Resource.findById(id).then(function(resource) {
-      if (!resource) {
+    return modelService.destroy(id).then(function(result) {
+      if (!result) {
         res.status(404);
-        res.json(new errors.ResourceNotFoundError(model, id));
-        return Promise.resolve();
+        res.json(new errors.ResourceNotFoundError(name, id));
+        return;
       }
-      return resource.destroy().then(function() {
-        res.status(200);
-        res.json([{
-          deletedId: id
-        }])
-      }).catch(function(error) {
-        res.status(500);
-        res.json(error);
-      })
+      res.status(200);
+      res.json([{deletedId: id}]);
+    }).catch(function(error) {
+      res.status(500);
+      res.json(error);
     });
   };
 

@@ -8,9 +8,7 @@ chai.use(sinonChai);
 chai.should();
 var errors = require('../../services/errorService');
 var Promise = require('bluebird');
-var Category = require('../../models').Category;
-
-
+var categoryService = require('../../services/categoryService');
 
 describe('Categories Controller', function() {
   describe('GET /categories', function() {
@@ -22,7 +20,7 @@ describe('Categories Controller', function() {
         status: sinon.spy(),
         json: sinon.spy()
       };
-      findAll = sinon.stub(Category, 'findAll');
+      findAll = sinon.stub(categoryService, 'findAll');
       categoriesController = require('../../controllers/categoriesController');
     });
 
@@ -40,11 +38,7 @@ describe('Categories Controller', function() {
         id: '2',
         name: 'Recommendation Letter'
       }];
-      findAll.returns(Promise.resolve(categories.map(
-        function(category) {
-          return {dataValues: category};
-        }
-      )));
+      findAll.returns(Promise.resolve(categories));
 
       return categoriesController.getAll(req, res).then(function() {
         res.json.should.have.been.calledWith(categories);
@@ -84,7 +78,7 @@ describe('Categories Controller', function() {
         status: sinon.spy(),
         json: sinon.spy()
       };
-      findById = sinon.stub(Category, 'findById');
+      findById = sinon.stub(categoryService, 'findById');
       categoriesController = require('../../controllers/categoriesController');
     });
 
@@ -94,14 +88,14 @@ describe('Categories Controller', function() {
       findById.restore();
     });
 
-    it('should respond with an array with the matching category and a 200 status', function() {
+    it('should respond with an array containing matching category and a 200 status', function() {
       req.params = {id: 1};
       var category = {
         id: '1',
         name: 'Essay'
       };
       findById.withArgs(1)
-        .returns(Promise.resolve({dataValues: category}));
+        .returns(Promise.resolve([category]));
 
       return categoriesController.getById(req, res).then(function() {
         res.json.should.have.been.calledWith([category]);
@@ -113,7 +107,7 @@ describe('Categories Controller', function() {
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('Category', req.params.id);
       findById.withArgs(2)
-        .returns(Promise.resolve(null));
+        .returns(Promise.resolve([]));
 
       return categoriesController.getById(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -136,7 +130,7 @@ describe('Categories Controller', function() {
   });
 
   describe('POST /categories', function() {
-    var req, res, categoriesController, CategoryStub;
+    var req, res, categoriesController, create;
 
     beforeEach(function() {
       req = {};
@@ -144,23 +138,23 @@ describe('Categories Controller', function() {
         status: sinon.spy(),
         json: sinon.spy()
       };
-      CategoryStub = sinon.stub(Category, 'create');
+      create = sinon.stub(categoryService, 'create');
       categoriesController = require('../../controllers/categoriesController');
     });
 
     afterEach(function() {
       res.status.reset();
       res.json.reset();
-      CategoryStub.restore();
+      create.restore();
     });
 
-    it('should respond with new category object and 200 status on success', function() {
+    it('should respond with an array containing the new category object and 200 status on success', function() {
       req.body = {name: 'Essay'};
       var successfulCreateResponse = {
         id: '2',
         name: req.body.name
       };
-      CategoryStub.returns(Promise.resolve({dataValues: successfulCreateResponse}));
+      create.returns(Promise.resolve([successfulCreateResponse]));
 
       return categoriesController.post(req, res).then(function() {
         res.json.should.have.been.calledWith([successfulCreateResponse]);
@@ -184,7 +178,7 @@ describe('Categories Controller', function() {
     it('should respond with an error and a 500 status on a database error', function() {
       req.body = {name: 'Essay'};
       var databaseError = new Error('some database error');
-      CategoryStub.returns(Promise.reject(databaseError));
+      create.returns(Promise.reject(databaseError));
 
       return categoriesController.post(req, res).then(function() {
         res.json.should.have.been.calledWith(databaseError);
@@ -194,7 +188,7 @@ describe('Categories Controller', function() {
   });
 
   describe('PUT /categories/:id', function() {
-    var req, res, categoriesController, findById, category, update;
+    var req, res, categoriesController, update;
 
     beforeEach(function() {
       req = {};
@@ -202,30 +196,25 @@ describe('Categories Controller', function() {
         status: sinon.spy(),
         json: sinon.spy()
       };
-      findById = sinon.stub(Category, 'findById');
-      category = {update: function(values) {}};
-      update = sinon.stub(category, 'update');
+      update = sinon.stub(categoryService, 'update');
       categoriesController = require('../../controllers/categoriesController');
     });
 
     afterEach(function() {
       res.status.reset();
       res.json.reset();
-      findById.restore();
       update.restore();
     });
 
-    it('should respond with the updated category object and 200 status on success', function() {
+    it('should respond with an array containing the updated category object and 200 status on success', function() {
       req.body = {name: 'Essay'};
       req.params = {id: 1};
       var updatedCategory = {
         id: '1',
         name: req.body.name
       };
-      findById.withArgs(1)
-        .returns(Promise.resolve(category));
-      update.withArgs(req.body)
-        .returns(Promise.resolve({dataValues: updatedCategory}));
+      update.withArgs(req.params.id, req.body)
+        .returns(Promise.resolve([updatedCategory]));
 
       return categoriesController.putOnId(req, res).then(function() {
         res.json.should.have.been.calledWith([updatedCategory]);
@@ -237,8 +226,8 @@ describe('Categories Controller', function() {
       req.body = {name: 'Essay'};
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('Category', req.params.id);
-      findById.withArgs(2)
-        .returns(Promise.resolve(null));
+      update.withArgs(req.params.id)
+        .returns(Promise.resolve(false));
 
       return categoriesController.putOnId(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -250,9 +239,7 @@ describe('Categories Controller', function() {
       req.body = {name: 'Essay'};
       req.params = {id: 1};
       var error = new Error('database error');
-      findById.withArgs(1)
-        .returns(Promise.resolve(category));
-      update.withArgs(req.body)
+      update.withArgs(req.params.id, req.body)
         .returns(Promise.reject(error));
 
       return categoriesController.putOnId(req, res).then(function() {
@@ -263,7 +250,7 @@ describe('Categories Controller', function() {
   });
 
   describe('DELETE /categories/:id', function() {
-    var req, res, categoriesController, findById, category, destroy;
+    var req, res, categoriesController, destroy;
 
     beforeEach(function() {
       req = {};
@@ -271,25 +258,20 @@ describe('Categories Controller', function() {
         status: sinon.spy(),
         json: sinon.spy()
       };
-      findById = sinon.stub(Category, 'findById');
-      category = {destroy: function(values) {}};
-      destroy = sinon.stub(category, 'destroy');
+      destroy = sinon.stub(categoryService, 'destroy');
       categoriesController = require('../../controllers/categoriesController');
     });
 
     afterEach(function() {
       res.status.reset();
       res.json.reset();
-      findById.restore();
       destroy.restore();
     });
 
-    it('should respond with the category ID and 200 status on success', function() {
+    it('should respond with the categoryService ID and 200 status on success', function() {
       req.params = {id: 1};
-      findById.withArgs(1)
-        .returns(Promise.resolve(category));
-      destroy.withArgs()
-        .returns(Promise.resolve());
+      destroy.withArgs(req.params.id)
+        .returns(Promise.resolve(true));
 
       return categoriesController.removeById(req, res).then(function() {
         res.json.should.have.been.calledWith([{deletedId: 1}]);
@@ -300,8 +282,8 @@ describe('Categories Controller', function() {
     it('should respond with an error and 404 status if category does not exist', function() {
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('Category', req.params.id);
-      findById.withArgs(2)
-        .returns(Promise.resolve(null));
+      destroy.withArgs(req.params.id)
+        .returns(Promise.resolve(false));
 
       return categoriesController.removeById(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -312,9 +294,7 @@ describe('Categories Controller', function() {
     it('should respond with an error and a 500 status on a database error', function() {
       req.params = {id: 1};
       var error = new Error('database error');
-      findById.withArgs(1)
-        .returns(Promise.resolve(category));
-      destroy.withArgs()
+      destroy.withArgs(req.params.id)
         .returns(Promise.reject(error));
 
       return categoriesController.removeById(req, res).then(function() {
