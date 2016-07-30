@@ -1,6 +1,6 @@
 var models = require('../models');
-var validators = require('../lib/validators');
-var errors = require('../lib/errors');
+var validators = require('../services/validatorService');
+var errors = require('../services/errorService');
 var Promise = require('bluebird');
 
 var resourceControllerFactory = function(model, schema) {

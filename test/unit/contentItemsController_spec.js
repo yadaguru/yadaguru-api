@@ -6,7 +6,7 @@ var sinonChai = require('sinon-chai');
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 chai.should();
-var errors = require('../../lib/errors');
+var errors = require('../../services/errorService');
 var Promise = require('bluebird');
 var ContentItem = require('../../models').ContentItem;
 

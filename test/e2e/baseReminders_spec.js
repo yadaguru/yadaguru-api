@@ -13,9 +13,9 @@ var Timeframe = models.Timeframes;
 var Category = models.Category;
 
 
-describe('/api/base_reminders', function() {
+xdescribe('/api/base_reminders', function() {
 
-  describe('GET', function() {
+  xdescribe('GET', function() {
     var timeframes = [{
       name: 'Today',
       type: 'now'
@@ -105,7 +105,7 @@ describe('/api/base_reminders', function() {
   });
 
 
-  describe('POST', function() {
+  xdescribe('POST', function() {
 
     before(function(done) {
       models.sequelize.sync({force: true}).then(function() {
@@ -188,7 +188,7 @@ describe('/api/base_reminders', function() {
     });
   });
 
-  describe('PUT', function() {
+  xdescribe('PUT', function() {
 
     before(function(done) {
       models.sequelize.sync({force: true}).then(function() {
@@ -252,7 +252,7 @@ describe('/api/base_reminders', function() {
     });
   });
 
-  describe('DELETE', function() {
+  xdescribe('DELETE', function() {
 
     before(function(done) {
       models.sequelize.sync({force: true}).then(function() {

@@ -1,6 +1,6 @@
 var validators = require('validator');
-var sanitizers = require('./sanitizers');
-var ValidationError = require('./errors').ValidationError;
+var sanitizers = require('./sanitizerService');
+var ValidationError = require('./errorService').ValidationError;
 
 module.exports = function() {
 

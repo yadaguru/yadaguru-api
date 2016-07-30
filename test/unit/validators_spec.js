@@ -2,8 +2,8 @@ var chai = require('chai');
 chai.should();
 var should = chai.should();
 
-var ValidationError = require('../../lib/errors');
-var validators = require ('../../lib/validators');
+var ValidationError = require('../../services/errorService');
+var validators = require ('../../services/validatorService');
 
 describe('Validators', function() {
   var validationSchema = {

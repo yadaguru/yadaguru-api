@@ -1,7 +1,7 @@
 var chai = require('chai');
 chai.should();
 
-var sanitizers = require ('../../lib/sanitizers');
+var sanitizers = require ('../../services/sanitizerService');
 
 describe('Sanitizers', function() {
   describe('sanitizeDigitString', function() {
