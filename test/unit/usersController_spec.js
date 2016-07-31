@@ -8,9 +8,7 @@ chai.use(sinonChai);
 chai.should();
 var errors = require('../../services/errorService');
 var Promise = require('bluebird');
-var User = require('../../models').User;
-
-
+var userService = require('../../services/userService');
 
 describe('Users Controller', function() {
   describe('GET /users', function() {
@@ -22,7 +20,7 @@ describe('Users Controller', function() {
         status: sinon.spy(),
         json: sinon.spy()
       };
-      findAll = sinon.stub(User, 'findAll');
+      findAll = sinon.stub(userService, 'findAll');
       usersController = require('../../controllers/usersController');
     });
 
@@ -37,20 +35,16 @@ describe('Users Controller', function() {
         id: '1',
         phoneNumber: '1234567890',
         confirmCode: '',
-        confirmCodeExpires: '',
+        confirmCodeTimestamp: '',
         sponsorCode: ''
       }, {
         id: '2',
         phoneNumber: '9876543210',
         confirmCode: '',
-        confirmCodeExpires: '',
+        confirmCodeTimestamp: '',
         sponsorCode: ''
       }];
-      findAll.returns(Promise.resolve(users.map(
-        function(user) {
-          return {dataValues: user};
-        }
-      )));
+      findAll.returns(Promise.resolve(users));
 
       return usersController.getAll(req, res).then(function() {
         res.json.should.have.been.calledWith(users);
@@ -90,7 +84,7 @@ describe('Users Controller', function() {
         status: sinon.spy(),
         json: sinon.spy()
       };
-      findById = sinon.stub(User, 'findById');
+      findById = sinon.stub(userService, 'findById');
       usersController = require('../../controllers/usersController');
     });
 
@@ -106,11 +100,11 @@ describe('Users Controller', function() {
         id: '1',
         phoneNumber: '1234567890',
         confirmCode: '',
-        confirmCodeExpires: '',
+        confirmCodeTimestamp: '',
         sponsorCode: ''
       };
       findById.withArgs(1)
-        .returns(Promise.resolve({dataValues: user}));
+        .returns(Promise.resolve([user]));
 
       return usersController.getById(req, res).then(function() {
         res.json.should.have.been.calledWith([user]);
@@ -122,7 +116,7 @@ describe('Users Controller', function() {
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('User', req.params.id);
       findById.withArgs(2)
-        .returns(Promise.resolve(null));
+        .returns(Promise.resolve([]));
 
       return usersController.getById(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -145,7 +139,7 @@ describe('Users Controller', function() {
   });
 
   describe('POST /users', function() {
-    var req, res, usersController, UserStub;
+    var req, res, usersController, create;
 
     beforeEach(function() {
       req = {};
@@ -153,14 +147,14 @@ describe('Users Controller', function() {
         status: sinon.spy(),
         json: sinon.spy()
       };
-      UserStub = sinon.stub(User, 'create');
+      create = sinon.stub(userService, 'create');
       usersController = require('../../controllers/usersController');
     });
 
     afterEach(function() {
       res.status.reset();
       res.json.reset();
-      UserStub.restore();
+      create.restore();
     });
 
     it('should respond with new user object and 200 status on success', function() {
@@ -169,10 +163,10 @@ describe('Users Controller', function() {
         id: '1',
         phoneNumber: req.body.phoneNumber,
         confirmCode: '',
-        confirmCodeExpires: '',
+        confirmCodeTimestamp: '',
         sponsorCode: ''
       };
-      UserStub.returns(Promise.resolve({dataValues: successfulCreateResponse}));
+      create.returns(Promise.resolve([successfulCreateResponse]));
 
       return usersController.post(req, res).then(function() {
         res.json.should.have.been.calledWith([successfulCreateResponse]);
@@ -186,10 +180,10 @@ describe('Users Controller', function() {
         id: '1',
         phoneNumber: '1234567890',
         confirmCode: '',
-        confirmCodeExpires: '',
+        confirmCodeTimestamp: '',
         sponsorCode: ''
       };
-      UserStub.returns(Promise.resolve({dataValues: successfulCreateResponse}));
+      create.returns(Promise.resolve([successfulCreateResponse]));
 
       return usersController.post(req, res).then(function() {
         res.json.should.have.been.calledWith([successfulCreateResponse]);
@@ -227,7 +221,7 @@ describe('Users Controller', function() {
     it('should respond with an error and a 500 status on a database error', function() {
       req.body = {phoneNumber: '1234567890'};
       var databaseError = new Error('some database error');
-      UserStub.returns(Promise.reject(databaseError));
+      create.returns(Promise.reject(databaseError));
 
       return usersController.post(req, res).then(function() {
         res.json.should.have.been.calledWith(databaseError);
@@ -237,7 +231,7 @@ describe('Users Controller', function() {
   });
 
   describe('PUT /users/:id', function() {
-    var req, res, usersController, findById, user, update;
+    var req, res, usersController, update;
 
     beforeEach(function() {
       req = {};
@@ -245,16 +239,13 @@ describe('Users Controller', function() {
         status: sinon.spy(),
         json: sinon.spy()
       };
-      findById = sinon.stub(User, 'findById');
-      user = {update: function(values) {}};
-      update = sinon.stub(user, 'update');
+      update = sinon.stub(userService, 'update');
       usersController = require('../../controllers/usersController');
     });
 
     afterEach(function() {
       res.status.reset();
       res.json.reset();
-      findById.restore();
       update.restore();
     });
 
@@ -265,13 +256,11 @@ describe('Users Controller', function() {
         id: '1',
         phoneNumber: req.body.phoneNumber,
         confirmCode: '',
-        confirmCodeExpires: '',
+        confirmCodeTimestamp: '',
         sponsorCode: ''
       };
-      findById.withArgs(1)
-        .returns(Promise.resolve(user));
-      update.withArgs(req.body)
-        .returns(Promise.resolve({dataValues: updatedUser}));
+      update.withArgs(req.params.id, req.body)
+        .returns(Promise.resolve([updatedUser]));
 
       return usersController.putOnId(req, res).then(function() {
         res.json.should.have.been.calledWith([updatedUser]);
@@ -287,8 +276,6 @@ describe('Users Controller', function() {
         message: 'must be a string of 10 digits',
         value: '12345'
       }]);
-      findById.withArgs(1)
-        .returns(Promise.resolve(user));
 
       return usersController.putOnId(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -300,8 +287,8 @@ describe('Users Controller', function() {
       req.body = {phoneNumber: '1234567890'};
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('User', req.params.id);
-      findById.withArgs(2)
-        .returns(Promise.resolve(null));
+      update.withArgs(req.params.id)
+        .returns(Promise.resolve(false));
 
       return usersController.putOnId(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -313,9 +300,7 @@ describe('Users Controller', function() {
       req.body = {phoneNumber: '1234567890'};
       req.params = {id: 1};
       var error = new Error('database error');
-      findById.withArgs(1)
-        .returns(Promise.resolve(user));
-      update.withArgs(req.body)
+      update.withArgs(req.params.id, req.body)
         .returns(Promise.reject(error));
 
       return usersController.putOnId(req, res).then(function() {
@@ -326,7 +311,7 @@ describe('Users Controller', function() {
   });
 
   describe('DELETE /users/:id', function() {
-    var req, res, usersController, findById, user, destroy;
+    var req, res, usersController, destroy;
 
     beforeEach(function() {
       req = {};
@@ -334,25 +319,20 @@ describe('Users Controller', function() {
         status: sinon.spy(),
         json: sinon.spy()
       };
-      findById = sinon.stub(User, 'findById');
-      user = {destroy: function(values) {}};
-      destroy = sinon.stub(user, 'destroy');
+      destroy = sinon.stub(userService, 'destroy');
       usersController = require('../../controllers/usersController');
     });
 
     afterEach(function() {
       res.status.reset();
       res.json.reset();
-      findById.restore();
       destroy.restore();
     });
 
     it('should respond with the user ID and 200 status on success', function() {
       req.params = {id: 1};
-      findById.withArgs(1)
-        .returns(Promise.resolve(user));
-      destroy.withArgs()
-        .returns(Promise.resolve());
+      destroy.withArgs(req.params.id)
+        .returns(Promise.resolve(true));
 
       return usersController.removeById(req, res).then(function() {
         res.json.should.have.been.calledWith([{deletedId: 1}]);
@@ -363,8 +343,8 @@ describe('Users Controller', function() {
     it('should respond with an error and 404 status if user does not exist', function() {
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('User', req.params.id);
-      findById.withArgs(2)
-        .returns(Promise.resolve(null));
+      destroy.withArgs(req.params.id)
+        .returns(Promise.resolve(false));
 
       return usersController.removeById(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -375,9 +355,7 @@ describe('Users Controller', function() {
     it('should respond with an error and a 500 status on a database error', function() {
       req.params = {id: 1};
       var error = new Error('database error');
-      findById.withArgs(1)
-        .returns(Promise.resolve(user));
-      destroy.withArgs()
+      destroy.withArgs(req.params.id)
         .returns(Promise.reject(error));
 
       return usersController.removeById(req, res).then(function() {
