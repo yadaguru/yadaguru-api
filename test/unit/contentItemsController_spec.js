@@ -8,9 +8,7 @@ chai.use(sinonChai);
 chai.should();
 var errors = require('../../services/errorService');
 var Promise = require('bluebird');
-var ContentItem = require('../../models').ContentItem;
-
-
+var contentItemService = require('../../services/contentItemService');
 
 describe('Content Items Controller', function() {
   describe('GET /content_items', function() {
@@ -22,7 +20,7 @@ describe('Content Items Controller', function() {
         status: sinon.spy(),
         json: sinon.spy()
       };
-      findAll = sinon.stub(ContentItem, 'findAll');
+      findAll = sinon.stub(contentItemService, 'findAll');
       contentItemsController = require('../../controllers/contentItemsController');
     });
 
@@ -42,11 +40,7 @@ describe('Content Items Controller', function() {
         name: 'Another help Tip',
         content: 'Here is another help tip'
       }];
-      findAll.returns(Promise.resolve(contentItems.map(
-        function(contentItem) {
-          return {dataValues: contentItem};
-        }
-      )));
+      findAll.returns(Promise.resolve(contentItems));
 
       return contentItemsController.getAll(req, res).then(function() {
         res.json.should.have.been.calledWith(contentItems);
@@ -86,7 +80,7 @@ describe('Content Items Controller', function() {
         status: sinon.spy(),
         json: sinon.spy()
       };
-      findById = sinon.stub(ContentItem, 'findById');
+      findById = sinon.stub(contentItemService, 'findById');
       contentItemsController = require('../../controllers/contentItemsController');
     });
 
@@ -104,7 +98,7 @@ describe('Content Items Controller', function() {
         content: 'Here is some help'
       };
       findById.withArgs(1)
-        .returns(Promise.resolve({dataValues: contentItem}));
+        .returns(Promise.resolve([contentItem]));
 
       return contentItemsController.getById(req, res).then(function() {
         res.json.should.have.been.calledWith([contentItem]);
@@ -116,7 +110,7 @@ describe('Content Items Controller', function() {
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('ContentItem', req.params.id);
       findById.withArgs(2)
-        .returns(Promise.resolve(null));
+        .returns(Promise.resolve([]));
 
       return contentItemsController.getById(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -139,7 +133,7 @@ describe('Content Items Controller', function() {
   });
 
   describe('POST /content_items', function() {
-    var req, res, contentItemsController, ContentItemStub;
+    var req, res, contentItemsController, create;
 
     beforeEach(function() {
       req = {};
@@ -147,14 +141,14 @@ describe('Content Items Controller', function() {
         status: sinon.spy(),
         json: sinon.spy()
       };
-      ContentItemStub = sinon.stub(ContentItem, 'create');
+      create = sinon.stub(contentItemService, 'create');
       contentItemsController = require('../../controllers/contentItemsController');
     });
 
     afterEach(function() {
       res.status.reset();
       res.json.reset();
-      ContentItemStub.restore();
+      create.restore();
     });
 
     it('should respond with new contentItem object and 200 status on success', function() {
@@ -164,7 +158,7 @@ describe('Content Items Controller', function() {
         name: req.body.name,
         content: req.body.content
       };
-      ContentItemStub.returns(Promise.resolve({dataValues: successfulCreateResponse}));
+      create.returns(Promise.resolve([successfulCreateResponse]));
 
       return contentItemsController.post(req, res).then(function() {
         res.json.should.have.been.calledWith([successfulCreateResponse]);
@@ -201,7 +195,7 @@ describe('Content Items Controller', function() {
     it('should respond with an error and a 500 status on a database error', function() {
       req.body = {name: 'Help Tip', content: 'Some Help Text'};
       var databaseError = new Error('some database error');
-      ContentItemStub.returns(Promise.reject(databaseError));
+      create.returns(Promise.reject(databaseError));
 
       return contentItemsController.post(req, res).then(function() {
         res.json.should.have.been.calledWith(databaseError);
@@ -211,7 +205,7 @@ describe('Content Items Controller', function() {
   });
 
   describe('PUT /content_items/:id', function() {
-    var req, res, contentItemsController, findById, contentItem, update;
+    var req, res, contentItemsController, update;
 
     beforeEach(function() {
       req = {};
@@ -219,16 +213,13 @@ describe('Content Items Controller', function() {
         status: sinon.spy(),
         json: sinon.spy()
       };
-      findById = sinon.stub(ContentItem, 'findById');
-      contentItem = {update: function(values) {}};
-      update = sinon.stub(contentItem, 'update');
+      update = sinon.stub(contentItemService, 'update');
       contentItemsController = require('../../controllers/contentItemsController');
     });
 
     afterEach(function() {
       res.status.reset();
       res.json.reset();
-      findById.restore();
       update.restore();
     });
 
@@ -240,10 +231,8 @@ describe('Content Items Controller', function() {
         name: req.body.name,
         content: req.body.content
       };
-      findById.withArgs(1)
-        .returns(Promise.resolve(contentItem));
-      update.withArgs(req.body)
-        .returns(Promise.resolve({dataValues: updatedContentItem}));
+      update.withArgs(req.params.id, req.body)
+        .returns(Promise.resolve([updatedContentItem]));
 
       return contentItemsController.putOnId(req, res).then(function() {
         res.json.should.have.been.calledWith([updatedContentItem]);
@@ -255,8 +244,8 @@ describe('Content Items Controller', function() {
       req.body = {name: 'Help Tip', content: 'Some Help Text'};
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('ContentItem', req.params.id);
-      findById.withArgs(2)
-        .returns(Promise.resolve(null));
+      update.withArgs(2)
+        .returns(Promise.resolve(false));
 
       return contentItemsController.putOnId(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -268,9 +257,7 @@ describe('Content Items Controller', function() {
       req.body = {name: 'Essay'};
       req.params = {id: 1};
       var error = new Error('database error');
-      findById.withArgs(1)
-        .returns(Promise.resolve(contentItem));
-      update.withArgs(req.body)
+      update.withArgs(req.params.id, req.body)
         .returns(Promise.reject(error));
 
       return contentItemsController.putOnId(req, res).then(function() {
@@ -281,7 +268,7 @@ describe('Content Items Controller', function() {
   });
 
   describe('DELETE /content_items/:id', function() {
-    var req, res, contentItemsController, findById, contentItem, destroy;
+    var req, res, contentItemsController, destroy;
 
     beforeEach(function() {
       req = {};
@@ -289,25 +276,20 @@ describe('Content Items Controller', function() {
         status: sinon.spy(),
         json: sinon.spy()
       };
-      findById = sinon.stub(ContentItem, 'findById');
-      contentItem = {destroy: function(values) {}};
-      destroy = sinon.stub(contentItem, 'destroy');
+      destroy = sinon.stub(contentItemService, 'destroy');
       contentItemsController = require('../../controllers/contentItemsController');
     });
 
     afterEach(function() {
       res.status.reset();
       res.json.reset();
-      findById.restore();
       destroy.restore();
     });
 
     it('should respond with the content item ID and 200 status on success', function() {
       req.params = {id: 1};
-      findById.withArgs(1)
-        .returns(Promise.resolve(contentItem));
-      destroy.withArgs()
-        .returns(Promise.resolve());
+      destroy.withArgs(req.params.id)
+        .returns(Promise.resolve(true));
 
       return contentItemsController.removeById(req, res).then(function() {
         res.json.should.have.been.calledWith([{deletedId: 1}]);
@@ -318,8 +300,8 @@ describe('Content Items Controller', function() {
     it('should respond with an error and 404 status if contentItem does not exist', function() {
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('ContentItem', req.params.id);
-      findById.withArgs(2)
-        .returns(Promise.resolve(null));
+      destroy.withArgs(req.params.id)
+        .returns(Promise.resolve(false));
 
       return contentItemsController.removeById(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -330,9 +312,7 @@ describe('Content Items Controller', function() {
     it('should respond with an error and a 500 status on a database error', function() {
       req.params = {id: 1};
       var error = new Error('database error');
-      findById.withArgs(1)
-        .returns(Promise.resolve(contentItem));
-      destroy.withArgs()
+      destroy.withArgs(req.params.id)
         .returns(Promise.reject(error));
 
       return contentItemsController.removeById(req, res).then(function() {
