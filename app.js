@@ -32,6 +32,7 @@ app.use('/', router);
 app.use('/api/users', require('./routes/usersRoute'));
 app.use('/api/categories', require('./routes/categoriesRoute'));
 app.use('/api/content_items', require('./routes/contentItemsRoute'));
+app.use('/api/schools', require('./routes/schoolsRoute'));
 
 /* Setup methods for starting and stopping HTTP(S) servers */
 var httpServer, httpsServer;
