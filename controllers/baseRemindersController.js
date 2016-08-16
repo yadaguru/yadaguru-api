@@ -1,3 +1,5 @@
+var baseReminderService = require('../services/baseReminderService');
+
 var schema = {
   name: {
     required: true
@@ -30,4 +32,4 @@ var schema = {
   }
 };
 
-module.exports = require('./baseController')('BaseReminder', schema);
+module.exports = require('./baseController')('BaseReminder', baseReminderService, schema);

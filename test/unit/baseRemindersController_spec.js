@@ -8,12 +8,12 @@ chai.use(sinonChai);
 chai.should();
 var errors = require('../../services/errorService');
 var Promise = require('bluebird');
-var BaseReminder = require('../../models').BaseReminder;
+var baseReminderService = require('../../services/baseReminderService');
 
 
 
-xdescribe('Base Reminders Controller', function() {
-  xdescribe('GET /base_reminders', function() {
+describe('Base Reminders Controller', function() {
+  describe('GET /base_reminders', function() {
     var req, res, baseRemindersController, findAll;
 
     beforeEach(function() {
@@ -22,7 +22,7 @@ xdescribe('Base Reminders Controller', function() {
         status: sinon.spy(),
         json: sinon.spy()
       };
-      findAll = sinon.stub(BaseReminder, 'findAll');
+      findAll = sinon.stub(baseReminderService, 'findAll');
       baseRemindersController = require('../../controllers/baseRemindersController');
     });
 
@@ -52,11 +52,7 @@ xdescribe('Base Reminders Controller', function() {
         timeframeIds: [3],
         categoryId: 2
       }];
-      findAll.returns(Promise.resolve(baseReminders.map(
-        function(baseReminder) {
-          return {dataValues: baseReminder};
-        }
-      )));
+      findAll.returns(Promise.resolve(baseReminders));
 
       return baseRemindersController.getAll(req, res).then(function() {
         res.json.should.have.been.calledWith(baseReminders);
@@ -87,7 +83,7 @@ xdescribe('Base Reminders Controller', function() {
     });
   });
 
-  xdescribe('GET /base_reminders/:id', function() {
+  describe('GET /base_reminders/:id', function() {
     var req, res, baseRemindersController, findById;
 
     beforeEach(function() {
@@ -96,7 +92,7 @@ xdescribe('Base Reminders Controller', function() {
         status: sinon.spy(),
         json: sinon.spy()
       };
-      findById = sinon.stub(BaseReminder, 'findById');
+      findById = sinon.stub(baseReminderService, 'findById');
       baseRemindersController = require('../../controllers/baseRemindersController');
     });
 
@@ -119,7 +115,7 @@ xdescribe('Base Reminders Controller', function() {
         categoryId: 1
       };
       findById.withArgs(1)
-        .returns(Promise.resolve({dataValues: baseReminder}));
+        .returns(Promise.resolve([baseReminder]));
 
       return baseRemindersController.getById(req, res).then(function() {
         res.json.should.have.been.calledWith([baseReminder]);
@@ -131,7 +127,7 @@ xdescribe('Base Reminders Controller', function() {
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('BaseReminder', req.params.id);
       findById.withArgs(2)
-        .returns(Promise.resolve(null));
+        .returns(Promise.resolve([]));
 
       return baseRemindersController.getById(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -153,8 +149,8 @@ xdescribe('Base Reminders Controller', function() {
     });
   });
 
-  xdescribe('POST /base_reminders', function() {
-    var req, res, baseRemindersController, BaseReminderStub;
+  describe('POST /base_reminders', function() {
+    var req, res, baseRemindersController, create;
 
     beforeEach(function() {
       req = {};
@@ -162,14 +158,14 @@ xdescribe('Base Reminders Controller', function() {
         status: sinon.spy(),
         json: sinon.spy()
       };
-      BaseReminderStub = sinon.stub(BaseReminder, 'create');
+      create = sinon.stub(baseReminderService, 'create');
       baseRemindersController = require('../../controllers/baseRemindersController');
     });
 
     afterEach(function() {
       res.status.reset();
       res.json.reset();
-      BaseReminderStub.restore();
+      create.restore();
     });
 
     it('should respond with new baseReminder object and 200 status with a valid request', function() {
@@ -180,7 +176,7 @@ xdescribe('Base Reminders Controller', function() {
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',
         timeframeIds: [1, 2],
-        categoryId: 1
+        categoryId: '1'
       };
 
       var successfulCreateResponse = {
@@ -193,7 +189,7 @@ xdescribe('Base Reminders Controller', function() {
         timeframeIds: req.body.timeframeIds,
         categoryId: req.body.categoryId
       };
-      BaseReminderStub.returns(Promise.resolve({dataValues: successfulCreateResponse}));
+      create.returns(Promise.resolve([successfulCreateResponse]));
 
       return baseRemindersController.post(req, res).then(function() {
         res.json.should.have.been.calledWith([successfulCreateResponse]);
@@ -207,7 +203,7 @@ xdescribe('Base Reminders Controller', function() {
         message: 'Better get writing!',
         detail: 'Some help for writing your essay',
         timeframeIds: [1, 2],
-        categoryId: 1
+        categoryId: '1'
       };
 
       var successfulCreateResponse = {
@@ -220,7 +216,7 @@ xdescribe('Base Reminders Controller', function() {
         timeframeIds: req.body.timeframeIds,
         categoryId: req.body.categoryId
       };
-      BaseReminderStub.returns(Promise.resolve({dataValues: successfulCreateResponse}));
+      create.returns(Promise.resolve([successfulCreateResponse]));
 
       return baseRemindersController.post(req, res).then(function() {
         res.json.should.have.been.calledWith([successfulCreateResponse]);
@@ -258,11 +254,12 @@ xdescribe('Base Reminders Controller', function() {
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',
         timeframeIds: '1, 2',
-        categoryId: 1
+        categoryId: '1'
       };
       var error = new errors.ValidationError([{
         field: 'timeframeIds',
-        message: 'must be an array of timeframe IDs'
+        message: 'must be an array of timeframe IDs',
+        value: '1, 2'
       }]);
 
       return baseRemindersController.post(req, res).then(function() {
@@ -279,11 +276,12 @@ xdescribe('Base Reminders Controller', function() {
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',
         timeframeIds: [],
-        categoryId: 1
+        categoryId: '1'
       };
       var error = new errors.ValidationError([{
         field: 'timeframeIds',
-        message: 'must be an array of timeframe IDs'
+        message: 'must be an array of timeframe IDs',
+        value: []
       }]);
 
       return baseRemindersController.post(req, res).then(function() {
@@ -300,11 +298,12 @@ xdescribe('Base Reminders Controller', function() {
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',
         timeframeIds: ['now'],
-        categoryId: 1
+        categoryId: '1'
       };
       var error = new errors.ValidationError([{
         field: 'timeframeIds',
-        message: 'must be an array of timeframe IDs'
+        message: 'must be an array of timeframe IDs',
+        value: ['now']
       }]);
 
       return baseRemindersController.post(req, res).then(function() {
@@ -325,7 +324,8 @@ xdescribe('Base Reminders Controller', function() {
       };
       var error = new errors.ValidationError([{
         field: 'categoryId',
-        message: 'must be a number'
+        message: 'must be a number',
+        value: 'Essays'
       }]);
 
       return baseRemindersController.post(req, res).then(function() {
@@ -335,9 +335,17 @@ xdescribe('Base Reminders Controller', function() {
     });
 
     it('should respond with an error and a 500 status on a database error', function() {
-      req.body = {name: 'Essay'};
+      req.body = {
+        name: 'Write Essay',
+        message: 'Better get writing!',
+        detail: 'Some help for writing your essay',
+        lateMessage: 'Too late',
+        lateDetail: 'Should have started sooner',
+        timeframeIds: [1, 2],
+        categoryId: '1'
+      };
       var databaseError = new Error('some database error');
-      BaseReminderStub.returns(Promise.reject(databaseError));
+      create.returns(Promise.reject(databaseError));
 
       return baseRemindersController.post(req, res).then(function() {
         res.json.should.have.been.calledWith(databaseError);
@@ -346,8 +354,8 @@ xdescribe('Base Reminders Controller', function() {
     });
   });
 
-  xdescribe('PUT /base_reminders/:id', function() {
-    var req, res, baseRemindersController, findById, baseReminder, update;
+  describe('PUT /base_reminders/:id', function() {
+    var req, res, baseRemindersController, update;
 
     beforeEach(function() {
       req = {};
@@ -355,16 +363,13 @@ xdescribe('Base Reminders Controller', function() {
         status: sinon.spy(),
         json: sinon.spy()
       };
-      findById = sinon.stub(BaseReminder, 'findById');
-      baseReminder = {update: function(values) {}};
-      update = sinon.stub(baseReminder, 'update');
+      update = sinon.stub(baseReminderService, 'update');
       baseRemindersController = require('../../controllers/baseRemindersController');
     });
 
     afterEach(function() {
       res.status.reset();
       res.json.reset();
-      findById.restore();
       update.restore();
     });
 
@@ -383,10 +388,7 @@ xdescribe('Base Reminders Controller', function() {
         timeframeIds: [1],
         categoryId: 1
       };
-      findById.withArgs(1)
-        .returns(Promise.resolve(baseReminder));
-      update.withArgs(req.body)
-        .returns(Promise.resolve({dataValues: updatedBaseReminder}));
+      update.returns(Promise.resolve([updatedBaseReminder]));
 
       return baseRemindersController.putOnId(req, res).then(function() {
         res.json.should.have.been.calledWith([updatedBaseReminder]);
@@ -400,8 +402,8 @@ xdescribe('Base Reminders Controller', function() {
       };
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('BaseReminder', req.params.id);
-      findById.withArgs(2)
-        .returns(Promise.resolve(null));
+      update.withArgs(2)
+        .returns(Promise.resolve(false));
 
       return baseRemindersController.putOnId(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -413,9 +415,7 @@ xdescribe('Base Reminders Controller', function() {
       req.body = {name: 'Essay'};
       req.params = {id: 1};
       var error = new Error('database error');
-      findById.withArgs(1)
-        .returns(Promise.resolve(baseReminder));
-      update.withArgs(req.body)
+      update.withArgs(req.params.id, req.body)
         .returns(Promise.reject(error));
 
       return baseRemindersController.putOnId(req, res).then(function() {
@@ -425,8 +425,8 @@ xdescribe('Base Reminders Controller', function() {
     });
   });
 
-  xdescribe('DELETE /base_reminders/:id', function() {
-    var req, res, baseRemindersController, findById, baseReminder, destroy;
+  describe('DELETE /base_reminders/:id', function() {
+    var req, res, baseRemindersController, destroy;
 
     beforeEach(function() {
       req = {};
@@ -434,25 +434,20 @@ xdescribe('Base Reminders Controller', function() {
         status: sinon.spy(),
         json: sinon.spy()
       };
-      findById = sinon.stub(BaseReminder, 'findById');
-      baseReminder = {destroy: function(values) {}};
-      destroy = sinon.stub(baseReminder, 'destroy');
+      destroy = sinon.stub(baseReminderService, 'destroy');
       baseRemindersController = require('../../controllers/baseRemindersController');
     });
 
     afterEach(function() {
       res.status.reset();
       res.json.reset();
-      findById.restore();
       destroy.restore();
     });
 
     it('should respond with the baseReminder ID and 200 status on success', function() {
       req.params = {id: 1};
-      findById.withArgs(1)
-        .returns(Promise.resolve(baseReminder));
-      destroy.withArgs()
-        .returns(Promise.resolve());
+      destroy.withArgs(req.params.id)
+        .returns(Promise.resolve(true));
 
       return baseRemindersController.removeById(req, res).then(function() {
         res.json.should.have.been.calledWith([{deletedId: 1}]);
@@ -463,8 +458,8 @@ xdescribe('Base Reminders Controller', function() {
     it('should respond with an error and 404 status if baseReminder does not exist', function() {
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('BaseReminder', req.params.id);
-      findById.withArgs(2)
-        .returns(Promise.resolve(null));
+      destroy.withArgs(req.params.id)
+        .returns(Promise.resolve(false));
 
       return baseRemindersController.removeById(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -475,8 +470,6 @@ xdescribe('Base Reminders Controller', function() {
     it('should respond with an error and a 500 status on a database error', function() {
       req.params = {id: 1};
       var error = new Error('database error');
-      findById.withArgs(1)
-        .returns(Promise.resolve(baseReminder));
       destroy.withArgs()
         .returns(Promise.reject(error));
 
