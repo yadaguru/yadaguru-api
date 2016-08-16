@@ -154,7 +154,7 @@ describe('The BaseReminders Service', function() {
       setTimeframes = sinon.stub(newBaseReminderDbResponse, 'setTimeframes');
     });
 
-    after(function() {
+    afterEach(function() {
       newBaseReminderDbResponse = undefined;
       newTimeframeAssociations = undefined;
       create.restore();
@@ -169,8 +169,9 @@ describe('The BaseReminders Service', function() {
     });
   });
 
-  xdescribe('The update function', function() {
-    var findById, row, update, idToUpdate;
+  describe('The update function', function() {
+    var findById, update, setTimeframes, getTimeframes, associatedTimeframes,
+        updatedBaseReminderDbResponse, updatedTimeframeAssociations;
 
     var updatedBaseReminder = {
       name: 'Write Essays',
@@ -182,66 +183,118 @@ describe('The BaseReminders Service', function() {
       timeframeIds: [1, 2]
     };
 
-    idToUpdate = 1;
+    var updatedBaseReminderNoTimeframes = {
+      name: 'Write Essays',
+      message: 'Write Your Essays',
+      detail: 'More detail about essays',
+      lateMessage: 'Your Essays are late',
+      lateDetail: 'What to do about late essays',
+      categoryId: 1
+    };
 
-    before(function() {
+    beforeEach(function() {
+      updatedBaseReminderDbResponse = {
+        dataValues: {
+          name: 'Write Essays',
+          message: 'Write Your Essays',
+          detail: 'More detail about essays',
+          lateMessage: 'Your Essays are late',
+          lateDetail: 'What to do about late essays',
+          categoryId: 1
+        },
+        setTimeframes: function(){},
+        getTimeframes: function(){}
+      };
+
+      updatedTimeframeAssociations = [[{
+        dataValues: {
+          TimeframeId: 1
+        }
+      }, {
+        dataValues: {
+          TimeframeId: 2
+        }
+      }]];
+
+      associatedTimeframes = [{
+        dataValues: {
+          id: 1
+        }}, {
+        dataValues: {
+          id: 2
+        }
+      }];
+
+
+      update = sinon.stub(BaseReminder, 'update');
       findById = sinon.stub(BaseReminder, 'findById');
-      row = {update: function(){}};
-      update = sinon.stub(row, 'update');
+      setTimeframes = sinon.stub(updatedBaseReminderDbResponse, 'setTimeframes');
+      getTimeframes = sinon.stub(updatedBaseReminderDbResponse, 'getTimeframes');
     });
 
-    after(function() {
+    afterEach(function() {
+      updatedBaseReminderDbResponse = undefined;
+      updatedTimeframeAssociations = undefined;
       findById.restore();
       update.restore();
+      setTimeframes.restore();
+      getTimeframes.restore();
     });
 
     it('should resolve with an array containing the updated baseReminder object', function() {
-      findById.withArgs(idToUpdate)
-        .returns(Promise.resolve(row));
-      update.withArgs(updatedBaseReminder)
-        .returns(Promise.resolve({dataValues: updatedBaseReminder}));
+      findById.returns(Promise.resolve({}));
+      update.returns(Promise.resolve(updatedBaseReminderDbResponse));
+      setTimeframes.returns(Promise.resolve(updatedTimeframeAssociations));
 
-      return baseReminderService.update(idToUpdate, updatedBaseReminder).should.eventually.deep.equal([updatedBaseReminder]);
+      return baseReminderService.update(1, updatedBaseReminder).should.eventually.deep.equal([updatedBaseReminder]);
+    });
+
+    it('should resolve with an array containing the updated baseReminder object, even if timeframes are not updated', function() {
+      findById.returns(Promise.resolve({}));
+      update.returns(Promise.resolve(updatedBaseReminderDbResponse));
+      getTimeframes.returns(Promise.resolve(associatedTimeframes));
+
+      return baseReminderService.update(1, updatedBaseReminderNoTimeframes).should.eventually.deep.equal([updatedBaseReminder]);
     });
 
     it('should resolve with false if the id does not exist', function() {
-      findById.withArgs(idToUpdate)
-        .returns(Promise.resolve(null));
+      findById.returns(Promise.resolve(null));
 
-      return baseReminderService.update(idToUpdate, updatedBaseReminder).should.eventually.be.false;
+      return baseReminderService.update(1, updatedBaseReminder).should.eventually.be.false;
     });
   });
 
-  xdescribe('The destroy function', function() {
-    var row, destroy, findById;
+  describe('The destroy function', function() {
+    var baseReminder, destroy, findById, setTimeframes;
 
-    var idToDestroy = 1;
-
-    before(function() {
+    beforeEach(function() {
       findById = sinon.stub(BaseReminder, 'findById');
-      row = {destroy: function(){}};
-      destroy = sinon.stub(row, 'destroy');
+      baseReminder = {
+        destroy: function(){},
+        setTimeframes: function(){}
+      };
+      destroy = sinon.stub(baseReminder, 'destroy');
+      setTimeframes = sinon.stub(baseReminder, 'setTimeframes')
     });
 
-    after(function() {
+    afterEach(function() {
       findById.restore();
       destroy.restore();
+      setTimeframes.restore();
     });
 
     it('should resolve with true when the row is destroyed', function() {
-      findById.withArgs(idToDestroy)
-        .returns(Promise.resolve(row));
-      destroy.withArgs()
-        .returns(Promise.resolve(undefined));
+      findById.returns(Promise.resolve(baseReminder));
+      setTimeframes.returns(Promise.resolve());
+      destroy.returns(Promise.resolve(undefined));
 
-      return baseReminderService.destroy(idToDestroy).should.eventually.be.true;
+      return baseReminderService.destroy(1).should.eventually.be.true;
     });
 
     it('should resolve with false id does not exist', function() {
-      findById.withArgs(idToDestroy)
-        .returns(Promise.resolve(null));
+      findById.returns(Promise.resolve(null));
 
-      return baseReminderService.destroy(idToDestroy).should.eventually.be.false;
+      return baseReminderService.destroy(1).should.eventually.be.false;
     });
   });
 });
