@@ -1,6 +1,6 @@
 var validators = require('validator');
-var sanitizers = require('./sanitizers');
-var ValidationError = require('./errors').ValidationError;
+var sanitizers = require('./sanitizerService');
+var ValidationError = require('./errorService').ValidationError;
 
 module.exports = function() {
 
@@ -11,6 +11,25 @@ module.exports = function() {
 
   validators.isSixDigits = function(string) {
     return validators.isNumeric(string) && validators.isLength(string, {min: 6, max: 6});
+  };
+
+  validators.isNonEmptyArray = function(array) {
+    return array.length > 0;
+  };
+
+  validators.isArrayOfNumbers = function(array) {
+    if (!Array.isArray(array)) {
+      return false;
+    }
+    if (array.length === 0) {
+      return false;
+    }
+    return array.every(function(member) {
+      if (isNaN(member)) {
+        return false;
+      }
+      return typeof member === 'number';
+    })
   };
 
   var _validateField = function(field, value, rules) {

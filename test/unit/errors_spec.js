@@ -1,7 +1,7 @@
 var chai = require('chai');
 chai.should();
 
-var errors = require('../../lib/errors');
+var errors = require('../../services/errorService');
 
 describe('Errors', function() {
   describe('ResourceNotFoundError', function() {

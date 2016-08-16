@@ -1,3 +1,5 @@
+var contentItemService = require('../services/contentItemService');
+
 var schema = {
   name: {
     required: true
@@ -7,4 +9,4 @@ var schema = {
   }
 };
 
-module.exports = require('./baseController')('ContentItem', schema);
+module.exports = require('./baseController')('ContentItem', contentItemService, schema);
