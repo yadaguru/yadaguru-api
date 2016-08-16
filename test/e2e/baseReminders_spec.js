@@ -9,43 +9,43 @@ chai.should();
 var app = require('../../app.js');
 var models = require('../../models');
 var BaseReminder = models.BaseReminder;
-var Timeframe = models.Timeframes;
+var Timeframe = models.Timeframe;
 var Category = models.Category;
 
 
-xdescribe('/api/base_reminders', function() {
+describe('/api/base_reminders', function() {
+  var timeframes = [{
+    name: 'Today',
+    type: 'now'
+  }, {
+    name: '7 Days Before',
+    type: 'relative',
+    formula: '7'
+  }];
 
-  xdescribe('GET', function() {
-    var timeframes = [{
-      name: 'Today',
-      type: 'now'
-    }, {
-      name: '7 Days Before',
-      type: 'relative',
-      formula: '7'
-    }];
+  var categories = [{
+    name: 'Essays'
+  }, {
+    name: 'Recommendations'
+  }];
 
-    var categories = [{
-      name: 'Essays'
-    }, {
-      name: 'Recommendations'
-    }];
+  var baseReminders = [{
+    name: 'Write Essay',
+    message: 'Better get writing!',
+    detail: 'Some help for writing your essay',
+    lateMessage: 'Too late',
+    lateDetail: 'Should have started sooner',
+    categoryId: 1
+  }, {
+    name: 'Get Recommendations',
+    message: 'Ask your counselor',
+    detail: 'Tips for asking your counselor',
+    lateMessage: 'Too late',
+    lateDetail: '',
+    categoryId: 2
+  }];
 
-    var baseReminders = [{
-      name: 'Write Essay',
-      message: 'Better get writing!',
-      detail: 'Some help for writing your essay',
-      lateMessage: 'Too late',
-      lateDetail: 'Should have started sooner',
-      categoryId: 1
-    }, {
-      name: 'Get Recommendations',
-      message: 'Ask your counselor',
-      detail: 'Tips for asking your counselor',
-      lateMessage: 'Too late',
-      lateDetail: '',
-      categoryId: 2
-    }];
+  describe('GET', function() {
 
     before(function(done) {
       models.sequelize.sync({force: true}).then(function() {
@@ -54,7 +54,7 @@ xdescribe('/api/base_reminders', function() {
             BaseReminder.create(baseReminders[0]).then(function(br) {
               br.setTimeframes([1, 2]).then(function() {
                 BaseReminder.create(baseReminders[1]).then(function(br) {
-                  br.setTimeframe([1]).then(function() {
+                  br.setTimeframes([1]).then(function() {
                     done();
                   })
                 })
@@ -105,7 +105,7 @@ xdescribe('/api/base_reminders', function() {
   });
 
 
-  xdescribe('POST', function() {
+  describe('POST', function() {
 
     before(function(done) {
       models.sequelize.sync({force: true}).then(function() {
@@ -125,7 +125,7 @@ xdescribe('/api/base_reminders', function() {
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',
         timeframeIds: [1, 2],
-        categoryId: 1
+        categoryId: '1'
       };
 
       request(app)
@@ -137,7 +137,7 @@ xdescribe('/api/base_reminders', function() {
           if (err) return done(err);
           res.body[0].should.have.property('id');
           res.body[0].should.have.property('name', 'Write Essay');
-          req.body[0].timeframeIds.should.deep.equal([1, 2]);
+          res.body[0].timeframeIds.should.deep.equal([1, 2]);
           done();
         });
     });
@@ -149,7 +149,7 @@ xdescribe('/api/base_reminders', function() {
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',
         timeframeIds: [1, 2],
-        categoryId: 1
+        categoryId: '1'
       };
 
       request(app)
@@ -182,13 +182,13 @@ xdescribe('/api/base_reminders', function() {
         .expect(400)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body.message.should.be.equal('timeframeIds must be an array of timeframe IDs. categoryId must be a number');
+          res.body.message.should.be.equal('categoryId must be a number. timeframeIds must be an array of timeframe IDs. ');
           done();
         });
     });
   });
 
-  xdescribe('PUT', function() {
+  describe('PUT', function() {
 
     before(function(done) {
       models.sequelize.sync({force: true}).then(function() {
@@ -246,13 +246,13 @@ xdescribe('/api/base_reminders', function() {
         .end(function(err, res) {
           if (err) return done(err);
           res.body[0].should.have.property('id', 1);
-          res.body[0].should.have.property('name', 'Recommendations');
+          res.body[0].should.have.property('name', 'Write Essays');
           done();
         });
     });
   });
 
-  xdescribe('DELETE', function() {
+  describe('DELETE', function() {
 
     before(function(done) {
       models.sequelize.sync({force: true}).then(function() {

@@ -170,7 +170,7 @@ describe('The BaseReminders Service', function() {
   });
 
   describe('The update function', function() {
-    var findById, update, setTimeframes, getTimeframes, associatedTimeframes,
+    var findById, update, setTimeframes, getTimeframes, associatedTimeframes, baseReminder,
         updatedBaseReminderDbResponse, updatedTimeframeAssociations;
 
     var updatedBaseReminder = {
@@ -225,9 +225,13 @@ describe('The BaseReminders Service', function() {
         }
       }];
 
+      baseReminder = {
+        update: function(){}
+      };
 
-      update = sinon.stub(BaseReminder, 'update');
+
       findById = sinon.stub(BaseReminder, 'findById');
+      update = sinon.stub(baseReminder, 'update');
       setTimeframes = sinon.stub(updatedBaseReminderDbResponse, 'setTimeframes');
       getTimeframes = sinon.stub(updatedBaseReminderDbResponse, 'getTimeframes');
     });
@@ -242,7 +246,7 @@ describe('The BaseReminders Service', function() {
     });
 
     it('should resolve with an array containing the updated baseReminder object', function() {
-      findById.returns(Promise.resolve({}));
+      findById.returns(Promise.resolve(baseReminder));
       update.returns(Promise.resolve(updatedBaseReminderDbResponse));
       setTimeframes.returns(Promise.resolve(updatedTimeframeAssociations));
 
@@ -250,7 +254,7 @@ describe('The BaseReminders Service', function() {
     });
 
     it('should resolve with an array containing the updated baseReminder object, even if timeframes are not updated', function() {
-      findById.returns(Promise.resolve({}));
+      findById.returns(Promise.resolve(baseReminder));
       update.returns(Promise.resolve(updatedBaseReminderDbResponse));
       getTimeframes.returns(Promise.resolve(associatedTimeframes));
 

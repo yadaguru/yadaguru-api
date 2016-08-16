@@ -52,12 +52,12 @@ baseReminderService.create = function(data) {
 };
 
 baseReminderService.update = function(id, data) {
-  return BaseReminder.findById(id).then(function(row) {
-    if (!row) {
+  return BaseReminder.findById(id).then(function(baseReminder) {
+    if (!baseReminder) {
       return Promise.resolve(false);
     }
 
-    return BaseReminder.update(data).then(function(updatedBaseReminder) {
+    return baseReminder.update(data).then(function(updatedBaseReminder) {
       var baseReminder = updatedBaseReminder.dataValues;
       if (data.timeframeIds) {
         return updatedBaseReminder.setTimeframes(data.timeframeIds).then(function(updatedTimeframeAssociations) {
