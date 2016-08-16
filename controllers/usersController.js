@@ -1,3 +1,5 @@
+var userService = require('../services/userService');
+
 var schema = {
   phoneNumber: {
     required: true,
@@ -19,4 +21,4 @@ var schema = {
   }
 };
 
-module.exports = require('./baseController')('User', schema);
+module.exports = require('./baseController')('User', userService, schema);
