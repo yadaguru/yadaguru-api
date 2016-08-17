@@ -19,6 +19,26 @@ var resourceControllerFactory = function(name, modelService, schema) {
 
   /**
    * GET /resources/:id
+   * With access token in header
+   */
+  var getAllForUser = function(req, res) {
+
+    //TODO get user ID from token and add to sanitizedData
+    var userId = 1;
+
+    return modelService.findByUser(userId).then(function(resource) {
+      res.status(200);
+      res.json(resource);
+    }).catch(function(error) {
+      res.status(500);
+      res.json(error);
+    })
+
+
+  };
+
+  /**
+   * GET /resources/:id
    */
   var getById = function(req, res) {
     return modelService.findById(req.params.id).then(function(resource) {
@@ -35,6 +55,22 @@ var resourceControllerFactory = function(name, modelService, schema) {
     })
   };
 
+  var _create = function(sanitizedData, res) {
+    return modelService.create(sanitizedData).then(function(newResource) {
+      res.status(200);
+      res.json(newResource);
+    }).catch(function(error) {
+      res.status(500);
+      res.json(error);
+    });
+  };
+
+  var _sendInvalidResponse = function(validation, res) {
+    res.status(400);
+    res.json(validation.errors);
+    return Promise.resolve();
+  };
+
   /**
    * POST /resources
    */
@@ -42,18 +78,27 @@ var resourceControllerFactory = function(name, modelService, schema) {
     var validation = validators.sanitizeAndValidate(req.body, schema, true);
 
     if (!validation.isValid) {
-      res.status(400);
-      res.json(validation.errors);
-      return Promise.resolve();
+      return _sendInvalidResponse(validation, res);
     }
 
-    return modelService.create(validation.sanitizedData).then(function(newResource) {
-      res.status(200);
-      res.json(newResource);
-    }).catch(function(error) {
-      res.status(500);
-      res.json(error);
-    });
+    return _create(validation.sanitizedData, res);
+  };
+
+  /**
+   * POST /resources
+   * With access token in header
+   */
+  var postForUser = function(req, res) {
+    var validation = validators.sanitizeAndValidate(req.body, schema, true);
+
+    if (!validation.isValid) {
+      return _sendInvalidResponse(validation, res);
+    }
+
+    //TODO get user ID from token and add to sanitizedData
+    validation.sanitizedData.userId = 1;
+
+    return _create(validation.sanitizedData, res);
   };
 
   /**
@@ -105,8 +150,10 @@ var resourceControllerFactory = function(name, modelService, schema) {
 
   return {
     getAll: getAll,
+    getAllForUser: getAllForUser,
     getById: getById,
     post : post,
+    postForUser: postForUser,
     putOnId : putOnId,
     removeById : removeById
   }

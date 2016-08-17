@@ -1,10 +1,33 @@
-var baseDbService = function(Model) {
+var baseDbService = function(Model, outputSanitizer) {
+
+  var _sanitizeOutput = function(data) {
+    if (!Array.isArray(data)) {
+      data = [data];
+    }
+
+    if (outputSanitizer) {
+      data = data.map(function(row) {
+        return outputSanitizer(row);
+      })
+    }
+
+    return data;
+
+  };
 
   var findAll = function() {
     return Model.findAll().then(function(rows) {
-      return rows.map(function(row) {
+      return _sanitizeOutput(rows.map(function(row) {
         return row.dataValues;
-      })
+      }));
+    })
+  };
+
+  var findByUser = function(userId) {
+    return Model.findAll({where: {userId: userId}}).then(function(rows) {
+      return _sanitizeOutput(rows.map(function(row) {
+        return row.dataValues;
+      }))
     })
   };
 
@@ -13,13 +36,13 @@ var baseDbService = function(Model) {
       if (!row) {
         return [];
       }
-      return [row.dataValues];
+      return _sanitizeOutput(row.dataValues);
     })
   };
 
   var create = function(data) {
     return Model.create(data).then(function(newRow) {
-      return [newRow.dataValues];
+      return _sanitizeOutput(newRow.dataValues);
     })
   };
 
@@ -29,7 +52,7 @@ var baseDbService = function(Model) {
         return Promise.resolve(false);
       }
       return row.update(data).then(function(updatedRow) {
-        return [updatedRow.dataValues]
+        return _sanitizeOutput(updatedRow.dataValues);
       })
     });
   };
@@ -47,6 +70,7 @@ var baseDbService = function(Model) {
 
   return {
     findAll: findAll,
+    findByUser: findByUser,
     findById: findById,
     create: create,
     update: update,

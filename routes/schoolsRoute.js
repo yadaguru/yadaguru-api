@@ -5,8 +5,8 @@ var schoolsController = require('../controllers/schoolsController');
 var routes = function() {
 
   router.route('/')
-    .get(schoolsController.getAll)
-    .post(schoolsController.post);
+    .get(schoolsController.getAllForUser)
+    .post(schoolsController.postForUser);
 
   router.route('/:id')
     .get(schoolsController.getById)

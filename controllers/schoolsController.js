@@ -1,21 +1,22 @@
+var schoolService = require('../services/schoolService');
+
 var schema = {
   name: {
-    required: true,
+    required: true
   },
-  dueDate {
+  dueDate: {
+    required: true,
     rules: [{
-      required: true,
-      validators.isDate(string),
-      message: 'Must be a date',
-    }],
+      validator: 'isDate',
+      message: 'must be a date'
+    }]
   },
   isActive: {
     rules: [{
-      required: true,
-      validators.isBoolean(string),
-      message:'Must be True or False',
+      validator: 'isBoolean',
+      message:'must be true or false'
      }]
   }
 };
 
-module.exports = require('./baseController')('School', schema);
+module.exports = require('./baseController')('School', schoolService, schema);
