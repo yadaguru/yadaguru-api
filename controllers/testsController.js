@@ -1,3 +1,5 @@
+var testService = require('../services/testService');
+
 var schema = {
   type: {
     required: true
@@ -10,4 +12,4 @@ var schema = {
   }
 };
 
-module.exports = require('./baseController')('Test', schema);
+module.exports = require('./baseController')('Test', testService, schema);
