@@ -10,7 +10,7 @@ var errors = require('../../services/errorService');
 var Promise = require('bluebird');
 var testService = require('../../services/testService');
 
-describe('Content Items Controller', function() {
+describe('Tests Controller', function() {
   describe('GET /tests', function() {
     var req, res, testsController, findAll;
 

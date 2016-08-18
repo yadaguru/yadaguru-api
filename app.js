@@ -33,6 +33,7 @@ app.use('/api/users', require('./routes/usersRoute'));
 app.use('/api/categories', require('./routes/categoriesRoute'));
 app.use('/api/content_items', require('./routes/contentItemsRoute'));
 app.use('/api/tests', require('./routes/testsRoute'));
+app.use('/api/test_dates', require('./routes/testDatesRoute'));
 app.use('/api/schools', require('./routes/schoolsRoute'));
 app.use('/api/base_reminders', require('./routes/baseRemindersRoute'));
 
