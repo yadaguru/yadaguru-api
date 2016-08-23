@@ -39,6 +39,13 @@ module.exports = function(sequelize, DataTypes) {
             allowNull: false
           }
         });
+        Reminder.belongsTo(models.User, {
+          onDelete: 'cascade',
+          foreignKey: {
+            name: 'userId',
+            allowNull: false
+          }
+        })
       }
     }
   });
