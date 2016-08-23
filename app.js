@@ -36,6 +36,7 @@ app.use('/api/tests', require('./routes/testsRoute'));
 app.use('/api/test_dates', require('./routes/testDatesRoute'));
 app.use('/api/schools', require('./routes/schoolsRoute'));
 app.use('/api/base_reminders', require('./routes/baseRemindersRoute'));
+app.use('/api/reminders', require('./routes/remindersRoute'));
 
 /* Setup methods for starting and stopping HTTP(S) servers */
 var httpServer, httpsServer;

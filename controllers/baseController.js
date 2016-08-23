@@ -4,6 +4,8 @@ var Promise = require('bluebird');
 
 var resourceControllerFactory = function(name, modelService, schema) {
 
+  schema = schema || {};
+
   /**
    * GET /resources
    */
@@ -34,7 +36,20 @@ var resourceControllerFactory = function(name, modelService, schema) {
       res.json(error);
     })
 
+  };
 
+  var makeGetAllForResourceFn = function(resource, modelMethod) {
+    return function(req, res) {
+      var resourceId = req.params[resource];
+
+      return modelService[modelMethod](resourceId).then(function(resource) {
+        res.status(200);
+        res.json(resource);
+      }).catch(function(error) {
+        res.status(500);
+        res.json(error);
+      })
+    }
   };
 
   /**
@@ -152,6 +167,7 @@ var resourceControllerFactory = function(name, modelService, schema) {
     getAll: getAll,
     getAllForUser: getAllForUser,
     getById: getById,
+    makeGetAllForResourceFn: makeGetAllForResourceFn,
     post : post,
     postForUser: postForUser,
     putOnId : putOnId,

@@ -23,12 +23,19 @@ var baseDbService = function(Model, outputSanitizer) {
     })
   };
 
-  var findByUser = function(userId) {
-    return Model.findAll({where: {userId: userId}}).then(function(rows) {
-      return _sanitizeOutput(rows.map(function(row) {
-        return row.dataValues;
-      }))
-    })
+  var makeFindByResourceFn = function(resource) {
+    return function(id) {
+      var where = {};
+      where[resource] = id;
+      return Model.findAll({where: where}).then(function(rows) {
+        if (rows.length === 0) {
+          return rows;
+        }
+        return _sanitizeOutput(rows.map(function(row) {
+          return row.dataValues;
+        }));
+      })
+    }
   };
 
   var findById = function(id) {
@@ -43,6 +50,12 @@ var baseDbService = function(Model, outputSanitizer) {
   var create = function(data) {
     return Model.create(data).then(function(newRow) {
       return _sanitizeOutput(newRow.dataValues);
+    })
+  };
+
+  var bulkCreate = function(data) {
+    return Model.bulkCreate(data).then(function(newRows) {
+      return newRows.length;
     })
   };
 
@@ -70,9 +83,10 @@ var baseDbService = function(Model, outputSanitizer) {
 
   return {
     findAll: findAll,
-    findByUser: findByUser,
+    makeFindByResourceFn: makeFindByResourceFn,
     findById: findById,
     create: create,
+    bulkCreate: bulkCreate,
     update: update,
     destroy: destroy
   }
