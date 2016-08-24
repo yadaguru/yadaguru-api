@@ -9,6 +9,7 @@ chai.should();
 var app = require('../../app.js');
 var models = require('../../models');
 var Category = models.Category;
+var BaseReminder = models.BaseReminder;
 
 
 describe('/api/categories', function() {
@@ -167,7 +168,7 @@ describe('/api/categories', function() {
 
   describe('DELETE', function() {
 
-    before(function(done) {
+    beforeEach(function(done) {
       models.sequelize.sync({force: true}).then(function() {
         Category.create({name: 'Essays'}).then(function() {
           done();
@@ -184,6 +185,24 @@ describe('/api/categories', function() {
           res.body.should.deep.equal([{deletedId: '1'}]);
           done();
         });
+    });
+
+    it('should fail if category is associated with a base reminder', function(done) {
+      BaseReminder.create({
+        name: 'foo',
+        message: 'bar',
+        detail: 'foobar',
+        categoryId: '1'
+      }).then(function() {
+        request(app)
+          .delete('/api/categories/1')
+          .expect(409)
+          .end(function(err, res) {
+            if (err) return done(err);
+            res.body.message.should.be.equal('Category is being used by another resource');
+            done();
+          })
+      })
     });
 
     it('should respond with a 404 if the category does not exist', function(done) {

@@ -9,6 +9,8 @@ chai.should();
 var app = require('../../app.js');
 var models = require('../../models');
 var User = models.User;
+var School = models.School;
+var Reminder = models.Reminder;
 
 
 describe('/api/users', function() {
@@ -172,10 +174,27 @@ describe('/api/users', function() {
 
   describe('DELETE', function() {
 
-    before(function(done) {
+    beforeEach(function(done) {
       models.sequelize.sync({force: true}).then(function() {
         User.create({phoneNumber: '1234567890'}).then(function() {
-          done();
+          School.create({
+            userId: 1,
+            name: 'Temple',
+            dueDate: '2017-02-01',
+            isActive: 'true'
+          }).then(function() {
+            Reminder.create({
+              schoolId: 1,
+              userId: 1,
+              name: 'foo',
+              message: 'bar',
+              detail: 'foobar',
+              timeframe: '1 week before',
+              dueDate: '2017-02-01'
+            }).then(function() {
+              done();
+            })
+          });
         })
       });
     });
@@ -189,6 +208,22 @@ describe('/api/users', function() {
           res.body.should.deep.equal([{deletedId: '1'}]);
           done();
         });
+    });
+
+    it('should delete reminders and schools associated with the user', function(done) {
+      request(app)
+        .delete('/api/users/1')
+        .expect(200)
+        .end(function(err, res) {
+          if (err) return done(err);
+          School.findAll({where: {userId: 1}}).then(function(schoolResp) {
+            schoolResp.should.deep.equal([]);
+            Reminder.findAll({where: {userId: 1}}).then(function(reminderResp) {
+              reminderResp.should.deep.equal([]);
+              done();
+            })
+          })
+        })
     });
 
     it('should respond with a 404 if the user does not exist', function(done) {

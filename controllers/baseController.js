@@ -158,6 +158,11 @@ var resourceControllerFactory = function(name, modelService, schema) {
       res.status(200);
       res.json([{deletedId: id}]);
     }).catch(function(error) {
+      if (error.name === 'SequelizeForeignKeyConstraintError') {
+        res.status(409);
+        res.json(new errors.ForeignConstraintError(name));
+        return;
+      }
       res.status(500);
       res.json(error);
     });

@@ -291,6 +291,21 @@ describe('Categories Controller', function() {
       })
     });
 
+    it('should respond with an error and 409 status if there is a foreign constraint error', function() {
+      req.params = {id: 2};
+      var dbError = new Error();
+      dbError.name = 'SequelizeForeignKeyConstraintError';
+      var error = new errors.ForeignConstraintError('Category');
+
+      destroy.withArgs(req.params.id)
+        .returns(Promise.reject(dbError));
+
+      return categoriesController.removeById(req, res).then(function() {
+        res.json.should.have.been.calledWith(error);
+        res.status.should.have.been.calledWith(409);
+      })
+    });
+
     it('should respond with an error and a 500 status on a database error', function() {
       req.params = {id: 1};
       var error = new Error('database error');

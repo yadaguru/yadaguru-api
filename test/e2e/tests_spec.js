@@ -8,6 +8,7 @@ var chai = require('chai');
 chai.should();
 var app = require('../../app.js');
 var models = require('../../models');
+var TestDate = models.TestDate;
 var Test = models.Test;
 
 
@@ -192,7 +193,7 @@ describe('/api/tests', function() {
 
   describe('DELETE', function() {
 
-    before(function(done) {
+    beforeEach(function(done) {
       models.sequelize.sync({force: true}).then(function() {
         Test.create(tests[0]).then(function() {
           done();
@@ -209,6 +210,23 @@ describe('/api/tests', function() {
           res.body.should.deep.equal([{deletedId: '1'}]);
           done();
         });
+    });
+
+    it('should fail if test is associated with a test date', function(done) {
+      TestDate.create({
+        testId: 1,
+        registrationDate: '2017-01-01',
+        adminDate: '2017-02-01'
+      }).then(function() {
+        request(app)
+          .delete('/api/tests/1')
+          .expect(409)
+          .end(function(err, res) {
+            if (err) return done(err);
+            res.body.message.should.be.equal('Test is being used by another resource');
+            done();
+          })
+      })
     });
 
     it('should respond with a 404 if the test does not exist', function(done) {
