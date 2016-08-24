@@ -35,6 +35,7 @@ app.use('/api/content_items', require('./routes/contentItemsRoute'));
 app.use('/api/tests', require('./routes/testsRoute'));
 app.use('/api/test_dates', require('./routes/testDatesRoute'));
 app.use('/api/schools', require('./routes/schoolsRoute'));
+app.use('/api/timeframes', require('./routes/timeframesRoute'));
 app.use('/api/base_reminders', require('./routes/baseRemindersRoute'));
 app.use('/api/reminders', require('./routes/remindersRoute'));
 

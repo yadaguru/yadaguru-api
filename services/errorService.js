@@ -22,9 +22,18 @@ module.exports = function() {
   ValidationError.prototype = Object.create(Error.prototype);
   ValidationError.prototype.constructor = ValidationError;
 
+  var ForeignConstraintError = function(resource) {
+    this.name = 'ForeignConstraintError';
+    this.message = resource + ' is being used by another resource';
+    this.resource = resource;
+  };
+  ForeignConstraintError.prototype = Object.create(Error.prototype);
+  ForeignConstraintError.prototype.constructor = ForeignConstraintError;
+
   return {
     ResourceNotFoundError: ResourceNotFoundError,
-    ValidationError: ValidationError
+    ValidationError: ValidationError,
+    ForeignConstraintError: ForeignConstraintError
   }
 
 }();

@@ -32,13 +32,28 @@ module.exports = function() {
     })
   };
 
-  var _validateField = function(field, value, rules) {
+  validators.isValidTimeframeType = function(type) {
+    return ['now', 'absolute', 'relative'].indexOf(type) > -1;
+  };
+
+  validators.isValidFormulaForType = function(formula, _, requestBody) {
+    switch (requestBody.type) {
+      case 'relative':
+        return validators.isNumeric(formula);
+      case 'absolute':
+        return validators.isDate(formula);
+      default:
+        return true;
+    }
+  };
+
+  var _validateField = function(field, value, rules, requestBody) {
     if (!rules) {
       return [];
     }
 
     return rules.map(function(rule) {
-      if (!validators[rule.validator](value, rule.options)) {
+      if (!validators[rule.validator](value, rule.options, requestBody)) {
         return ({
           field: field,
           message: rule.message,
@@ -57,7 +72,7 @@ module.exports = function() {
       if (!validationSchema.hasOwnProperty(field)) {
         return [];
       }
-      return _validateField(field, requestBody[field], validationSchema[field].rules);
+      return _validateField(field, requestBody[field], validationSchema[field].rules, requestBody);
     }).reduce(function(a, b) {return a.concat(b)}, []));
 
     return {
@@ -83,7 +98,7 @@ module.exports = function() {
   var sanitizeAndValidate = function(requestBody, validationSchema, all) {
     var sanitizedBody = sanitizers.sanitizeRequest(requestBody, validationSchema);
     var validationFn = all ? validateAll : validateRequest;
-    validation = validationFn(sanitizedBody, validationSchema);
+    var validation = validationFn(sanitizedBody, validationSchema);
     if (validation.isValid) {
       validation.sanitizedData = sanitizedBody;
     }

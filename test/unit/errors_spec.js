@@ -34,5 +34,16 @@ describe('Errors', function() {
         e.message.should.equal('phoneNumber must be a number. confirmCode must be 6 digits long. ');
       }
     });
+  });
+  describe('ForeignConstraintError', function() {
+    it('should have properties name, message, and resource corresponding with the called args', function() {
+      try {
+        throw new errors.ForeignConstraintError('User');
+      } catch (e) {
+        e.name.should.equal('ForeignConstraintError');
+        e.message.should.equal('User is being used by another resource');
+        e.resource.should.equal('User');
+      }
+    });
   })
 });

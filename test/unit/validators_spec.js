@@ -217,6 +217,41 @@ describe('Validators', function() {
       validators.validators.isArrayOfNumbers('1 2').should.be.false;
       validators.validators.isArrayOfNumbers(3).should.be.false;
     });
+  });
+
+  describe('isValidTimeframeType', function() {
+    it('should return true if type is "now", "absolute" or "relative"', function() {
+      validators.validators.isValidTimeframeType('now').should.be.true;
+      validators.validators.isValidTimeframeType('relative').should.be.true;
+      validators.validators.isValidTimeframeType('absolute').should.be.true;
+    });
+
+    it('should return false if type is not "now", "absolute", or "relative"', function() {
+      validators.validators.isValidTimeframeType('foobar').should.be.false;
+    })
+  });
+
+  describe('isValidFormulaForType', function() {
+    it('should return true if type is "now"', function() {
+      validators.validators.isValidFormulaForType('whatever', undefined, {type: 'now'}).should.be.true;
+    });
+
+    it('should return true if type is "relative" and formula is a number', function() {
+      validators.validators.isValidFormulaForType('30', undefined, {type: 'relative'}).should.be.true;
+    });
+
+    it('should return false if type is "relative" and formula is not a number', function() {
+      validators.validators.isValidFormulaForType('foobar', undefined, {type: 'relative'}).should.be.false;
+    });
+
+    it('should return true if type is "absolute" and formula is a valid date', function() {
+      validators.validators.isValidFormulaForType('2017-01-01', undefined, {type: 'absolute'}).should.be.true;
+    });
+
+    it('should return false if type is "absolute" and formula is NOT a valid date', function() {
+      validators.validators.isValidFormulaForType('not a date', undefined, {type: 'absolute'}).should.be.false;
+    });
+
   })
 
 });
