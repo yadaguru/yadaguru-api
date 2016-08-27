@@ -12,7 +12,7 @@ var userService = require('../../services/userService');
 
 describe('Users Controller', function() {
   describe('POST /users', function() {
-    var req, res, usersController, create;
+    var req, res, usersController, create, getUserByPhoneNumber, user, save, generateConfirmCode;
 
     beforeEach(function() {
       req = {};
@@ -21,45 +21,79 @@ describe('Users Controller', function() {
         json: sinon.spy()
       };
       create = sinon.stub(userService, 'create');
+      getUserByPhoneNumber = sinon.stub(userService, 'getUserByPhoneNumber');
+      user = {
+        save: function() {}
+      };
+      save = sinon.stub(user, 'save');
       usersController = require('../../controllers/usersController');
+      generateConfirmCode = sinon.stub(usersController, 'generateConfirmCode');
+      this.clock = sinon.useFakeTimers();
     });
 
     afterEach(function() {
       res.status.reset();
       res.json.reset();
       create.restore();
+      getUserByPhoneNumber.restore();
+      save.restore();
+      generateConfirmCode.restore();
+      this.clock.restore();
     });
 
-    it('should respond with new user object and 200 status on success', function() {
+    it('should create user if matching phone number does not exist, and respond with status 200 & the new user id', function() {
       req.body = {phoneNumber: '1234567890'};
-      var successfulCreateResponse = {
-        id: '1',
-        phoneNumber: req.body.phoneNumber,
-        confirmCode: '',
-        confirmCodeTimestamp: '',
-        sponsorCode: ''
-      };
-      create.returns(Promise.resolve([successfulCreateResponse]));
+
+      getUserByPhoneNumber.withArgs('1234567890')
+        .returns(Promise.resolve(null));
+
+      generateConfirmCode.returns('123456');
+
+      create.withArgs({
+        phoneNumber: '1234567890',
+        confirmCode: '123456',
+        confirmCodeTimestamp: '1970-01-01T00:00:00Z'
+      }).returns(Promise.resolve([{id: '1', confirmCode: '123456'}]));
 
       return usersController.post(req, res).then(function() {
-        res.json.should.have.been.calledWith([successfulCreateResponse]);
+        res.json.should.have.been.calledWith({userId: '1'});
         res.status.should.have.been.calledWith(200);
       });
     });
 
-    it('should respond with a new user object and a 200 status, even if the phone number is formatted', function() {
-      req.body = {phoneNumber: '(123) 456-7890'};
-      var successfulCreateResponse = {
-        id: '1',
-        phoneNumber: '1234567890',
-        confirmCode: '',
-        confirmCodeTimestamp: '',
-        sponsorCode: ''
-      };
-      create.returns(Promise.resolve([successfulCreateResponse]));
+    it('should update user if matching phone number exists, and respond with status 200 & the new user id', function() {
+      req.body = {phoneNumber: '1234567890'};
+
+      getUserByPhoneNumber.withArgs('1234567890')
+        .returns(Promise.resolve(user));
+
+      generateConfirmCode.returns('123456');
+
+      save
+        .returns(Promise.resolve({'id': '1', confirmCode: '123456'}));
 
       return usersController.post(req, res).then(function() {
-        res.json.should.have.been.calledWith([successfulCreateResponse]);
+        res.json.should.have.been.calledWith({userId: '1'});
+        res.status.should.have.been.calledWith(200);
+      });
+    });
+
+    it('should create (or update) user even if phone number is not formatted correctly', function() {
+      req.body = {phoneNumber: '(123) 456-7890'};
+
+      getUserByPhoneNumber.withArgs('1234567890')
+        .returns(Promise.resolve(null));
+
+      generateConfirmCode.returns('123456');
+
+      create.withArgs({
+        phoneNumber: '1234567890',
+        confirmCode: '123456',
+        confirmCodeTimestamp: '1970-01-01T00:00:00Z'
+      }).returns(Promise.resolve([{id: '1', confirmCode: '123456'}]));
+
+      return usersController.post(req, res).then(function() {
+        res.json.should.have.been.calledWith({userId: '1'});
         res.status.should.have.been.calledWith(200);
       });
     });
@@ -94,7 +128,7 @@ describe('Users Controller', function() {
     it('should respond with an error and a 500 status on a database error', function() {
       req.body = {phoneNumber: '1234567890'};
       var databaseError = new Error('some database error');
-      create.returns(Promise.reject(databaseError));
+      getUserByPhoneNumber.returns(Promise.reject(databaseError));
 
       return usersController.post(req, res).then(function() {
         res.json.should.have.been.calledWith(databaseError);
@@ -103,7 +137,7 @@ describe('Users Controller', function() {
     });
   });
 
-  describe('PUT /users/:id', function() {
+  xdescribe('PUT /users/:id', function() {
     var req, res, usersController, update;
 
     beforeEach(function() {
@@ -183,7 +217,7 @@ describe('Users Controller', function() {
     });
   });
 
-  describe('DELETE /users/:id', function() {
+  xdescribe('DELETE /users/:id', function() {
     var req, res, usersController, destroy;
 
     beforeEach(function() {
@@ -237,4 +271,13 @@ describe('Users Controller', function() {
       })
     });
   });
+
+  describe('The generateConfirmCode function', function() {
+    it('should be six digits long', function() {
+      var usersController = require('../../controllers/usersController');
+      var code = usersController.generateConfirmCode();
+
+      code.length.should.equal(6);
+    })
+  })
 });

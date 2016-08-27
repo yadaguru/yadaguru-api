@@ -15,13 +15,15 @@ var Reminder = models.Reminder;
 
 describe('/api/users', function() {
   describe('POST', function() {
-    before(function(done) {
+    beforeEach(function(done) {
       models.sequelize.sync({force: true}).then(function() {
-        done();
+        User.create({phoneNumber: '9876543210'}).then(function() {
+          done();
+        })
       });
     });
 
-    it('should respond with user id when phone number is valid', function(done) {
+    it('should respond with new user id when phone number is valid and does not exist', function(done) {
       var json = { phoneNumber: '1234567890' };
 
       request(app)
@@ -31,25 +33,26 @@ describe('/api/users', function() {
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body[0].should.have.property('id');
-          res.body[0].should.have.property('phoneNumber', '1234567890');
+          res.body.should.have.property('userId', 2);
           done();
         });
     });
-    it('should respond with error when phone number already exists', function(done) {
-      var json = { phoneNumber: '1234567890' };
+
+    it('should updated user id when phone number is valid and already exists', function(done) {
+      var json = { phoneNumber: '9876543210' };
 
       request(app)
         .post('/api/users')
         .type('json')
         .send(json)
-        .expect(500)
+        .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body.name.should.be.equal('SequelizeUniqueConstraintError');
+          res.body.should.have.property('userId', 1);
           done();
         });
     });
+
     it('should respond with error when phone number is not ten digits', function(done) {
       var json = { phoneNumber: '12345678901' };
 
@@ -66,7 +69,7 @@ describe('/api/users', function() {
     });
 
     it('should respond with error when phone number contains letters', function(done) {
-      var json = { phoneNumber: '123456e890' }
+      var json = { phoneNumber: '123456e890' };
 
       request(app)
         .post('/api/users')
@@ -96,7 +99,7 @@ describe('/api/users', function() {
     });
   });
 
-  describe('PUT', function() {
+  xdescribe('PUT', function() {
 
     before(function(done) {
       models.sequelize.sync({force: true}).then(function() {
@@ -172,7 +175,7 @@ describe('/api/users', function() {
     });
   });
 
-  describe('DELETE', function() {
+  xdescribe('DELETE', function() {
 
     beforeEach(function(done) {
       models.sequelize.sync({force: true}).then(function() {

@@ -6,7 +6,7 @@ module.exports = function(sequelize, DataTypes) {
       unique: true
     },
     confirmCode: DataTypes.STRING,
-    confirmCodeTimestamp: DataTypes.TIME,
+    confirmCodeTimestamp: DataTypes.DATE,
     sponsorCode: DataTypes.STRING
   }, {
     classMethods: {

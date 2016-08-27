@@ -78,6 +78,33 @@ describe('The Users Service', function() {
     });
   });
 
+  describe('The getUserByPhoneNumber function', function() {
+    var findOne;
+
+    before(function() {
+      findOne = sinon.stub(User, 'findOne');
+    });
+
+    after(function() {
+      findOne.restore();
+    });
+
+    it('should resolve with  the matching user object', function() {
+      var userObj = {dataValues: users[0]};
+      findOne.withArgs({where: {phoneNumber: '1234567890'}})
+        .returns(Promise.resolve(userObj));
+
+      return userService.getUserByPhoneNumber('1234567890').should.eventually.deep.equal(userObj);
+    });
+
+    it('should resolve with null if no matching users were found', function() {
+      findOne.withArgs({where: {phoneNumber: '5555555555'}})
+        .returns(Promise.resolve(null));
+
+      return userService.getUserByPhoneNumber('5555555555').should.eventually.deep.equal(null);
+    });
+  });
+
   describe('The create function', function() {
     var create;
 

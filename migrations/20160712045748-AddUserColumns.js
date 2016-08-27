@@ -3,7 +3,7 @@
 module.exports = {
   up: function (queryInterface, Sequelize) {
     return queryInterface.addColumn('Users', 'confirmCode', Sequelize.STRING).then(function() {
-      return queryInterface.addColumn('Users', 'confirmCodeTimestamp', Sequelize.TIME).then(function() {
+      return queryInterface.addColumn('Users', 'confirmCodeTimestamp', Sequelize.DATE).then(function() {
         return queryInterface.addColumn('Users', 'sponsorCode', Sequelize.STRING);
       });
     });
