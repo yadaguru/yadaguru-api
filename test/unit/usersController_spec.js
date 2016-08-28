@@ -9,6 +9,7 @@ chai.should();
 var errors = require('../../services/errorService');
 var Promise = require('bluebird');
 var userService = require('../../services/userService');
+var auth = require('../../services/authService');
 
 describe('Users Controller', function() {
   describe('POST /users', function() {
@@ -27,7 +28,7 @@ describe('Users Controller', function() {
       };
       save = sinon.stub(user, 'save');
       usersController = require('../../controllers/usersController');
-      generateConfirmCode = sinon.stub(usersController, 'generateConfirmCode');
+      generateConfirmCode = sinon.stub(auth, 'generateConfirmCode');
       this.clock = sinon.useFakeTimers();
     });
 
@@ -137,8 +138,8 @@ describe('Users Controller', function() {
     });
   });
 
-  xdescribe('PUT /users/:id', function() {
-    var req, res, usersController, update;
+  describe('PUT /users/:id', function() {
+    var req, res, usersController, findById, getUserToken, update;
 
     beforeEach(function() {
       req = {};
@@ -146,32 +147,98 @@ describe('Users Controller', function() {
         status: sinon.spy(),
         json: sinon.spy()
       };
+      findById = sinon.stub(userService, 'findById');
+      getUserToken = sinon.stub(auth, 'getUserToken');
       update = sinon.stub(userService, 'update');
       usersController = require('../../controllers/usersController');
+      this.clock = sinon.useFakeTimers();
     });
 
     afterEach(function() {
       res.status.reset();
       res.json.reset();
+      findById.restore();
+      getUserToken.restore();
       update.restore();
+      this.clock.restore();
     });
 
-    it('should respond with the updated user object and 200 status on success', function() {
-      req.body = {phoneNumber: '1234567890'};
+    it('should respond access token and 200 status if confirm code is in body and matches and is not expired.', function() {
+      req.body = {confirmCode: '123456'};
       req.params = {id: 1};
+      findById.withArgs(1)
+        .returns(Promise.resolve([{
+          id: 1,
+          confirmCode: '123456',
+          confirmCodeTimestamp: '1970-01-01T00:00:00Z'
+        }]));
+      getUserToken.withArgs(1, 'user')
+        .returns('a valid user token');
+
+      this.clock.tick(10000);
+
+      return usersController.putOnId(req, res).then(function() {
+        res.json.should.have.been.calledWith({token: 'a valid user token'});
+        res.status.should.have.been.calledWith(200);
+      });
+    });
+
+    it('should update the user and respond with updated user and 200 status if confirmCode is not passed.', function() {
+      req.body = {sponsorCode: '123456'};
+      req.params = {id: 1};
+
       var updatedUser = {
-        id: '1',
-        phoneNumber: req.body.phoneNumber,
-        confirmCode: '',
-        confirmCodeTimestamp: '',
-        sponsorCode: ''
+        id: 1,
+        phoneNumber: '1234567890',
+        confirmCode: '123456',
+        confirmCodeTimestamp: '1970-01-01T00:00:00Z',
+        sponsorCode: '123456'
       };
-      update.withArgs(req.params.id, req.body)
+
+      update.withArgs(1, {sponsorCode: '123456'})
         .returns(Promise.resolve([updatedUser]));
 
       return usersController.putOnId(req, res).then(function() {
         res.json.should.have.been.calledWith([updatedUser]);
         res.status.should.have.been.calledWith(200);
+      });
+    });
+
+    it('should respond with an error and 400 status if confirm code does not match.', function() {
+      req.body = {confirmCode: '654321'};
+      req.params = {id: 1};
+      findById.withArgs(1)
+        .returns(Promise.resolve([{
+          id: 1,
+          confirmCode: '123456',
+          confirmCodeTimestamp: '1970-01-01T00:00:00Z'
+        }]));
+      var error = new errors.LoginError();
+
+      this.clock.tick(10000);
+
+      return usersController.putOnId(req, res).then(function() {
+        res.json.should.have.been.calledWith(error);
+        res.status.should.have.been.calledWith(400);
+      });
+    });
+
+    it('should respond with an error and 400 status if confirm code has expired.', function() {
+      req.body = {confirmCode: '123456'};
+      req.params = {id: 1};
+      findById.withArgs(1)
+        .returns(Promise.resolve([{
+          id: 1,
+          confirmCode: '123456',
+          confirmCodeTimestamp: '1970-01-01T00:00:00Z'
+        }]));
+      var error = new errors.LoginError();
+
+      this.clock.tick(70000);
+
+      return usersController.putOnId(req, res).then(function() {
+        res.json.should.have.been.calledWith(error);
+        res.status.should.have.been.calledWith(400);
       });
     });
 
@@ -217,7 +284,7 @@ describe('Users Controller', function() {
     });
   });
 
-  xdescribe('DELETE /users/:id', function() {
+  describe('DELETE /users/:id', function() {
     var req, res, usersController, destroy;
 
     beforeEach(function() {
@@ -271,13 +338,4 @@ describe('Users Controller', function() {
       })
     });
   });
-
-  describe('The generateConfirmCode function', function() {
-    it('should be six digits long', function() {
-      var usersController = require('../../controllers/usersController');
-      var code = usersController.generateConfirmCode();
-
-      code.length.should.equal(6);
-    })
-  })
 });

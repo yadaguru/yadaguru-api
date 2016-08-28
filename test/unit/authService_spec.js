@@ -87,4 +87,12 @@ describe('The authService', function() {
     })
   });
 
+  describe('The generateConfirmCode function', function() {
+    it('should be six digits long', function() {
+      var code = authService.generateConfirmCode();
+
+      code.length.should.equal(6);
+    })
+  })
+
 });

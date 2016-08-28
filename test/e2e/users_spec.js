@@ -11,6 +11,8 @@ var models = require('../../models');
 var User = models.User;
 var School = models.School;
 var Reminder = models.Reminder;
+var moment = require('moment');
+var jwt = require('jsonwebtoken');
 
 
 describe('/api/users', function() {
@@ -99,18 +101,72 @@ describe('/api/users', function() {
     });
   });
 
-  xdescribe('PUT', function() {
+  describe('PUT', function() {
+    var token = jwt.sign({userId: 1, role: 'user'}, 'development_secret', {noTimestamp: true});
 
-    before(function(done) {
+    beforeEach(function(done) {
       models.sequelize.sync({force: true}).then(function() {
-        User.create({phoneNumber: '1234567890'}).then(function() {
+        User.bulkCreate([{
+          phoneNumber: '1234567890',
+          confirmCode: '123456',
+          confirmCodeTimestamp: moment.utc().subtract(10, 'seconds').format()
+        }, {
+          phoneNumber: '9876543210',
+          confirmCode: '654321',
+          confirmCodeTimestamp: moment.utc().subtract(90, 'seconds').format()
+        }]).then(function() {
           done();
         })
       });
     });
 
-    it('should respond with the updated user on successful update', function(done) {
+    it('should respond with a JWT when PUTing a confirm code, and the confirm code is valid/not expired', function(done) {
       var json = { confirmCode: '123456' };
+
+      request(app)
+        .put('/api/users/1')
+        .type('json')
+        .send(json)
+        .expect(200)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.should.have.property('token', token);
+          done();
+        });
+    });
+
+    it('should respond an error if the confirm code does not match', function(done) {
+      var json = { confirmCode: '654321' };
+
+      request(app)
+        .put('/api/users/1')
+        .type('json')
+        .send(json)
+        .expect(400)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.be.equal('Login Failed: confirmCode is not valid or has expired');
+          done();
+        });
+    });
+
+    it('should respond an error if the confirm code has expired', function(done) {
+      var json = { confirmCode: '654321' };
+
+      request(app)
+        .put('/api/users/2')
+        .type('json')
+        .send(json)
+        .expect(400)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.be.equal('Login Failed: confirmCode is not valid or has expired');
+          done();
+        });
+    });
+
+    it('should respond with the updated user on successful update', function(done) {
+      var json = { sponsorCode: '123456' };
 
       request(app)
         .put('/api/users/1')
@@ -121,7 +177,7 @@ describe('/api/users', function() {
           if (err) return done(err);
           res.body[0].should.have.property('id', 1);
           res.body[0].should.have.property('phoneNumber', '1234567890');
-          res.body[0].should.have.property('confirmCode', '123456');
+          res.body[0].should.have.property('sponsorCode', '123456');
           done();
         });
     });
@@ -130,13 +186,13 @@ describe('/api/users', function() {
       var json = { confirmCode: '123456' };
 
       request(app)
-        .put('/api/users/2')
+        .put('/api/users/3')
         .type('json')
         .send(json)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body.message.should.be.equal('User with id 2 not found');
+          res.body.message.should.be.equal('User with id 3 not found');
           done();
         });
     });
@@ -175,7 +231,7 @@ describe('/api/users', function() {
     });
   });
 
-  xdescribe('DELETE', function() {
+  describe('DELETE', function() {
 
     beforeEach(function(done) {
       models.sequelize.sync({force: true}).then(function() {

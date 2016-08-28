@@ -1,6 +1,8 @@
 var userService = require('../services/userService');
 var validators = require('../services/validatorService');
+var errors = require('../services/errorService');
 var moment = require('moment');
+var auth = require('../services/authService');
 var env = process.env.NODE_ENV;
 
 var schema = {
@@ -55,12 +57,25 @@ module.exports = function() {
     });
   };
 
-  usersController.generateConfirmCode = function() {
-    return String(Math.floor(Math.random() * (999999 - 100000) + 100000));
+  usersController.putOnId = function(req, res) {
+    var id = req.params.id;
+    var validation = validators.sanitizeAndValidate(req.body, schema);
+
+    if (!validation.isValid) {
+      res.status(400);
+      res.json(validation.errors);
+      return Promise.resolve();
+    }
+
+    if (validation.sanitizedData.confirmCode) {
+      return _verifyUser(id, validation.sanitizedData.confirmCode, res);
+    }
+
+    return _update(id, validation.sanitizedData, res);
   };
 
   function _loginUser(user) {
-    user.confirmCode = usersController.generateConfirmCode();
+    user.confirmCode = auth.generateConfirmCode();
     user.confirmCodeTimestamp = moment.utc().format();
     return user.save().then(function(user) {
       return user;
@@ -68,7 +83,7 @@ module.exports = function() {
   }
 
   function _createUser(data) {
-    data.confirmCode = usersController.generateConfirmCode();
+    data.confirmCode = auth.generateConfirmCode();
     data.confirmCodeTimestamp = moment.utc().format();
     return userService.create(data).then(function(newUser) {
       return newUser[0];
@@ -82,6 +97,47 @@ module.exports = function() {
     } else {
       // Send message through Twilio
     }
+  }
+
+  function _update(id, data, res) {
+    return userService.update(id, data).then(function(updatedUser) {
+      if (!updatedUser) {
+        res.status(404);
+        res.json(new errors.ResourceNotFoundError('User', id));
+        return;
+      }
+      res.status(200);
+      res.json(updatedUser);
+    }).catch(function(error) {
+      res.status(500);
+      res.json(error);
+    });
+  }
+
+  function _verifyUser(id, confirmCode, res) {
+    return userService.findById(id).then(function(user) {
+      if (user.length === 0) {
+        res.status(404);
+        res.json(new errors.ResourceNotFoundError('User', id));
+        return;
+      }
+
+      user = user[0];
+      if (user.confirmCode === confirmCode && _isTimestampValid(user.confirmCodeTimestamp)) {
+        var token = auth.getUserToken(user.id, 'user');
+        res.status(200);
+        res.json({token: token});
+        return;
+      }
+
+      res.status(400);
+      res.json(new errors.LoginError());
+    })
+  }
+
+  function _isTimestampValid(timestamp) {
+    // TODO - make 60000 configurable
+    return moment.utc().diff(moment(timestamp)) <= 60000;
   }
 
   return usersController;

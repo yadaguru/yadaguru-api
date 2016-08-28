@@ -30,10 +30,16 @@ module.exports = function() {
   ForeignConstraintError.prototype = Object.create(Error.prototype);
   ForeignConstraintError.prototype.constructor = ForeignConstraintError;
 
+  var LoginError = function() {
+    this.name = 'LoginError';
+    this.message = 'Login Failed: confirmCode is not valid or has expired'
+  };
+
   return {
     ResourceNotFoundError: ResourceNotFoundError,
     ValidationError: ValidationError,
-    ForeignConstraintError: ForeignConstraintError
+    ForeignConstraintError: ForeignConstraintError,
+    LoginError: LoginError
   }
 
 }();

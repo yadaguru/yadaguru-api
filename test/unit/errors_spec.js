@@ -45,5 +45,15 @@ describe('Errors', function() {
         e.resource.should.equal('User');
       }
     });
+  });
+  describe('LoginError', function() {
+    it('should have set properties name and message', function() {
+      try {
+        throw new errors.LoginError();
+      } catch (e) {
+        e.name.should.equal('LoginError');
+        e.message.should.equal('Login Failed: confirmCode is not valid or has expired');
+      }
+    });
   })
 });
