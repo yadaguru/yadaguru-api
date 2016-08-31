@@ -93,6 +93,38 @@ describe('The authService', function() {
 
       code.length.should.equal(6);
     })
+  });
+
+  describe('The getUserData function', function() {
+    var verify;
+
+    beforeEach(function() {
+      verify = sinon.stub(jwt, 'verify');
+    });
+
+    afterEach(function() {
+      verify.restore();
+    });
+
+    it('should return user data if token is valid', function() {
+      verify.withArgs('a valid user token', 'development_secret')
+        .returns({userId: 1, role: 'user'});
+
+      authService.getUserData('a valid user token')
+        .should.deep.equal({userId :1, role: 'user'});
+    });
+
+    it('should return false if token is invalid', function() {
+      verify.withArgs('an invalid token', 'development_secret')
+        .throws(new jwt.JsonWebTokenError());
+
+      authService.getUserData('an invalid token').should.be.false;
+    });
+
+
+    it('should return false no token is provided', function() {
+      authService.getUserData(undefined).should.be.false;
+    })
   })
 
 });

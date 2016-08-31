@@ -53,29 +53,29 @@ describe('The Schools Service', function() {
     });
   });
 
-  describe('The findById function', function() {
-    var findById;
+  describe('The findByIdForUser function', function() {
+    var findAll;
 
     before(function() {
-      findById = sinon.stub(School, 'findById');
+      findAll = sinon.stub(School, 'findAll');
     });
 
     after(function() {
-      findById.restore();
+      findAll.restore();
     });
 
     it('should resolve with an array with the matching school object', function() {
-      findById.withArgs(1)
+      findAll.withArgs({where: {id: 1, userId: 1}})
         .returns(Promise.resolve({dataValues: schools[0]}));
 
-      return schoolService.findById(1).should.eventually.deep.equal([schools[0]]);
+      return schoolService.findByIdForUser(1, 1).should.eventually.deep.equal([schools[0]]);
     });
 
     it('should resolve with an empty array if no schools were found', function() {
-      findById.withArgs(3)
+      findAll.withArgs({where: {id: 2, userId: 1}})
         .returns(Promise.resolve(null));
 
-      return schoolService.findById(3).should.eventually.deep.equal([]);
+      return schoolService.findByIdForUser(2, 1).should.eventually.deep.equal([]);
     });
   });
 
@@ -105,8 +105,8 @@ describe('The Schools Service', function() {
     });
   });
 
-  describe('The update function', function() {
-    var findById, row, update, idToUpdate;
+  describe('The updateForUser function', function() {
+    var findAll, row, update, idToUpdate;
 
     var updatedSchool = {
         userId: 1,
@@ -118,63 +118,62 @@ describe('The Schools Service', function() {
     idToUpdate = 1;
 
     before(function() {
-      findById = sinon.stub(School, 'findById');
+      findAll = sinon.stub(School, 'findAll');
       row = {update: function(){}};
       update = sinon.stub(row, 'update');
     });
 
     after(function() {
-      findById.restore();
+      findAll.restore();
       update.restore();
     });
 
     it('should resolve with an array containing the updated school object', function() {
-      findById.withArgs(idToUpdate)
+      findAll.withArgs({where: {id: 1, userId: 1}})
         .returns(Promise.resolve(row));
       update.withArgs(updatedSchool)
         .returns(Promise.resolve({dataValues: updatedSchool}));
 
-      return schoolService.update(idToUpdate, updatedSchool).should.eventually.deep.equal([updatedSchool]);
+      return schoolService.updateForUser(idToUpdate, updatedSchool, 1)
+        .should.eventually.deep.equal([updatedSchool]);
     });
 
     it('should resolve with false if the id does not exist', function() {
-      findById.withArgs(idToUpdate)
+      findAll.withArgs({where: {id: 2, userId: 1}})
         .returns(Promise.resolve(null));
 
-      return schoolService.update(idToUpdate, updatedSchool).should.eventually.be.false;
+      return schoolService.updateForUser(2, updatedSchool, 1).should.eventually.be.false;
     });
   });
 
-  describe('The destroy function', function() {
-    var row, destroy, findById;
-
-    var idToDestroy = 1;
+  describe('The destroyForUser function', function() {
+    var row, destroy, findAll;
 
     before(function() {
-      findById = sinon.stub(School, 'findById');
+      findAll = sinon.stub(School, 'findAll');
       row = {destroy: function(){}};
       destroy = sinon.stub(row, 'destroy');
     });
 
     after(function() {
-      findById.restore();
+      findAll.restore();
       destroy.restore();
     });
 
     it('should resolve with true when the row is destroyed', function() {
-      findById.withArgs(idToDestroy)
+      findAll.withArgs({where: {id: 1, userId: 1}})
         .returns(Promise.resolve(row));
       destroy.withArgs()
         .returns(Promise.resolve(undefined));
 
-      return schoolService.destroy(idToDestroy).should.eventually.be.true;
+      return schoolService.destroyForUser(1, 1).should.eventually.be.true;
     });
 
     it('should resolve with false id does not exist', function() {
-      findById.withArgs(idToDestroy)
+      findAll.withArgs({where: {id: 2, userId: 1}})
         .returns(Promise.resolve(null));
 
-      return schoolService.destroy(idToDestroy).should.eventually.be.false;
+      return schoolService.destroyForUser(2, 1).should.eventually.be.false;
     });
   });
 });

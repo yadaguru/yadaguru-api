@@ -37,10 +37,24 @@ module.exports = function() {
     return String(Math.floor(Math.random() * (999999 - 100000) + 100000));
   }
 
+  function getUserData(token) {
+    var tokenData;
+
+    try {
+      tokenData = verifyUserToken(token);
+    } catch (e) {
+      return false;
+    }
+
+    return tokenData;
+  }
+
+
   return {
     getUserToken: getUserToken,
     verifyUserToken: verifyUserToken,
-    generateConfirmCode: generateConfirmCode
+    generateConfirmCode: generateConfirmCode,
+    getUserData: getUserData
   };
 
 }();

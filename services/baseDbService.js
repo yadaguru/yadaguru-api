@@ -47,6 +47,15 @@ var baseDbService = function(Model, outputSanitizer) {
     })
   };
 
+  var findByIdForUser = function(id, userId) {
+    return Model.findAll({where: {id: id, userId: userId}}).then(function(row) {
+      if (!row) {
+        return [];
+      }
+      return _sanitizeOutput(row.dataValues);
+    })
+  };
+
   var create = function(data) {
     return Model.create(data).then(function(newRow) {
       return _sanitizeOutput(newRow.dataValues);
@@ -70,8 +79,30 @@ var baseDbService = function(Model, outputSanitizer) {
     });
   };
 
+  var updateForUser = function(id, data, userId) {
+    return Model.findAll({where: {id: id, userId: userId}}).then(function(row) {
+      if (!row) {
+        return Promise.resolve(false);
+      }
+      return row.update(data).then(function(updatedRow) {
+        return _sanitizeOutput(updatedRow.dataValues);
+      })
+    });
+  };
+
   var destroy = function(id) {
     return Model.findById(id).then(function(row) {
+      if (!row) {
+        return Promise.resolve(false);
+      }
+      return row.destroy().then(function() {
+        return true;
+      })
+    })
+  };
+
+  var destroyForUser = function(id, userId) {
+    return Model.findAll({where: {id: id, userId: userId}}).then(function(row) {
       if (!row) {
         return Promise.resolve(false);
       }
@@ -85,10 +116,13 @@ var baseDbService = function(Model, outputSanitizer) {
     findAll: findAll,
     makeFindByResourceFn: makeFindByResourceFn,
     findById: findById,
+    findByIdForUser: findByIdForUser,
     create: create,
     bulkCreate: bulkCreate,
     update: update,
-    destroy: destroy
+    updateForUser: updateForUser,
+    destroy: destroy,
+    destroyForUser: destroyForUser
   }
 
 };

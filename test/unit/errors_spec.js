@@ -55,5 +55,15 @@ describe('Errors', function() {
         e.message.should.equal('Login Failed: confirmCode is not valid or has expired');
       }
     });
+  });
+  describe('NotAuthorizedError', function() {
+    it('should have set properties name and message', function() {
+      try {
+        throw new errors.NotAuthorizedError();
+      } catch (e) {
+        e.name.should.equal('NotAuthorizedError');
+        e.message.should.equal('Not Authorized: You do not have permission to access this resource');
+      }
+    });
   })
 });

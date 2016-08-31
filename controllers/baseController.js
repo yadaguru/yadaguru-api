@@ -1,22 +1,53 @@
 var validators = require('../services/validatorService');
 var errors = require('../services/errorService');
 var Promise = require('bluebird');
+var auth = require('../services/authService');
 
-var resourceControllerFactory = function(name, modelService, schema) {
+var resourceControllerFactory = function(name, modelService, schema, requiredRoles) {
 
   schema = schema || {};
+  requiredRoles = requiredRoles || {};
+
+  function isUserAuthorized(req, method, roles) {
+    if (!roles[method]) {
+      return true;
+    }
+
+    var userData = auth.getUserData(req.get('Bearer'));
+    return userData && roles[method].indexOf(userData.role) > -1;
+  }
+
+  function getAuthorizedUser(req, method, roles) {
+    if (!roles[method]) {
+      throw new Error('This route requires user data and must be restricted to at least one role.');
+    }
+
+    var userData = auth.getUserData(req.get('Bearer'));
+    if (!userData || roles[method].indexOf(userData.role) < 0) {
+      return false;
+    }
+
+    return userData;
+  }
 
   /**
    * GET /resources
    */
   var getAll = function(req, res) {
+    if (!isUserAuthorized(req, 'getAll', requiredRoles)) {
+      res.status(401);
+      res.json(new errors.NotAuthorizedError());
+      return;
+    }
+
     return modelService.findAll().then(function(resources) {
       res.status(200);
       res.json(resources);
     }).catch(function(error) {
       res.status(500);
       res.json(error);
-    })
+    });
+
   };
 
   /**
@@ -24,9 +55,14 @@ var resourceControllerFactory = function(name, modelService, schema) {
    * With access token in header
    */
   var getAllForUser = function(req, res) {
+    var userData = getAuthorizedUser(req, 'getAllForUser', requiredRoles);
+    if (!userData) {
+      res.status(401);
+      res.json(new errors.NotAuthorizedError());
+      return Promise.resolve();
+    }
 
-    //TODO get user ID from token and add to sanitizedData
-    var userId = 1;
+    var userId = userData.id;
 
     return modelService.findByUser(userId).then(function(resource) {
       res.status(200);
@@ -38,8 +74,14 @@ var resourceControllerFactory = function(name, modelService, schema) {
 
   };
 
-  var makeGetAllForResourceFn = function(resource, modelMethod) {
+  var makeGetAllForResourceFn = function(resource, modelMethod, methodName) {
     return function(req, res) {
+      if (!isUserAuthorized(req, methodName, requiredRoles)) {
+        res.status(401);
+        res.json(new errors.NotAuthorizedError());
+        return Promise.resolve();
+      }
+
       var resourceId = req.params[resource];
 
       return modelService[modelMethod](resourceId).then(function(resource) {
@@ -56,7 +98,35 @@ var resourceControllerFactory = function(name, modelService, schema) {
    * GET /resources/:id
    */
   var getById = function(req, res) {
+    if (!isUserAuthorized(req, 'getById', requiredRoles)) {
+      res.status(401);
+      res.json(new errors.NotAuthorizedError());
+      return Promise.resolve();
+    }
+
     return modelService.findById(req.params.id).then(function(resource) {
+      if (resource.length === 0) {
+        res.status(404);
+        res.json(new errors.ResourceNotFoundError(name, req.params.id));
+        return;
+      }
+      res.status(200);
+      res.json(resource);
+    }).catch(function(error) {
+      res.status(500);
+      res.json(error);
+    })
+  };
+
+  var getByIdForUser = function(req, res) {
+    var userData = getAuthorizedUser(req, 'getByIdForUser', requiredRoles);
+    if (!userData) {
+      res.status(401);
+      res.json(new errors.NotAuthorizedError());
+      return Promise.resolve();
+    }
+
+    return modelService.findByIdForUser(req.params.id, userData.userId).then(function(resource) {
       if (resource.length === 0) {
         res.status(404);
         res.json(new errors.ResourceNotFoundError(name, req.params.id));
@@ -90,6 +160,12 @@ var resourceControllerFactory = function(name, modelService, schema) {
    * POST /resources
    */
   var post = function(req, res) {
+    if (!isUserAuthorized(req, 'post', requiredRoles)) {
+      res.status(401);
+      res.json(new errors.NotAuthorizedError());
+      return Promise.resolve();
+    }
+
     var validation = validators.sanitizeAndValidate(req.body, schema, true);
 
     if (!validation.isValid) {
@@ -104,14 +180,20 @@ var resourceControllerFactory = function(name, modelService, schema) {
    * With access token in header
    */
   var postForUser = function(req, res) {
+    var userData = getAuthorizedUser(req, 'postForUser', requiredRoles);
+    if (!userData) {
+      res.status(401);
+      res.json(new errors.NotAuthorizedError());
+      return Promise.resolve();
+    }
+
     var validation = validators.sanitizeAndValidate(req.body, schema, true);
 
     if (!validation.isValid) {
       return _sendInvalidResponse(validation, res);
     }
 
-    //TODO get user ID from token and add to sanitizedData
-    validation.sanitizedData.userId = 1;
+    validation.sanitizedData.userId = userData.id;
 
     return _create(validation.sanitizedData, res);
   };
@@ -120,6 +202,12 @@ var resourceControllerFactory = function(name, modelService, schema) {
    * PUT /resources/:id
    */
   var putOnId = function(req, res) {
+    if (!isUserAuthorized(req, 'putOnId', requiredRoles)) {
+      res.status(401);
+      res.json(new errors.NotAuthorizedError());
+      return Promise.resolve();
+    }
+
     var id = req.params.id;
     var validation = validators.sanitizeAndValidate(req.body, schema);
 
@@ -143,13 +231,79 @@ var resourceControllerFactory = function(name, modelService, schema) {
     });
   };
 
+  var putOnIdForUser = function(req, res) {
+    var userData = getAuthorizedUser(req, 'postForUser', requiredRoles);
+    if (!userData) {
+      res.status(401);
+      res.json(new errors.NotAuthorizedError());
+      return Promise.resolve();
+    }
+
+    var id = req.params.id;
+    var validation = validators.sanitizeAndValidate(req.body, schema);
+
+    if (!validation.isValid) {
+      res.status(400);
+      res.json(validation.errors);
+      return Promise.resolve();
+    }
+
+    return modelService.updateForUser(id, validation.sanitizedData, userData.userId).then(function(updatedResource) {
+      if (!updatedResource) {
+        res.status(404);
+        res.json(new errors.ResourceNotFoundError(name, id));
+        return;
+      }
+      res.status(200);
+      res.json(updatedResource);
+    }).catch(function(error) {
+      res.status(500);
+      res.json(error);
+    });
+  };
+
   /**
    * DELETE /resources/:id
    */
   var removeById = function(req, res) {
+    if (!isUserAuthorized(req, 'removeById', requiredRoles)) {
+      res.status(401);
+      res.json(new errors.NotAuthorizedError());
+      return Promise.resolve();
+    }
+
     var id = req.params.id;
 
     return modelService.destroy(id).then(function(result) {
+      if (!result) {
+        res.status(404);
+        res.json(new errors.ResourceNotFoundError(name, id));
+        return;
+      }
+      res.status(200);
+      res.json([{deletedId: id}]);
+    }).catch(function(error) {
+      if (error.name === 'SequelizeForeignKeyConstraintError') {
+        res.status(409);
+        res.json(new errors.ForeignConstraintError(name));
+        return;
+      }
+      res.status(500);
+      res.json(error);
+    });
+  };
+
+  var removeByIdForUser = function(req, res) {
+    var userData = getAuthorizedUser(req, 'removeByIdForUser', requiredRoles);
+    if (!userData) {
+      res.status(401);
+      res.json(new errors.NotAuthorizedError());
+      return Promise.resolve();
+    }
+
+    var id = req.params.id;
+
+    return modelService.destroyForUser(id, userData.userId).then(function(result) {
       if (!result) {
         res.status(404);
         res.json(new errors.ResourceNotFoundError(name, id));
@@ -172,11 +326,14 @@ var resourceControllerFactory = function(name, modelService, schema) {
     getAll: getAll,
     getAllForUser: getAllForUser,
     getById: getById,
+    getByIdForUser: getByIdForUser,
     makeGetAllForResourceFn: makeGetAllForResourceFn,
     post : post,
     postForUser: postForUser,
     putOnId : putOnId,
-    removeById : removeById
+    putOnIdForUser : putOnIdForUser,
+    removeById : removeById,
+    removeByIdForUser: removeByIdForUser
   }
 
 };

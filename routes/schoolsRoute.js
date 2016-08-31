@@ -9,9 +9,9 @@ var routes = function() {
     .post(schoolsController.postForUser);
 
   router.route('/:id')
-    .get(schoolsController.getById)
-    .put(schoolsController.putOnId)
-    .delete(schoolsController.removeById);
+    .get(schoolsController.getByIdForUser)
+    .put(schoolsController.putOnIdForUser)
+    .delete(schoolsController.removeByIdForUser);
 
   return router;
 };

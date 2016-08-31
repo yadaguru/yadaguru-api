@@ -19,4 +19,12 @@ var schema = {
   }
 };
 
-module.exports = require('./baseController')('School', schoolService, schema);
+var requiredRoles = {
+  getAllForUser: ['user'],
+  postForUser: ['user'],
+  getByIdForUser: ['user'],
+  putOnIdForUser: ['user'],
+  removeByIdForUser: ['user']
+};
+
+module.exports = require('./baseController')('School', schoolService, schema, requiredRoles);

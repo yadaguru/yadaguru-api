@@ -34,12 +34,23 @@ module.exports = function() {
     this.name = 'LoginError';
     this.message = 'Login Failed: confirmCode is not valid or has expired'
   };
+  LoginError.prototype = Object.create(Error.prototype);
+  LoginError.prototype.constructor = LoginError;
+
+  var NotAuthorizedError = function() {
+    this.name = 'NotAuthorizedError';
+    this.message = 'Not Authorized: You do not have permission to access this resource'
+  };
+  NotAuthorizedError.prototype = Object.create(Error.prototype);
+  NotAuthorizedError.prototype.constructor = NotAuthorizedError;
 
   return {
     ResourceNotFoundError: ResourceNotFoundError,
     ValidationError: ValidationError,
     ForeignConstraintError: ForeignConstraintError,
-    LoginError: LoginError
-  }
+    LoginError: LoginError,
+    NotAuthorizedError: NotAuthorizedError
+  };
+
 
 }();
