@@ -62,7 +62,7 @@ var resourceControllerFactory = function(name, modelService, schema, requiredRol
       return Promise.resolve();
     }
 
-    var userId = userData.id;
+    var userId = userData.userId;
 
     return modelService.findByUser(userId).then(function(resource) {
       res.status(200);
@@ -193,7 +193,7 @@ var resourceControllerFactory = function(name, modelService, schema, requiredRol
       return _sendInvalidResponse(validation, res);
     }
 
-    validation.sanitizedData.userId = userData.id;
+    validation.sanitizedData.userId = userData.userId;
 
     return _create(validation.sanitizedData, res);
   };

@@ -65,7 +65,8 @@ describe('Schools Controller', function() {
       getUserData.withArgs('a valid token')
         .returns({userId: 1, role: 'user'});
 
-      findByUser.returns(Promise.resolve(schools));
+      findByUser.withArgs(1)
+        .returns(Promise.resolve(schools));
 
       return schoolsController.getAllForUser(req, res).then(function() {
         res.json.should.have.been.calledWith(schools);
@@ -80,7 +81,8 @@ describe('Schools Controller', function() {
       getUserData.withArgs('a valid token')
         .returns({userId: 1, role: 'user'});
 
-      findByUser.returns(Promise.resolve([]));
+      findByUser.withArgs(1)
+        .returns(Promise.resolve([]));
 
       return schoolsController.getAllForUser(req, res).then(function() {
         res.json.should.have.been.calledWith([]);
@@ -244,6 +246,12 @@ describe('Schools Controller', function() {
         dueDate: '2017-02-01',
         isActive: 'true'
       };
+      var data =  {
+        name: 'Temple',
+        dueDate: '2017-02-01',
+        isActive: 'true',
+        userId: 1
+      };
       var successfulCreateResponse = {
         id: '1',
         userId: '1',
@@ -251,7 +259,8 @@ describe('Schools Controller', function() {
         dueDate: req.body.dueDate,
         isActive: req.body.isActive
       };
-      create.returns(Promise.resolve([successfulCreateResponse]));
+      create.withArgs(data)
+        .returns(Promise.resolve([successfulCreateResponse]));
 
       return schoolsController.postForUser(req, res).then(function() {
         res.json.should.have.been.calledWith([successfulCreateResponse]);
@@ -358,8 +367,15 @@ describe('Schools Controller', function() {
         dueDate: '2017-02-01',
         isActive: 'true'
       };
+      var data =  {
+        name: 'Temple',
+        dueDate: '2017-02-01',
+        isActive: 'true',
+        userId: 1
+      };
       var databaseError = new Error('some database error');
-      create.returns(Promise.reject(databaseError));
+      create.withArgs(data)
+        .returns(Promise.reject(databaseError));
 
       return schoolsController.postForUser(req, res).then(function() {
         res.json.should.have.been.calledWith(databaseError);

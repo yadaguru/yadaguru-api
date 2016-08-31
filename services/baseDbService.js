@@ -48,7 +48,7 @@ var baseDbService = function(Model, outputSanitizer) {
   };
 
   var findByIdForUser = function(id, userId) {
-    return Model.findAll({where: {id: id, userId: userId}}).then(function(row) {
+    return Model.findOne({where: {id: id, userId: userId}}).then(function(row) {
       if (!row) {
         return [];
       }
@@ -80,7 +80,7 @@ var baseDbService = function(Model, outputSanitizer) {
   };
 
   var updateForUser = function(id, data, userId) {
-    return Model.findAll({where: {id: id, userId: userId}}).then(function(row) {
+    return Model.findOne({where: {id: id, userId: userId}}).then(function(row) {
       if (!row) {
         return Promise.resolve(false);
       }
@@ -102,7 +102,7 @@ var baseDbService = function(Model, outputSanitizer) {
   };
 
   var destroyForUser = function(id, userId) {
-    return Model.findAll({where: {id: id, userId: userId}}).then(function(row) {
+    return Model.findOne({where: {id: id, userId: userId}}).then(function(row) {
       if (!row) {
         return Promise.resolve(false);
       }

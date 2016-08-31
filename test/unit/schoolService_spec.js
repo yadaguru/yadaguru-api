@@ -54,25 +54,25 @@ describe('The Schools Service', function() {
   });
 
   describe('The findByIdForUser function', function() {
-    var findAll;
+    var findOne;
 
     before(function() {
-      findAll = sinon.stub(School, 'findAll');
+      findOne = sinon.stub(School, 'findOne');
     });
 
     after(function() {
-      findAll.restore();
+      findOne.restore();
     });
 
     it('should resolve with an array with the matching school object', function() {
-      findAll.withArgs({where: {id: 1, userId: 1}})
+      findOne.withArgs({where: {id: 1, userId: 1}})
         .returns(Promise.resolve({dataValues: schools[0]}));
 
       return schoolService.findByIdForUser(1, 1).should.eventually.deep.equal([schools[0]]);
     });
 
     it('should resolve with an empty array if no schools were found', function() {
-      findAll.withArgs({where: {id: 2, userId: 1}})
+      findOne.withArgs({where: {id: 2, userId: 1}})
         .returns(Promise.resolve(null));
 
       return schoolService.findByIdForUser(2, 1).should.eventually.deep.equal([]);
@@ -106,7 +106,7 @@ describe('The Schools Service', function() {
   });
 
   describe('The updateForUser function', function() {
-    var findAll, row, update, idToUpdate;
+    var findOne, row, update, idToUpdate;
 
     var updatedSchool = {
         userId: 1,
@@ -118,18 +118,18 @@ describe('The Schools Service', function() {
     idToUpdate = 1;
 
     before(function() {
-      findAll = sinon.stub(School, 'findAll');
+      findOne = sinon.stub(School, 'findOne');
       row = {update: function(){}};
       update = sinon.stub(row, 'update');
     });
 
     after(function() {
-      findAll.restore();
+      findOne.restore();
       update.restore();
     });
 
     it('should resolve with an array containing the updated school object', function() {
-      findAll.withArgs({where: {id: 1, userId: 1}})
+      findOne.withArgs({where: {id: 1, userId: 1}})
         .returns(Promise.resolve(row));
       update.withArgs(updatedSchool)
         .returns(Promise.resolve({dataValues: updatedSchool}));
@@ -139,7 +139,7 @@ describe('The Schools Service', function() {
     });
 
     it('should resolve with false if the id does not exist', function() {
-      findAll.withArgs({where: {id: 2, userId: 1}})
+      findOne.withArgs({where: {id: 2, userId: 1}})
         .returns(Promise.resolve(null));
 
       return schoolService.updateForUser(2, updatedSchool, 1).should.eventually.be.false;
@@ -147,21 +147,21 @@ describe('The Schools Service', function() {
   });
 
   describe('The destroyForUser function', function() {
-    var row, destroy, findAll;
+    var row, destroy, findOne;
 
     before(function() {
-      findAll = sinon.stub(School, 'findAll');
+      findOne = sinon.stub(School, 'findOne');
       row = {destroy: function(){}};
       destroy = sinon.stub(row, 'destroy');
     });
 
     after(function() {
-      findAll.restore();
+      findOne.restore();
       destroy.restore();
     });
 
     it('should resolve with true when the row is destroyed', function() {
-      findAll.withArgs({where: {id: 1, userId: 1}})
+      findOne.withArgs({where: {id: 1, userId: 1}})
         .returns(Promise.resolve(row));
       destroy.withArgs()
         .returns(Promise.resolve(undefined));
@@ -170,7 +170,7 @@ describe('The Schools Service', function() {
     });
 
     it('should resolve with false id does not exist', function() {
-      findAll.withArgs({where: {id: 2, userId: 1}})
+      findOne.withArgs({where: {id: 2, userId: 1}})
         .returns(Promise.resolve(null));
 
       return schoolService.destroyForUser(2, 1).should.eventually.be.false;
