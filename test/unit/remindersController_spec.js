@@ -9,24 +9,39 @@ chai.should();
 var errors = require('../../services/errorService');
 var Promise = require('bluebird');
 var reminderService = require('../../services/reminderService');
+var auth = require('../../services/authService');
 
 describe('Reminders Controller', function() {
+  var req, res, remindersController, reqGet, getUserData;
+
+  beforeEach(function() {
+    req = {
+      get: function(){}
+    };
+    res = {
+      status: sinon.spy(),
+      json: sinon.spy()
+    };
+    reqGet = sinon.stub(req, 'get');
+    getUserData = sinon.stub(auth, 'getUserData');
+    remindersController = require('../../controllers/remindersController');
+  });
+
+  afterEach(function() {
+    res.status.reset();
+    res.json.reset();
+    reqGet.restore();
+    getUserData.restore();
+  });
+
   describe('GET /reminders', function() {
-    var req, res, remindersController, findByUser;
+    var findByUser;
 
     beforeEach(function() {
-      req = {};
-      res = {
-        status: sinon.spy(),
-        json: sinon.spy()
-      };
       findByUser = sinon.stub(reminderService, 'findByUser');
-      remindersController = require('../../controllers/remindersController');
     });
 
     afterEach(function() {
-      res.status.reset();
-      res.json.reset();
       findByUser.restore();
     });
 
@@ -54,7 +69,13 @@ describe('Reminders Controller', function() {
         dueDate: '2017-02-01',
         timeframe: 'One week before'
       }];
-      findByUser.returns(Promise.resolve(reminders));
+
+      reqGet.withArgs('Bearer')
+        .returns('a valid token');
+      getUserData.withArgs('a valid token')
+        .returns({userId: 1, role: 'user'});
+      findByUser.withArgs(1)
+        .returns(Promise.resolve(reminders));
 
       return remindersController.getAllForUser(req, res).then(function() {
         res.json.should.have.been.calledWith(reminders);
@@ -64,7 +85,12 @@ describe('Reminders Controller', function() {
     });
 
     it('should respond with an empty array and a 200 status if there are no reminders', function() {
-      findByUser.returns(Promise.resolve([]));
+      reqGet.withArgs('Bearer')
+        .returns('a valid token');
+      getUserData.withArgs('a valid token')
+        .returns({userId: 1, role: 'user'});
+      findByUser.withArgs(1)
+        .returns(Promise.resolve([]));
 
       return remindersController.getAllForUser(req, res).then(function() {
         res.json.should.have.been.calledWith([]);
@@ -73,7 +99,36 @@ describe('Reminders Controller', function() {
 
     });
 
+    it('should respond a 401 error if the user role is not authorized for this route', function() {
+      reqGet.withArgs('Bearer')
+        .returns('a valid token');
+      getUserData.withArgs('a valid token')
+        .returns({userId: 1, role: 'admin'});
+
+      return remindersController.getAllForUser(req, res).then(function() {
+        res.json.should.have.been.calledWith(new errors.NotAuthorizedError());
+        res.status.should.have.been.calledWith(401);
+      });
+    });
+
+    it('should respond a 401 error if the user token is invalid', function() {
+      reqGet.withArgs('Bearer')
+        .returns('an invalid token');
+      getUserData.withArgs('an invalid token')
+        .returns(false);
+
+      return remindersController.getAllForUser(req, res).then(function() {
+        res.json.should.have.been.calledWith(new errors.NotAuthorizedError());
+        res.status.should.have.been.calledWith(401);
+      });
+    });
+
     it('should respond with an error object and a 500 status on a database error', function() {
+      reqGet.withArgs('Bearer')
+        .returns('a valid token');
+      getUserData.withArgs('a valid token')
+        .returns({userId: 1, role: 'user'});
+
       var error = new Error('database error');
       findByUser.returns(Promise.reject(error));
 
@@ -86,24 +141,15 @@ describe('Reminders Controller', function() {
   });
 
   describe('GET /reminders/school/:id', function() {
-    var req, res, remindersController, findBySchool;
+    var findByResourceForUser;
 
     beforeEach(function() {
-      req = {
-        params: {id: 1}
-      };
-      res = {
-        status: sinon.spy(),
-        json: sinon.spy()
-      };
-      findBySchool = sinon.stub(reminderService, 'findBySchool');
-      remindersController = require('../../controllers/remindersController');
+      req.params = {id: 1};
+      findByResourceForUser = sinon.stub(reminderService, 'findByResourceForUser');
     });
 
     afterEach(function() {
-      res.status.reset();
-      res.json.reset();
-      findBySchool.restore();
+      findByResourceForUser.restore();
     });
 
     it('should respond with an array of all reminders belonging to school ID and a 200 status', function() {
@@ -130,9 +176,15 @@ describe('Reminders Controller', function() {
         dueDate: '2017-02-01',
         timeframe: 'One week before'
       }];
-      findBySchool.returns(Promise.resolve(reminders));
 
-      return remindersController.getAllForSchool(req, res).then(function() {
+      reqGet.withArgs('Bearer')
+        .returns('a valid token');
+      getUserData.withArgs('a valid token')
+        .returns({userId: 1, role: 'user'});
+      findByResourceForUser.withArgs('School', 1, 1)
+        .returns(Promise.resolve(reminders));
+
+      return remindersController.getAllForSchoolForUser(req, res).then(function() {
         res.json.should.have.been.calledWith(reminders);
         res.status.should.have.been.calledWith(200);
       });
@@ -140,20 +192,54 @@ describe('Reminders Controller', function() {
     });
 
     it('should respond with an empty array and a 200 status if there are no reminders matching the school ID', function() {
-      findBySchool.returns(Promise.resolve([]));
+      reqGet.withArgs('Bearer')
+        .returns('a valid token');
+      getUserData.withArgs('a valid token')
+        .returns({userId: 1, role: 'user'});
+      findByResourceForUser.withArgs('School', 1, 1)
+        .returns(Promise.resolve([]));
 
-      return remindersController.getAllForSchool(req, res).then(function() {
+      return remindersController.getAllForSchoolForUser(req, res).then(function() {
         res.json.should.have.been.calledWith([]);
         res.status.should.have.been.calledWith(200);
       });
 
     });
 
-    it('should respond with an error object and a 500 status on a database error', function() {
-      var error = new Error('database error');
-      findBySchool.returns(Promise.reject(error));
+    it('should respond a 401 error if the user role is not authorized for this route', function() {
+      reqGet.withArgs('Bearer')
+        .returns('a valid token');
+      getUserData.withArgs('a valid token')
+        .returns({userId: 1, role: 'admin'});
 
-      return remindersController.getAllForSchool(req, res).then(function() {
+      return remindersController.getAllForSchoolForUser(req, res).then(function() {
+        res.json.should.have.been.calledWith(new errors.NotAuthorizedError());
+        res.status.should.have.been.calledWith(401);
+      });
+    });
+
+    it('should respond a 401 error if the user token is invalid', function() {
+      reqGet.withArgs('Bearer')
+        .returns('an invalid token');
+      getUserData.withArgs('an invalid token')
+        .returns(false);
+
+      return remindersController.getAllForSchoolForUser(req, res).then(function() {
+        res.json.should.have.been.calledWith(new errors.NotAuthorizedError());
+        res.status.should.have.been.calledWith(401);
+      });
+    });
+
+    it('should respond with an error object and a 500 status on a database error', function() {
+      reqGet.withArgs('Bearer')
+        .returns('a valid token');
+      getUserData.withArgs('a valid token')
+        .returns({userId: 1, role: 'user'});
+
+      var error = new Error('database error');
+      findByResourceForUser.returns(Promise.reject(error));
+
+      return remindersController.getAllForSchoolForUser(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
         res.status.should.have.been.calledWith(500);
       });
@@ -162,26 +248,19 @@ describe('Reminders Controller', function() {
   });
 
   describe('GET /reminders/:id', function() {
-    var req, res, remindersController, findById;
+    var findByIdForUser;
 
     beforeEach(function() {
-      req = {};
-      res = {
-        status: sinon.spy(),
-        json: sinon.spy()
-      };
-      findById = sinon.stub(reminderService, 'findById');
+      req.params = {id: 1};
+      findByIdForUser = sinon.stub(reminderService, 'findByIdForUser');
       remindersController = require('../../controllers/remindersController');
     });
 
     afterEach(function() {
-      res.status.reset();
-      res.json.reset();
-      findById.restore();
+      findByIdForUser.restore();
     });
 
     it('should respond with an array with the matching reminder and a 200 status', function() {
-      req.params = {id: 1};
       var reminder = {
         id: '1',
         userId: '1',
@@ -194,34 +273,69 @@ describe('Reminders Controller', function() {
         dueDate: '2017-02-01',
         timeframe: 'One week before'
       };
-      findById.withArgs(1)
+      reqGet.withArgs('Bearer')
+        .returns('a valid token');
+      getUserData.withArgs('a valid token')
+        .returns({userId: 1, role: 'user'});
+      findByIdForUser.withArgs(1, 1)
         .returns(Promise.resolve([reminder]));
 
-      return remindersController.getById(req, res).then(function() {
+      return remindersController.getByIdForUser(req, res).then(function() {
         res.json.should.have.been.calledWith([reminder]);
         res.status.should.have.been.calledWith(200);
       });
     });
 
     it('should an error object and a 404 status if the reminder does not exist', function() {
-      req.params = {id: 2};
+      reqGet.withArgs('Bearer')
+        .returns('a valid token');
+      getUserData.withArgs('a valid token')
+        .returns({userId: 1, role: 'user'});
+
       var error = new errors.ResourceNotFoundError('Reminder', req.params.id);
-      findById.withArgs(2)
+      findByIdForUser.withArgs(1, 1)
         .returns(Promise.resolve([]));
 
-      return remindersController.getById(req, res).then(function() {
+      return remindersController.getByIdForUser(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
         res.status.should.have.been.calledWith(404);
       });
+    });
 
+    it('should respond a 401 error if the user role is not authorized for this route', function() {
+      reqGet.withArgs('Bearer')
+        .returns('a valid token');
+      getUserData.withArgs('a valid token')
+        .returns({userId: 1, role: 'admin'});
+
+      return remindersController.getByIdForUser(req, res).then(function() {
+        res.json.should.have.been.calledWith(new errors.NotAuthorizedError());
+        res.status.should.have.been.calledWith(401);
+      });
+    });
+
+    it('should respond a 401 error if the user token is invalid', function() {
+      reqGet.withArgs('Bearer')
+        .returns('an invalid token');
+      getUserData.withArgs('an invalid token')
+        .returns(false);
+
+      return remindersController.getByIdForUser(req, res).then(function() {
+        res.json.should.have.been.calledWith(new errors.NotAuthorizedError());
+        res.status.should.have.been.calledWith(401);
+      });
     });
 
     it('should respond with an error object and a 500 status on a database error', function() {
-      req.params = {id: 1};
-      var error = new Error('database error');
-      findById.returns(Promise.reject(error));
+      reqGet.withArgs('Bearer')
+        .returns('a valid token');
+      getUserData.withArgs('a valid token')
+        .returns({userId: 1, role: 'user'});
 
-      return remindersController.getById(req, res).then(function() {
+      var error = new Error('database error');
+      findByIdForUser.returns(Promise.reject(error));
+
+      return remindersController.getByIdForUser(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
         res.status.should.have.been.calledWith(500);
       });

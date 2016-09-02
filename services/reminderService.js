@@ -7,7 +7,5 @@ var outputSanitizer = function(reminder) {
 };
 
 var reminderService = require('./baseDbService')(Reminder, outputSanitizer);
-reminderService.findByUser = reminderService.makeFindByResourceFn('userId');
-reminderService.findBySchool = reminderService.makeFindByResourceFn('schoolId');
 
 module.exports = reminderService;

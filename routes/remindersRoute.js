@@ -7,11 +7,11 @@ var routes = function() {
   router.route('/')
     .get(remindersController.getAllForUser);
 
-  router.route('/school/:schoolId')
-    .get(remindersController.getAllForSchool);
+  router.route('/school/:id')
+    .get(remindersController.getAllForSchoolForUser);
 
   router.route('/:id')
-    .get(remindersController.getById);
+    .get(remindersController.getByIdForUser);
 
   return router;
 };

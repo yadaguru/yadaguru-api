@@ -63,7 +63,7 @@ describe('The Reminders Service', function() {
     });
   });
 
-  describe('The findBySchool function', function() {
+  describe('The findByResourceForUser (find by school for user) function', function() {
     var findAll;
 
     before(function() {
@@ -81,7 +81,7 @@ describe('The Reminders Service', function() {
         }
       )));
 
-      return reminderService.findBySchool(1).should.eventually.deep.equal(reminders);
+      return reminderService.findByResourceForUser('School', 1, 1).should.eventually.deep.equal(reminders);
     });
 
     it('should resolve with an empty array there are no reminders', function() {

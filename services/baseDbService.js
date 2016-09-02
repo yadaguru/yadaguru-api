@@ -23,20 +23,33 @@ var baseDbService = function(Model, outputSanitizer) {
     })
   };
 
-  var makeFindByResourceFn = function(resource) {
-    return function(id) {
-      var where = {};
-      where[resource] = id;
-      return Model.findAll({where: where}).then(function(rows) {
-        if (rows.length === 0) {
-          return rows;
-        }
-        return _sanitizeOutput(rows.map(function(row) {
-          return row.dataValues;
-        }));
-      })
-    }
+  var findByResource = function(resource, id) {
+    var where = {};
+    where[resource] = id;
+    return Model.findAll({where: where}).then(function(rows) {
+      if (rows.length === 0) {
+        return rows;
+      }
+      return _sanitizeOutput(rows.map(function(row) {
+        return row.dataValues;
+      }));
+    })
   };
+
+  var findByResourceForUser = function(resource, id, userId) {
+    var where = {};
+    where[resource.toLowerCase() + 'Id'] = id;
+    where.userId = userId;
+    return Model.findAll({where: where}).then(function(rows) {
+      if (rows.length === 0) {
+        return rows;
+      }
+      return _sanitizeOutput(rows.map(function(row) {
+        return row.dataValues;
+      }));
+    })
+  };
+
 
   var findById = function(id) {
     return Model.findById(id).then(function(row) {
@@ -44,6 +57,14 @@ var baseDbService = function(Model, outputSanitizer) {
         return [];
       }
       return _sanitizeOutput(row.dataValues);
+    })
+  };
+
+  var findByUser = function(userId) {
+    return Model.findAll({where: {userId: userId}}).then(function(rows) {
+      return _sanitizeOutput(rows.map(function(row) {
+        return row.dataValues;
+      }))
     })
   };
 
@@ -114,9 +135,11 @@ var baseDbService = function(Model, outputSanitizer) {
 
   return {
     findAll: findAll,
-    makeFindByResourceFn: makeFindByResourceFn,
+    findByResource: findByResource,
+    findByResourceForUser: findByResourceForUser,
     findById: findById,
     findByIdForUser: findByIdForUser,
+    findByUser: findByUser,
     create: create,
     bulkCreate: bulkCreate,
     update: update,

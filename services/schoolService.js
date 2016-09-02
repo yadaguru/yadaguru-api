@@ -7,6 +7,5 @@ var outputSanitizer = function(school) {
 };
 
 var schoolService = require('./baseDbService')(School, outputSanitizer);
-schoolService.findByUser = schoolService.makeFindByResourceFn('userId');
 
 module.exports = schoolService;

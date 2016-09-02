@@ -11,6 +11,10 @@ var models = require('../../models');
 var Reminder = models.Reminder;
 var User = models.User;
 var School = models.School;
+var jwt = require('jsonwebtoken');
+var token = jwt.sign({userId: 1, role: 'user'}, 'development_secret', {noTimestamp: true});
+var tokenWrongRole = jwt.sign({userId: 1, role: 'admin'}, 'development_secret', {noTimestamp: true});
+var tokenWrongUser = jwt.sign({userId: 2, role: 'user'}, 'development_secret', {noTimestamp: true});
 
 
 describe('/api/reminders', function() {
@@ -73,6 +77,7 @@ describe('/api/reminders', function() {
     it('should respond with all reminders', function(done) {
       request(app)
         .get('/api/reminders')
+        .set('Bearer', token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -93,6 +98,7 @@ describe('/api/reminders', function() {
     it('should respond with all reminders for the school id', function(done) {
       request(app)
         .get('/api/reminders/school/1')
+        .set('Bearer', token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -113,6 +119,7 @@ describe('/api/reminders', function() {
     it('should respond with requested reminder object', function(done) {
       request(app)
         .get('/api/reminders/1')
+        .set('Bearer', token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -132,6 +139,7 @@ describe('/api/reminders', function() {
     it('should respond with a 404 if the reminder object does not exist', function(done) {
       request(app)
         .get('/api/reminders/3')
+        .set('Bearer', token)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
@@ -143,12 +151,60 @@ describe('/api/reminders', function() {
     it('should respond with an empty array if no reminders belong to the school ID', function(done) {
       request(app)
         .get('/api/reminders/school/3')
+        .set('Bearer', token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
           res.body.should.deep.equal([]);
           done();
         });
+    });
+
+    it('should respond with a 401 if there is no user token header', function(done) {
+      request(app)
+        .get('/api/reminders/1')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      request(app)
+        .get('/api/reminders/1')
+        .set('Bearer', 'not a valid token')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      request(app)
+        .get('/api/reminders/1')
+        .set('Bearer', tokenWrongRole)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 404 if the user attempts to access a reminder that does not belong to them', function(done) {
+      request(app)
+        .get('/api/reminders/1')
+        .set('Bearer', tokenWrongUser)
+        .expect(404)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Reminder with id 1 not found');
+          done();
+        })
     });
   });
 });

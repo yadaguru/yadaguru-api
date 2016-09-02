@@ -74,9 +74,9 @@ var resourceControllerFactory = function(name, modelService, schema, requiredRol
 
   };
 
-  var makeGetAllForResourceFn = function(resource, modelMethod, methodName) {
+  var getAllForResource = function(resource, modelMethod) {
     return function(req, res) {
-      if (!isUserAuthorized(req, methodName, requiredRoles)) {
+      if (!isUserAuthorized(req, 'getAllFor' + resource, requiredRoles)) {
         res.status(401);
         res.json(new errors.NotAuthorizedError());
         return Promise.resolve();
@@ -85,6 +85,28 @@ var resourceControllerFactory = function(name, modelService, schema, requiredRol
       var resourceId = req.params[resource];
 
       return modelService[modelMethod](resourceId).then(function(resource) {
+        res.status(200);
+        res.json(resource);
+      }).catch(function(error) {
+        res.status(500);
+        res.json(error);
+      })
+    }
+  };
+
+  var getAllForResourceForUser = function(resource) {
+    return function(req, res) {
+      var userData = getAuthorizedUser(req, 'getAllFor' + resource + 'ForUser', requiredRoles);
+      if (!userData) {
+        res.status(401);
+        res.json(new errors.NotAuthorizedError());
+        return Promise.resolve();
+      }
+
+      var id = req.params.id;
+      var userId = userData.userId;
+
+      return modelService.findByResourceForUser(resource, id, userId).then(function(resource) {
         res.status(200);
         res.json(resource);
       }).catch(function(error) {
@@ -327,7 +349,8 @@ var resourceControllerFactory = function(name, modelService, schema, requiredRol
     getAllForUser: getAllForUser,
     getById: getById,
     getByIdForUser: getByIdForUser,
-    makeGetAllForResourceFn: makeGetAllForResourceFn,
+    getAllForResource: getAllForResource,
+    getAllForResourceForUser: getAllForResourceForUser,
     post : post,
     postForUser: postForUser,
     putOnId : putOnId,
