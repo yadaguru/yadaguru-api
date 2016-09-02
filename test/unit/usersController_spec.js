@@ -139,14 +139,18 @@ describe('Users Controller', function() {
   });
 
   describe('PUT /users/:id', function() {
-    var req, res, usersController, findById, getUserToken, update;
+    var req, res, usersController, reqGet, getUserData, findById, getUserToken, update;
 
     beforeEach(function() {
-      req = {};
+      req = {
+        get: function(){}
+      };
       res = {
         status: sinon.spy(),
         json: sinon.spy()
       };
+      reqGet = sinon.stub(req, 'get');
+      getUserData = sinon.stub(auth, 'getUserData');
       findById = sinon.stub(userService, 'findById');
       getUserToken = sinon.stub(auth, 'getUserToken');
       update = sinon.stub(userService, 'update');
@@ -157,6 +161,8 @@ describe('Users Controller', function() {
     afterEach(function() {
       res.status.reset();
       res.json.reset();
+      reqGet.restore();
+      getUserData.restore();
       findById.restore();
       getUserToken.restore();
       update.restore();
@@ -194,6 +200,11 @@ describe('Users Controller', function() {
         confirmCodeTimestamp: '1970-01-01T00:00:00Z',
         sponsorCode: '123456'
       };
+
+      reqGet.withArgs('Bearer')
+        .returns('a valid token');
+      getUserData.withArgs('a valid token')
+        .returns({userId: 1, role: 'user'});
 
       update.withArgs(1, {sponsorCode: '123456'})
         .returns(Promise.resolve([updatedUser]));
@@ -257,23 +268,61 @@ describe('Users Controller', function() {
       })
     });
 
-    it('should respond with an error and 404 status if user does not exist', function() {
+    it('should respond with an error and 401 status if user does not match token', function() {
       req.body = {phoneNumber: '1234567890'};
       req.params = {id: 2};
-      var error = new errors.ResourceNotFoundError('User', req.params.id);
+      var error = new errors.NotAuthorizedError();
+      reqGet.withArgs('Bearer')
+        .returns('a valid token');
+      getUserData.withArgs('a valid token')
+        .returns({userId: 1, role: 'user'});
+
       update.withArgs(req.params.id)
         .returns(Promise.resolve(false));
 
       return usersController.putOnId(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
-        res.status.should.have.been.calledWith(404);
+        res.status.should.have.been.calledWith(401);
       })
+    });
+
+    it('should respond a 401 error if the user role is not authorized for this route', function() {
+      req.body = {phoneNumber: '1234567890'};
+      req.params = {id: 2};
+      reqGet.withArgs('Bearer')
+        .returns('a valid token');
+      getUserData.withArgs('a valid token')
+        .returns({userId: 1, role: 'admin'});
+
+      return usersController.putOnId(req, res).then(function() {
+        res.json.should.have.been.calledWith(new errors.NotAuthorizedError());
+        res.status.should.have.been.calledWith(401);
+      });
+    });
+
+    it('should respond a 401 error if the user token is invalid', function() {
+      req.body = {phoneNumber: '1234567890'};
+      req.params = {id: 2};
+      reqGet.withArgs('Bearer')
+        .returns('an invalid token');
+      getUserData.withArgs('an invalid token')
+        .returns(false);
+
+      return usersController.putOnId(req, res).then(function() {
+        res.json.should.have.been.calledWith(new errors.NotAuthorizedError());
+        res.status.should.have.been.calledWith(401);
+      });
     });
 
     it('should respond with an error and a 500 status on a database error', function() {
       req.body = {phoneNumber: '1234567890'};
       req.params = {id: 1};
       var error = new Error('database error');
+      reqGet.withArgs('Bearer')
+        .returns('a valid token');
+      getUserData.withArgs('a valid token')
+        .returns({userId: 1, role: 'user'});
+
       update.withArgs(req.params.id, req.body)
         .returns(Promise.reject(error));
 
@@ -285,14 +334,18 @@ describe('Users Controller', function() {
   });
 
   describe('DELETE /users/:id', function() {
-    var req, res, usersController, destroy;
+    var req, res, reqGet, getUserData, usersController, destroy;
 
     beforeEach(function() {
-      req = {};
+      req = {
+        get: function(){}
+      };
       res = {
         status: sinon.spy(),
         json: sinon.spy()
       };
+      reqGet = sinon.stub(req, 'get');
+      getUserData = sinon.stub(auth, 'getUserData');
       destroy = sinon.stub(userService, 'destroy');
       usersController = require('../../controllers/usersController');
     });
@@ -300,11 +353,17 @@ describe('Users Controller', function() {
     afterEach(function() {
       res.status.reset();
       res.json.reset();
+      reqGet.restore();
+      getUserData.restore();
       destroy.restore();
     });
 
     it('should respond with the user ID and 200 status on success', function() {
       req.params = {id: 1};
+      reqGet.withArgs('Bearer')
+        .returns('a valid token');
+      getUserData.withArgs('a valid token')
+        .returns({userId: 1, role: 'user'});
       destroy.withArgs(req.params.id)
         .returns(Promise.resolve(true));
 
@@ -314,20 +373,12 @@ describe('Users Controller', function() {
       })
     });
 
-    it('should respond with an error and 404 status if user does not exist', function() {
-      req.params = {id: 2};
-      var error = new errors.ResourceNotFoundError('User', req.params.id);
-      destroy.withArgs(req.params.id)
-        .returns(Promise.resolve(false));
-
-      return usersController.removeById(req, res).then(function() {
-        res.json.should.have.been.calledWith(error);
-        res.status.should.have.been.calledWith(404);
-      })
-    });
-
     it('should respond with an error and a 500 status on a database error', function() {
       req.params = {id: 1};
+      reqGet.withArgs('Bearer')
+        .returns('a valid token');
+      getUserData.withArgs('a valid token')
+        .returns({userId: 1, role: 'user'});
       var error = new Error('database error');
       destroy.withArgs(req.params.id)
         .returns(Promise.reject(error));
@@ -336,6 +387,32 @@ describe('Users Controller', function() {
         res.json.should.have.been.calledWith(error);
         res.status.should.have.been.calledWith(500);
       })
+    });
+
+    it('should respond a 401 error if the user role is not authorized for this route', function() {
+      reqGet.withArgs('Bearer')
+        .returns('a valid token');
+      getUserData.withArgs('a valid token')
+        .returns({userId: 1, role: 'admin'});
+
+      req.params = {id: 1};
+      return usersController.removeById(req, res).then(function() {
+        res.json.should.have.been.calledWith(new errors.NotAuthorizedError());
+        res.status.should.have.been.calledWith(401);
+      });
+    });
+
+    it('should respond a 401 error if the user token is invalid', function() {
+      reqGet.withArgs('Bearer')
+        .returns('an invalid token');
+      getUserData.withArgs('an invalid token')
+        .returns(false);
+
+      req.params = {id: 1};
+      return usersController.removeById(req, res).then(function() {
+        res.json.should.have.been.calledWith(new errors.NotAuthorizedError());
+        res.status.should.have.been.calledWith(401);
+      });
     });
   });
 });

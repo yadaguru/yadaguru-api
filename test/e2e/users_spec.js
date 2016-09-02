@@ -13,6 +13,9 @@ var School = models.School;
 var Reminder = models.Reminder;
 var moment = require('moment');
 var jwt = require('jsonwebtoken');
+var token = jwt.sign({userId: 1, role: 'user'}, 'development_secret', {noTimestamp: true});
+var tokenWrongRole = jwt.sign({userId: 1, role: 'admin'}, 'development_secret', {noTimestamp: true});
+var tokenWrongUser = jwt.sign({userId: 2, role: 'user'}, 'development_secret', {noTimestamp: true});
 
 
 describe('/api/users', function() {
@@ -170,6 +173,7 @@ describe('/api/users', function() {
 
       request(app)
         .put('/api/users/1')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(200)
@@ -218,6 +222,7 @@ describe('/api/users', function() {
 
       request(app)
         .put('/api/users/1')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(200)
@@ -228,6 +233,77 @@ describe('/api/users', function() {
           res.body[0].should.have.property('confirmCode', '123456');
           done();
         });
+    });
+
+    it('should respond with a 401 if there is no user token header', function(done) {
+      var json = {
+        sponsorCode: '123456'
+      };
+
+      request(app)
+        .put('/api/users/1')
+        .type('json')
+        .send(json)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      var json = {
+        sponsorCode: '123456'
+      };
+
+      request(app)
+        .put('/api/users/1')
+        .set('Bearer', 'not a valid token')
+        .type('json')
+        .send(json)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      var json = {
+        sponsorCode: '123456'
+      };
+
+      request(app)
+        .put('/api/users/1')
+        .set('Bearer', tokenWrongRole)
+        .type('json')
+        .send(json)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user attempts to update a different user', function(done) {
+      var json = {
+        sponsorCode: '123456'
+      };
+
+      request(app)
+        .put('/api/users/1')
+        .set('Bearer', tokenWrongUser)
+        .type('json')
+        .send(json)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
     });
   });
 
@@ -261,6 +337,7 @@ describe('/api/users', function() {
     it('should respond with the deleted user id on successful delete', function(done) {
       request(app)
         .delete('/api/users/1')
+        .set('Bearer', token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -272,6 +349,7 @@ describe('/api/users', function() {
     it('should delete reminders and schools associated with the user', function(done) {
       request(app)
         .delete('/api/users/1')
+        .set('Bearer', token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -285,15 +363,75 @@ describe('/api/users', function() {
         })
     });
 
-    it('should respond with a 404 if the user does not exist', function(done) {
+    it('should respond with a 401 if there is no user token header', function(done) {
+      var json = {
+        sponsorCode: '123456'
+      };
+
       request(app)
-        .delete('/api/users/2')
-        .expect(404)
+        .delete('/api/users/1')
+        .type('json')
+        .send(json)
+        .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body.message.should.equal('User with id 2 not found');
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
           done();
-        });
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      var json = {
+        sponsorCode: '123456'
+      };
+
+      request(app)
+        .delete('/api/users/1')
+        .set('Bearer', 'not a valid token')
+        .type('json')
+        .send(json)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      var json = {
+        sponsorCode: '123456'
+      };
+
+      request(app)
+        .delete('/api/users/1')
+        .set('Bearer', tokenWrongRole)
+        .type('json')
+        .send(json)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user attempts to update a different user', function(done) {
+      var json = {
+        sponsorCode: '123456'
+      };
+
+      request(app)
+        .delete('/api/users/1')
+        .set('Bearer', tokenWrongUser)
+        .type('json')
+        .send(json)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
     });
 
   });

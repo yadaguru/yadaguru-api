@@ -67,8 +67,17 @@ module.exports = function() {
       return Promise.resolve();
     }
 
+    // If confirm code is in body, we are logging in an verifying the confirmation code
     if (validation.sanitizedData.confirmCode) {
       return _verifyUser(id, validation.sanitizedData.confirmCode, res);
+    }
+
+    // If no confirm code, we are updating user data, verify token and proceed with update
+    var userData = auth.getUserData(req.get('Bearer'));
+    if (!userData || userData.role !== 'user' || userData.userId != id) {
+      res.status(401);
+      res.json(new errors.NotAuthorizedError());
+      return Promise.resolve();
     }
 
     return _update(id, validation.sanitizedData, res);
@@ -139,6 +148,34 @@ module.exports = function() {
     // TODO - make 60000 configurable
     return moment.utc().diff(moment(timestamp)) <= 60000;
   }
+
+  usersController.removeById = function(req, res) {
+    var id = req.params.id;
+    var userData = auth.getUserData(req.get('Bearer'));
+    if (!userData || userData.role !== 'user' || userData.userId != id) {
+      res.status(401);
+      res.json(new errors.NotAuthorizedError());
+      return Promise.resolve();
+    }
+
+    return userService.destroy(id).then(function(result) {
+      if (!result) {
+        res.status(404);
+        res.json(new errors.ResourceNotFoundError('User', id));
+        return;
+      }
+      res.status(200);
+      res.json([{deletedId: id}]);
+    }).catch(function(error) {
+      if (error.name === 'SequelizeForeignKeyConstraintError') {
+        res.status(409);
+        res.json(new errors.ForeignConstraintError('User'));
+        return;
+      }
+      res.status(500);
+      res.json(error);
+    });
+  };
 
   return usersController;
 }();
