@@ -1,0 +1,33 @@
+#!/usr/bin/node
+
+var username = process.argv[2];
+var password = process.argv[3];
+
+if (!username || !password) {
+  console.log('Usage: add_user username password');
+  process.exit();
+}
+
+console.log('Adding new admin user `' + username + '` with password `' + password + '`.');
+var AdminUser = require('../models').AdminUser;
+var bcrypt = require('bcryptjs');
+var salt = bcrypt.genSaltSync(10);
+var hash = bcrypt.hashSync(password, salt);
+
+AdminUser.create({
+  userName: username,
+  password: hash
+}).then(function(res) {
+  var userId = res.dataValues.id;
+  console.log('SUCCESS: New admin user `' + username + '` created with ID of `' + userId + '`.');
+  process.exit();
+}).catch(function(error) {
+  if (error.name === 'SequelizeUniqueConstraintError') {
+    console.log('ERROR: User with username `' + username + '` already exists.');
+    process.exit();
+  }
+  console.log('ERROR: Database Error: ' + error.name);
+  process.exit();
+});
+
+
