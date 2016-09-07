@@ -30,6 +30,7 @@ router.get('/', function(req, res) {
 
 app.use('/', router);
 app.use('/api/users', require('./routes/usersRoute'));
+app.use('/api/admin_users', require('./routes/adminUsersRoute'));
 app.use('/api/categories', require('./routes/categoriesRoute'));
 app.use('/api/content_items', require('./routes/contentItemsRoute'));
 app.use('/api/tests', require('./routes/testsRoute'));
