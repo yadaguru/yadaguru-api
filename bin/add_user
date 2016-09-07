@@ -9,17 +9,10 @@ if (!username || !password) {
 }
 
 console.log('Adding new admin user `' + username + '` with password `' + password + '`.');
-var AdminUser = require('../models').AdminUser;
-var bcrypt = require('bcryptjs');
-var salt = bcrypt.genSaltSync(10);
-var hash = bcrypt.hashSync(password, salt);
+var adminUserService = require('../services/adminUserService');
 
-AdminUser.create({
-  userName: username,
-  password: hash
-}).then(function(res) {
-  var userId = res.dataValues.id;
-  console.log('SUCCESS: New admin user `' + username + '` created with ID of `' + userId + '`.');
+adminUserService.create(username, password).then(function(newUser) {
+  console.log('SUCCESS: New admin user `' + username + '` created with ID of `' + newUser.id + '`.');
   process.exit();
 }).catch(function(error) {
   if (error.name === 'SequelizeUniqueConstraintError') {
