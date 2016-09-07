@@ -21,7 +21,12 @@ adminUserService.verifyUser = function(username, password) {
       return false;
     }
 
-    return bcrypt.compareSync(password, user.dataValues.password);
+    if (bcrypt.compareSync(password, user.dataValues.password)) {
+      return {
+        id: user.dataValues.id
+      };
+    }
+    return false;
   });
 };
 

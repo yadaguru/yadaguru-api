@@ -16,6 +16,7 @@ describe('The AdminUsers Service', function() {
     var findOne, compareSync;
 
     var adminUser = {
+      id: 1,
       userName: 'admin',
       password: 'salted hashed password'
     };
@@ -30,13 +31,13 @@ describe('The AdminUsers Service', function() {
       compareSync.restore();
     });
 
-    it('should return true if the user password matches the salted-hashed password', function() {
+    it('should return user id if the user password matches the salted-hashed password', function() {
       findOne.withArgs({where: {userName: 'admin'}})
         .returns(Promise.resolve({dataValues: adminUser}));
       compareSync.withArgs('password', 'salted hashed password')
-        .returns(true);
+        .returns(adminUser);
 
-      return adminUserService.verifyUser('admin', 'password').should.eventually.be.true;
+      return adminUserService.verifyUser('admin', 'password').should.eventually.deep.equal({id: 1});
     });
 
     it('should return false if the user does not exist.', function() {
@@ -60,6 +61,7 @@ describe('The AdminUsers Service', function() {
     var create, genSaltSync, hashSync;
 
     var newAdminUser = {
+      id: 1,
       userName: 'admin',
       password: 'salted hashed password'
     };
@@ -76,12 +78,12 @@ describe('The AdminUsers Service', function() {
       hashSync.restore();
     });
 
-    it('should resolve with an array containing the new adminUser with username and salted & hashed password', function() {
+    it('should resolve with a new adminUser object with username and salted & hashed password', function() {
       genSaltSync.withArgs(10)
         .returns('salt');
       hashSync.withArgs('password', 'salt')
         .returns('salted hashed password');
-      create.withArgs(newAdminUser)
+      create.withArgs({userName: 'admin', password: 'salted hashed password'})
         .returns(Promise.resolve({dataValues: newAdminUser}));
 
       return adminUserService.create('admin', 'password').should.eventually.deep.equal(newAdminUser);

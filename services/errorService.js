@@ -44,12 +44,18 @@ module.exports = function() {
   NotAuthorizedError.prototype = Object.create(Error.prototype);
   NotAuthorizedError.prototype.constructor = NotAuthorizedError;
 
+  var AdminLoginError = function() {
+    this.name = 'AdminLoginError';
+    this.message = 'Login Failed: username and/or password is incorrect'
+  };
+
   return {
     ResourceNotFoundError: ResourceNotFoundError,
     ValidationError: ValidationError,
     ForeignConstraintError: ForeignConstraintError,
     LoginError: LoginError,
-    NotAuthorizedError: NotAuthorizedError
+    NotAuthorizedError: NotAuthorizedError,
+    AdminLoginError: AdminLoginError
   };
 
 

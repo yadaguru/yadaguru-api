@@ -66,4 +66,14 @@ describe('Errors', function() {
       }
     });
   })
+  describe('AdminLoginError', function() {
+    it('should have set properties name and message', function() {
+      try {
+        throw new errors.AdminLoginError();
+      } catch (e) {
+        e.name.should.equal('AdminLoginError');
+        e.message.should.equal('Login Failed: username and/or password is incorrect');
+      }
+    });
+  });
 });
