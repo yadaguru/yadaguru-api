@@ -10,6 +10,9 @@ var app = require('../../app.js');
 var models = require('../../models');
 var Category = models.Category;
 var BaseReminder = models.BaseReminder;
+var jwt = require('jsonwebtoken');
+var token = jwt.sign({userId: 1, role: 'admin'}, 'development_secret', {noTimestamp: true});
+var tokenWrongRole = jwt.sign({userId: 1, role: 'user'}, 'development_secret', {noTimestamp: true});
 
 
 describe('/api/categories', function() {
@@ -33,6 +36,7 @@ describe('/api/categories', function() {
     it('should respond with all categories', function(done) {
       request(app)
         .get('/api/categories')
+        .set('Bearer', token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -46,6 +50,7 @@ describe('/api/categories', function() {
     it('should respond with requested category object', function(done) {
       request(app)
         .get('/api/categories/1')
+        .set('Bearer', token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -58,13 +63,49 @@ describe('/api/categories', function() {
     it('should respond with a 404 if the category object does not exist', function(done) {
       request(app)
         .get('/api/categories/3')
+        .set('Bearer', token)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
           res.body.message.should.equal('Category with id 3 not found');
           done();
         })
-    })
+    });
+
+    it('should respond with a 401 if there is no user token header', function(done) {
+      request(app)
+        .get('/api/categories')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      request(app)
+        .get('/api/categories')
+        .set('Bearer', 'not a valid token')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      request(app)
+        .get('/api/categories')
+        .set('Bearer', tokenWrongRole)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
   });
 
 
@@ -81,6 +122,7 @@ describe('/api/categories', function() {
 
       request(app)
         .post('/api/categories')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(200)
@@ -97,6 +139,7 @@ describe('/api/categories', function() {
 
       request(app)
         .post('/api/categories')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(400)
@@ -105,6 +148,41 @@ describe('/api/categories', function() {
           res.body.message.should.be.equal('name is required. ');
           done();
         });
+    });
+
+    it('should respond with a 401 if there is no user token header', function(done) {
+      request(app)
+        .post('/api/categories')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      request(app)
+        .post('/api/categories')
+        .set('Bearer', 'not a valid token')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      request(app)
+        .post('/api/categories')
+        .set('Bearer', tokenWrongRole)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
     });
   });
 
@@ -123,6 +201,7 @@ describe('/api/categories', function() {
 
       request(app)
         .put('/api/categories/1')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(200)
@@ -139,6 +218,7 @@ describe('/api/categories', function() {
 
       request(app)
         .put('/api/categories/2')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(404)
@@ -154,6 +234,7 @@ describe('/api/categories', function() {
 
       request(app)
         .put('/api/categories/1')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(200)
@@ -163,6 +244,41 @@ describe('/api/categories', function() {
           res.body[0].should.have.property('name', 'Recommendations');
           done();
         });
+    });
+
+    it('should respond with a 401 if there is no user token header', function(done) {
+      request(app)
+        .put('/api/categories/1')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      request(app)
+        .put('/api/categories/1')
+        .set('Bearer', 'not a valid token')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      request(app)
+        .put('/api/categories/1')
+        .set('Bearer', tokenWrongRole)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
     });
   });
 
@@ -179,6 +295,7 @@ describe('/api/categories', function() {
     it('should respond with the deleted category id on successful delete', function(done) {
       request(app)
         .delete('/api/categories/1')
+        .set('Bearer', token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -196,6 +313,7 @@ describe('/api/categories', function() {
       }).then(function() {
         request(app)
           .delete('/api/categories/1')
+          .set('Bearer', token)
           .expect(409)
           .end(function(err, res) {
             if (err) return done(err);
@@ -208,12 +326,48 @@ describe('/api/categories', function() {
     it('should respond with a 404 if the category does not exist', function(done) {
       request(app)
         .delete('/api/categories/2')
+        .set('Bearer', token)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
           res.body.message.should.equal('Category with id 2 not found');
           done();
         });
+    });
+
+    it('should respond with a 401 if there is no user token header', function(done) {
+      request(app)
+        .delete('/api/categories/1')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      request(app)
+        .delete('/api/categories/1')
+        .set('Bearer', 'not a valid token')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      request(app)
+        .delete('/api/categories/1')
+        .set('Bearer', tokenWrongRole)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
     });
 
   });
