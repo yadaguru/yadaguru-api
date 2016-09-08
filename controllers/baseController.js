@@ -37,7 +37,7 @@ var resourceControllerFactory = function(name, modelService, schema, requiredRol
     if (!isUserAuthorized(req, 'getAll', requiredRoles)) {
       res.status(401);
       res.json(new errors.NotAuthorizedError());
-      return;
+      return Promise.resolve();
     }
 
     return modelService.findAll().then(function(resources) {

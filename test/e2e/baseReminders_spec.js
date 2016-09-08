@@ -11,6 +11,9 @@ var models = require('../../models');
 var BaseReminder = models.BaseReminder;
 var Timeframe = models.Timeframe;
 var Category = models.Category;
+var jwt = require('jsonwebtoken');
+var token = jwt.sign({userId: 1, role: 'admin'}, 'development_secret', {noTimestamp: true});
+var tokenWrongRole = jwt.sign({userId: 1, role: 'user'}, 'development_secret', {noTimestamp: true});
 
 
 describe('/api/base_reminders', function() {
@@ -68,6 +71,7 @@ describe('/api/base_reminders', function() {
     it('should respond with all baseReminders', function(done) {
       request(app)
         .get('/api/base_reminders')
+        .set('Bearer', token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -83,6 +87,7 @@ describe('/api/base_reminders', function() {
     it('should respond with requested baseReminder object', function(done) {
       request(app)
         .get('/api/base_reminders/1')
+        .set('Bearer', token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -95,6 +100,7 @@ describe('/api/base_reminders', function() {
     it('should respond with a 404 if the baseReminder object does not exist', function(done) {
       request(app)
         .get('/api/base_reminders/3')
+        .set('Bearer', token)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
@@ -102,6 +108,41 @@ describe('/api/base_reminders', function() {
           done();
         })
     })
+
+    it('should respond with a 401 if there is no user token header', function(done) {
+      request(app)
+        .get('/api/base_reminders/1')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      request(app)
+        .get('/api/base_reminders/1')
+        .set('Bearer', 'not a valid token')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      request(app)
+        .get('/api/base_reminders/1')
+        .set('Bearer', tokenWrongRole)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
   });
 
 
@@ -130,6 +171,7 @@ describe('/api/base_reminders', function() {
 
       request(app)
         .post('/api/base_reminders')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(200)
@@ -154,6 +196,7 @@ describe('/api/base_reminders', function() {
 
       request(app)
         .post('/api/base_reminders')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(400)
@@ -177,6 +220,7 @@ describe('/api/base_reminders', function() {
 
       request(app)
         .post('/api/base_reminders')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(400)
@@ -185,6 +229,41 @@ describe('/api/base_reminders', function() {
           res.body.message.should.be.equal('categoryId must be a number. timeframeIds must be an array of timeframe IDs. ');
           done();
         });
+    });
+
+    it('should respond with a 401 if there is no user token header', function(done) {
+      request(app)
+        .post('/api/base_reminders')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      request(app)
+        .post('/api/base_reminders')
+        .set('Bearer', 'not a valid token')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      request(app)
+        .post('/api/base_reminders')
+        .set('Bearer', tokenWrongRole)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
     });
   });
 
@@ -209,6 +288,7 @@ describe('/api/base_reminders', function() {
 
       request(app)
         .put('/api/base_reminders/1')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(200)
@@ -225,6 +305,7 @@ describe('/api/base_reminders', function() {
 
       request(app)
         .put('/api/base_reminders/2')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(404)
@@ -240,6 +321,7 @@ describe('/api/base_reminders', function() {
 
       request(app)
         .put('/api/base_reminders/1')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(200)
@@ -249,6 +331,41 @@ describe('/api/base_reminders', function() {
           res.body[0].should.have.property('name', 'Write Essays');
           done();
         });
+    });
+
+    it('should respond with a 401 if there is no user token header', function(done) {
+      request(app)
+        .put('/api/base_reminders/1')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      request(app)
+        .put('/api/base_reminders/1')
+        .set('Bearer', 'not a valid token')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      request(app)
+        .put('/api/base_reminders/1')
+        .set('Bearer', tokenWrongRole)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
     });
   });
 
@@ -271,6 +388,7 @@ describe('/api/base_reminders', function() {
     it('should respond with the deleted baseReminder id on successful delete', function(done) {
       request(app)
         .delete('/api/base_reminders/1')
+        .set('Bearer', token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -282,12 +400,48 @@ describe('/api/base_reminders', function() {
     it('should respond with a 404 if the baseReminder does not exist', function(done) {
       request(app)
         .delete('/api/base_reminders/2')
+        .set('Bearer', token)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
           res.body.message.should.equal('BaseReminder with id 2 not found');
           done();
         });
+    });
+
+    it('should respond with a 401 if there is no user token header', function(done) {
+      request(app)
+        .delete('/api/base_reminders/1')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      request(app)
+        .delete('/api/base_reminders/1')
+        .set('Bearer', 'not a valid token')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      request(app)
+        .delete('/api/base_reminders/1')
+        .set('Bearer', tokenWrongRole)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
     });
 
   });
