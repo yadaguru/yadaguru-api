@@ -11,6 +11,9 @@ var models = require('../../models');
 var Category = models.Category;
 var Timeframe = models.Timeframe;
 var BaseReminder = models.BaseReminder;
+var jwt = require('jsonwebtoken');
+var token = jwt.sign({userId: 1, role: 'admin'}, 'development_secret', {noTimestamp: true});
+var tokenWrongRole = jwt.sign({userId: 1, role: 'user'}, 'development_secret', {noTimestamp: true});
 
 
 describe('/api/timeframes', function() {
@@ -43,6 +46,7 @@ describe('/api/timeframes', function() {
     it('should respond with all timeframes', function(done) {
       request(app)
         .get('/api/timeframes')
+        .set('Bearer', token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -57,6 +61,7 @@ describe('/api/timeframes', function() {
     it('should respond with requested timeframe object', function(done) {
       request(app)
         .get('/api/timeframes/2')
+        .set('Bearer', token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -71,15 +76,50 @@ describe('/api/timeframes', function() {
     it('should respond with a 404 if the timeframe object does not exist', function(done) {
       request(app)
         .get('/api/timeframes/4')
+        .set('Bearer', token)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
           res.body.message.should.equal('Timeframe with id 4 not found');
           done();
         })
-    })
-  });
+    });
 
+    it('should respond with a 401 if there is no user token header', function(done) {
+      request(app)
+        .get('/api/timeframes/2')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      request(app)
+        .get('/api/timeframes/2')
+        .set('Bearer', 'not a valid token')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      request(app)
+        .get('/api/timeframes/2')
+        .set('Bearer', tokenWrongRole)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+  });
 
   describe('POST', function() {
 
@@ -98,6 +138,7 @@ describe('/api/timeframes', function() {
 
       request(app)
         .post('/api/timeframes')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(200)
@@ -119,6 +160,7 @@ describe('/api/timeframes', function() {
 
       request(app)
         .post('/api/timeframes')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(400)
@@ -127,6 +169,41 @@ describe('/api/timeframes', function() {
           res.body.message.should.be.equal('type is required. ');
           done();
         });
+    });
+
+    it('should respond with a 401 if there is no user token header', function(done) {
+      request(app)
+        .post('/api/timeframes')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      request(app)
+        .post('/api/timeframes')
+        .set('Bearer', 'not a valid token')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      request(app)
+        .post('/api/timeframes')
+        .set('Bearer', tokenWrongRole)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
     });
   });
 
@@ -152,6 +229,7 @@ describe('/api/timeframes', function() {
 
       request(app)
         .put('/api/timeframes/1')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(200)
@@ -173,6 +251,7 @@ describe('/api/timeframes', function() {
 
       request(app)
         .put('/api/timeframes/2')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(404)
@@ -188,6 +267,7 @@ describe('/api/timeframes', function() {
 
       request(app)
         .put('/api/timeframes/1')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(200)
@@ -199,6 +279,41 @@ describe('/api/timeframes', function() {
           res.body[0].should.have.property('formula', '60');
           done();
         });
+    });
+
+    it('should respond with a 401 if there is no user token header', function(done) {
+      request(app)
+        .put('/api/timeframes/1')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      request(app)
+        .put('/api/timeframes/1')
+        .set('Bearer', 'not a valid token')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      request(app)
+        .put('/api/timeframes/1')
+        .set('Bearer', tokenWrongRole)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
     });
   });
 
@@ -219,6 +334,7 @@ describe('/api/timeframes', function() {
     it('should respond with the deleted timeframe id on successful delete', function(done) {
       request(app)
         .delete('/api/timeframes/1')
+        .set('Bearer', token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -238,6 +354,7 @@ describe('/api/timeframes', function() {
           newBaseReminder.setTimeframes([1]).then (function() {
             request(app)
               .delete('/api/timeframes/1')
+              .set('Bearer', token)
               .expect(409)
               .end(function(err, res) {
                 if (err) return done(err);
@@ -252,6 +369,7 @@ describe('/api/timeframes', function() {
     it('should respond with a 404 if the timeframe does not exist', function(done) {
       request(app)
         .delete('/api/timeframes/2')
+        .set('Bearer', token)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
@@ -260,5 +378,39 @@ describe('/api/timeframes', function() {
         });
     });
 
+    it('should respond with a 401 if there is no user token header', function(done) {
+      request(app)
+        .delete('/api/timeframes/1')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      request(app)
+        .delete('/api/timeframes/1')
+        .set('Bearer', 'not a valid token')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      request(app)
+        .delete('/api/timeframes/1')
+        .set('Bearer', tokenWrongRole)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
   });
 });

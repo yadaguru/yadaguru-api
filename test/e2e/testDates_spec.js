@@ -10,7 +10,9 @@ var app = require('../../app.js');
 var models = require('../../models');
 var TestDate = models.TestDate;
 var Test = models.Test;
-
+var jwt = require('jsonwebtoken');
+var token = jwt.sign({userId: 1, role: 'admin'}, 'development_secret', {noTimestamp: true});
+var tokenWrongRole = jwt.sign({userId: 1, role: 'user'}, 'development_secret', {noTimestamp: true});
 
 describe('/api/test_dates', function() {
 
@@ -53,6 +55,7 @@ describe('/api/test_dates', function() {
     it('should respond with all testDates', function(done) {
       request(app)
         .get('/api/test_dates')
+        .set('Bearer', token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -67,6 +70,7 @@ describe('/api/test_dates', function() {
     it('should respond with requested testDate object', function(done) {
       request(app)
         .get('/api/test_dates/1')
+        .set('Bearer', token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -81,13 +85,49 @@ describe('/api/test_dates', function() {
     it('should respond with a 404 if the testDate object does not exist', function(done) {
       request(app)
         .get('/api/test_dates/3')
+        .set('Bearer', token)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
           res.body.message.should.equal('TestDate with id 3 not found');
           done();
         })
-    })
+    });
+
+    it('should respond with a 401 if there is no user token header', function(done) {
+      request(app)
+        .get('/api/test_dates/1')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      request(app)
+        .get('/api/test_dates/1')
+        .set('Bearer', 'not a valid token')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      request(app)
+        .get('/api/test_dates/1')
+        .set('Bearer', tokenWrongRole)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
   });
 
 
@@ -112,6 +152,7 @@ describe('/api/test_dates', function() {
 
       request(app)
         .post('/api/test_dates')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(200)
@@ -133,6 +174,7 @@ describe('/api/test_dates', function() {
 
       request(app)
         .post('/api/test_dates')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(400)
@@ -141,6 +183,41 @@ describe('/api/test_dates', function() {
           res.body.message.should.be.equal('registrationDate is required. ');
           done();
         });
+    });
+
+    it('should respond with a 401 if there is no user token header', function(done) {
+      request(app)
+        .post('/api/test_dates')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      request(app)
+        .post('/api/test_dates')
+        .set('Bearer', 'not a valid token')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      request(app)
+        .post('/api/test_dates')
+        .set('Bearer', tokenWrongRole)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
     });
   });
 
@@ -163,6 +240,7 @@ describe('/api/test_dates', function() {
 
       request(app)
         .put('/api/test_dates/1')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(200)
@@ -183,6 +261,7 @@ describe('/api/test_dates', function() {
 
       request(app)
         .put('/api/test_dates/2')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(404)
@@ -198,6 +277,7 @@ describe('/api/test_dates', function() {
 
       request(app)
         .put('/api/test_dates/1')
+        .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(200)
@@ -209,6 +289,41 @@ describe('/api/test_dates', function() {
           res.body[0].should.have.property('adminDate', '2016-10-01');
           done();
         });
+    });
+
+    it('should respond with a 401 if there is no user token header', function(done) {
+      request(app)
+        .put('/api/test_dates/1')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      request(app)
+        .put('/api/test_dates/1')
+        .set('Bearer', 'not a valid token')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      request(app)
+        .put('/api/test_dates/1')
+        .set('Bearer', tokenWrongRole)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
     });
   });
 
@@ -227,6 +342,7 @@ describe('/api/test_dates', function() {
     it('should respond with the deleted testDate id on successful delete', function(done) {
       request(app)
         .delete('/api/test_dates/1')
+        .set('Bearer', token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -238,12 +354,48 @@ describe('/api/test_dates', function() {
     it('should respond with a 404 if the testDate does not exist', function(done) {
       request(app)
         .delete('/api/test_dates/2')
+        .set('Bearer', token)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
           res.body.message.should.equal('TestDate with id 2 not found');
           done();
         });
+    });
+
+    it('should respond with a 401 if there is no user token header', function(done) {
+      request(app)
+        .delete('/api/test_dates/1')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      request(app)
+        .delete('/api/test_dates/1')
+        .set('Bearer', 'not a valid token')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      request(app)
+        .delete('/api/test_dates/1')
+        .set('Bearer', tokenWrongRole)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
     });
 
   });

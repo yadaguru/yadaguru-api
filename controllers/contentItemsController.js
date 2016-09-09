@@ -9,4 +9,12 @@ var schema = {
   }
 };
 
-module.exports = require('./baseController')('ContentItem', contentItemService, schema);
+var requiredRoles = {
+  getAll: ['admin'],
+  post: ['admin'],
+  getById: ['user', 'admin'],
+  putOnId: ['admin'],
+  removeById: ['admin']
+};
+
+module.exports = require('./baseController')('ContentItem', contentItemService, schema, requiredRoles);

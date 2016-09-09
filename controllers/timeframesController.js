@@ -19,4 +19,12 @@ var schema = {
   }
 };
 
-module.exports = require('./baseController')('Timeframe', timeframeService, schema);
+var requiredRoles = {
+  getAll: ['admin'],
+  post: ['admin'],
+  getById: ['admin'],
+  putOnId: ['admin'],
+  removeById: ['admin']
+};
+
+module.exports = require('./baseController')('Timeframe', timeframeService, schema, requiredRoles);

@@ -9,7 +9,9 @@ chai.should();
 var app = require('../../app.js');
 var models = require('../../models');
 var ContentItem = models.ContentItem;
-
+var jwt = require('jsonwebtoken');
+var tokenAdmin = jwt.sign({userId: 1, role: 'admin'}, 'development_secret', {noTimestamp: true});
+var tokenUser = jwt.sign({userId: 1, role: 'user'}, 'development_secret', {noTimestamp: true});
 
 describe('/api/content_items', function() {
   describe('GET', function() {
@@ -34,6 +36,7 @@ describe('/api/content_items', function() {
     it('should respond with all contentItems', function(done) {
       request(app)
         .get('/api/content_items')
+        .set('Bearer', tokenAdmin)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -47,6 +50,21 @@ describe('/api/content_items', function() {
     it('should respond with requested content item object', function(done) {
       request(app)
         .get('/api/content_items/1')
+        .set('Bearer', tokenAdmin)
+        .expect(200)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body[0].should.have.property('id', 1);
+          res.body[0].should.have.property('name', contentItems[0].name);
+          res.body[0].should.have.property('content', contentItems[0].content);
+          done();
+        });
+    });
+
+    it('should respond with requested content item object, even if the request comes from a user', function(done) {
+      request(app)
+        .get('/api/content_items/1')
+        .set('Bearer', tokenUser)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -60,6 +78,7 @@ describe('/api/content_items', function() {
     it('should respond with a 404 if the content item object does not exist', function(done) {
       request(app)
         .get('/api/content_items/3')
+        .set('Bearer', tokenAdmin)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
@@ -67,6 +86,41 @@ describe('/api/content_items', function() {
           done();
         })
     })
+
+    it('should respond with a 401 if there is no user token header', function(done) {
+      request(app)
+        .get('/api/content_items/3')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      request(app)
+        .get('/api/content_items/3')
+        .set('Bearer', 'not a valid token')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      request(app)
+        .get('/api/content_items')
+        .set('Bearer', tokenUser)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
   });
 
 
@@ -83,6 +137,7 @@ describe('/api/content_items', function() {
 
       request(app)
         .post('/api/content_items')
+        .set('Bearer', tokenAdmin)
         .type('json')
         .send(json)
         .expect(200)
@@ -100,6 +155,7 @@ describe('/api/content_items', function() {
 
       request(app)
         .post('/api/content_items')
+        .set('Bearer', tokenAdmin)
         .type('json')
         .send(json)
         .expect(400)
@@ -108,6 +164,41 @@ describe('/api/content_items', function() {
           res.body.message.should.be.equal('content is required. ');
           done();
         });
+    });
+
+    it('should respond with a 401 if there is no user token header', function(done) {
+      request(app)
+        .post('/api/content_items')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      request(app)
+        .post('/api/content_items')
+        .set('Bearer', 'not a valid token')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      request(app)
+        .post('/api/content_items')
+        .set('Bearer', tokenUser)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
     });
   });
 
@@ -126,6 +217,7 @@ describe('/api/content_items', function() {
 
       request(app)
         .put('/api/content_items/1')
+        .set('Bearer', tokenAdmin)
         .type('json')
         .send(json)
         .expect(200)
@@ -143,6 +235,7 @@ describe('/api/content_items', function() {
 
       request(app)
         .put('/api/content_items/2')
+        .set('Bearer', tokenAdmin)
         .type('json')
         .send(json)
         .expect(404)
@@ -158,6 +251,7 @@ describe('/api/content_items', function() {
 
       request(app)
         .put('/api/content_items/1')
+        .set('Bearer', tokenAdmin)
         .type('json')
         .send(json)
         .expect(200)
@@ -167,6 +261,41 @@ describe('/api/content_items', function() {
           res.body[0].should.have.property('name', 'A Tip');
           done();
         });
+    });
+
+    it('should respond with a 401 if there is no user token header', function(done) {
+      request(app)
+        .put('/api/content_items/1')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      request(app)
+        .put('/api/content_items/1')
+        .set('Bearer', 'not a valid token')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      request(app)
+        .put('/api/content_items/1')
+        .set('Bearer', tokenUser)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
     });
   });
 
@@ -183,6 +312,7 @@ describe('/api/content_items', function() {
     it('should respond with the deleted content item id on successful delete', function(done) {
       request(app)
         .delete('/api/content_items/1')
+        .set('Bearer', tokenAdmin)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -194,6 +324,7 @@ describe('/api/content_items', function() {
     it('should respond with a 404 if the content item does not exist', function(done) {
       request(app)
         .delete('/api/content_items/2')
+        .set('Bearer', tokenAdmin)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
@@ -202,5 +333,39 @@ describe('/api/content_items', function() {
         });
     });
 
+    it('should respond with a 401 if there is no user token header', function(done) {
+      request(app)
+        .delete('/api/content_items/2')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      request(app)
+        .delete('/api/content_items/2')
+        .set('Bearer', 'not a valid token')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      request(app)
+        .delete('/api/content_items/2')
+        .set('Bearer', tokenUser)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
   });
 });
