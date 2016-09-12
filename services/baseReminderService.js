@@ -20,6 +20,27 @@ baseReminderService.findAll = function() {
   });
 };
 
+baseReminderService.findAllIncludingTimeframes = function() {
+  return BaseReminder.findAll({include: Timeframe}).then(function(resp) {
+    var baseReminders = resp.map(function(resp) {
+      return resp.dataValues;
+    });
+
+    return baseReminders.map(function(baseReminder) {
+      baseReminder.timeframes = baseReminder.Timeframes.map(function(timeframeResp) {
+        return {
+          id: timeframeResp.dataValues.id,
+          name: timeframeResp.dataValues.name,
+          type: timeframeResp.dataValues.type,
+          formula: timeframeResp.dataValues.formula
+        }
+      });
+      delete baseReminder.Timeframes;
+      return baseReminder;
+    })
+  })
+};
+
 baseReminderService.findById = function(id) {
   return BaseReminder.findById(id, {include: Timeframe}).then(function(resp) {
     if (!resp) {

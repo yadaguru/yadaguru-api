@@ -88,6 +88,107 @@ describe('The BaseReminders Service', function() {
     });
   });
 
+  describe('The findAllIncludingTimeframes function', function() {
+    var findAll, Timeframe, baseRemindersIncludingTimeframes;
+
+    beforeEach(function() {
+      baseRemindersIncludingTimeframes = [{
+        dataValues: {
+          id: '1',
+          name: 'Write Essay',
+          message: 'Better get writing!',
+          detail: 'Some help for writing your essay',
+          lateMessage: 'Too late',
+          lateDetail: 'Should have started sooner',
+          Timeframes: [{
+            dataValues: {
+              id: 1,
+              name: 'Today',
+              type: 'now',
+              formula: undefined
+            }
+          }, {
+            dataValues: {
+              id: 2,
+              name: 'In 30 Days',
+              type: 'relative',
+              formula: '30'
+            }
+          }],
+          categoryId: 1
+        }
+      }, {
+        dataValues: {
+          id: '2',
+          name: 'Get Recommendations',
+          message: 'Ask your counselor',
+          detail: 'Tips for asking your counselor',
+          lateMessage: 'Too late',
+          lateDetail: '',
+          Timeframes: [{
+            dataValues: {
+              id: 3,
+              name: 'January 1',
+              type: 'absolute',
+              formula: '2017-01-01'
+            }
+          }],
+          categoryId: 2
+        }
+      }];
+
+      findAll = sinon.stub(BaseReminder, 'findAll');
+      Timeframe = models.Timeframe;
+    });
+
+    afterEach(function() {
+      findAll.restore();
+    });
+
+    it('should resolve with baseReminder objects that include an array of Timeframes belonging to it', function() {
+      findAll.withArgs({include: Timeframe})
+        .returns(Promise.resolve(baseRemindersIncludingTimeframes));
+
+      var response = [{
+        id: '1',
+        name: 'Write Essay',
+        message: 'Better get writing!',
+        detail: 'Some help for writing your essay',
+        lateMessage: 'Too late',
+        lateDetail: 'Should have started sooner',
+        timeframes: [{
+          id: 1,
+          name: 'Today',
+          type: 'now',
+          formula: undefined
+        }, {
+          id: 2,
+          name: 'In 30 Days',
+          type: 'relative',
+          formula: '30'
+        }],
+        categoryId: 1
+      }, {
+        id: '2',
+        name: 'Get Recommendations',
+        message: 'Ask your counselor',
+        detail: 'Tips for asking your counselor',
+        lateMessage: 'Too late',
+        lateDetail: '',
+        timeframes: [{
+          id: 3,
+          name: 'January 1',
+          type: 'absolute',
+          formula: '2017-01-01'
+        }],
+        categoryId: 2
+      }];
+
+      return baseReminderService.findAllIncludingTimeframes()
+        .should.eventually.deep.equal(response);
+    })
+  });
+
   describe('The findById function', function() {
     var findById;
 
