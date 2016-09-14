@@ -8,9 +8,7 @@ var chai = require('chai');
 chai.should();
 var app = require('../../app.js');
 var models = require('../../models');
-var User = models.User;
-var School = models.School;
-var Reminder = models.Reminder;
+var mockData = require('../mockData');
 var moment = require('moment');
 var jwt = require('jsonwebtoken');
 var token = jwt.sign({userId: 1, role: 'user'}, 'development_secret', {noTimestamp: true});
@@ -19,17 +17,18 @@ var tokenWrongUser = jwt.sign({userId: 2, role: 'user'}, 'development_secret', {
 
 
 describe('/api/users', function() {
-  describe('POST', function() {
-    beforeEach(function(done) {
-      models.sequelize.sync({force: true}).then(function() {
-        User.create({phoneNumber: '9876543210'}).then(function() {
-          done();
-        })
-      });
-    });
 
+  beforeEach(function(done) {
+    models.sequelize.sync({force: true}).then(function() {
+      mockData.createMockData().then(function() {
+        done();
+      })
+    })
+  });
+
+  describe('POST', function() {
     it('should respond with new user id when phone number is valid and does not exist', function(done) {
-      var json = { phoneNumber: '1234567890' };
+      var json = { phoneNumber: '2158675309' };
 
       request(app)
         .post('/api/users')
@@ -38,7 +37,7 @@ describe('/api/users', function() {
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body.should.have.property('userId', 2);
+          res.body.should.have.property('userId', 3);
           done();
         });
     });
@@ -53,7 +52,7 @@ describe('/api/users', function() {
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body.should.have.property('userId', 1);
+          res.body.should.have.property('userId', 2);
           done();
         });
     });
@@ -109,7 +108,7 @@ describe('/api/users', function() {
 
     beforeEach(function(done) {
       models.sequelize.sync({force: true}).then(function() {
-        User.bulkCreate([{
+        models.User.bulkCreate([{
           phoneNumber: '1234567890',
           confirmCode: '123456',
           confirmCodeTimestamp: moment.utc().subtract(10, 'seconds').format()
@@ -308,32 +307,6 @@ describe('/api/users', function() {
   });
 
   describe('DELETE', function() {
-
-    beforeEach(function(done) {
-      models.sequelize.sync({force: true}).then(function() {
-        User.create({phoneNumber: '1234567890'}).then(function() {
-          School.create({
-            userId: 1,
-            name: 'Temple',
-            dueDate: '2017-02-01',
-            isActive: 'true'
-          }).then(function() {
-            Reminder.create({
-              schoolId: 1,
-              userId: 1,
-              name: 'foo',
-              message: 'bar',
-              detail: 'foobar',
-              timeframe: '1 week before',
-              dueDate: '2017-02-01'
-            }).then(function() {
-              done();
-            })
-          });
-        })
-      });
-    });
-
     it('should respond with the deleted user id on successful delete', function(done) {
       request(app)
         .delete('/api/users/1')
@@ -353,9 +326,9 @@ describe('/api/users', function() {
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-          School.findAll({where: {userId: 1}}).then(function(schoolResp) {
+          models.School.findAll({where: {userId: 1}}).then(function(schoolResp) {
             schoolResp.should.deep.equal([]);
-            Reminder.findAll({where: {userId: 1}}).then(function(reminderResp) {
+            models.Reminder.findAll({where: {userId: 1}}).then(function(reminderResp) {
               reminderResp.should.deep.equal([]);
               done();
             })

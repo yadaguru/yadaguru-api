@@ -9,6 +9,8 @@ chai.should();
 var errors = require('../../services/errorService');
 var Promise = require('bluebird');
 var schoolService = require('../../services/schoolService');
+var reminderService = require('../../services/reminderService');
+var reminderGenerationService = require('../../services/reminderGenerationService');
 var auth = require('../../services/authService');
 
 describe('Schools Controller', function() {
@@ -225,14 +227,18 @@ describe('Schools Controller', function() {
   });
 
   describe('POST /schools', function() {
-    var create;
+    var create, bulkCreate, getRemindersForSchool;
 
     beforeEach(function() {
       create = sinon.stub(schoolService, 'create');
+      bulkCreate = sinon.stub(reminderService, 'bulkCreate');
+      getRemindersForSchool = sinon.stub(reminderGenerationService, 'getRemindersForSchool');
     });
 
     afterEach(function() {
       create.restore();
+      bulkCreate.restore();
+      getRemindersForSchool.restore();
     });
 
     it('should respond with new school object and 200 status on success', function() {
@@ -240,6 +246,10 @@ describe('Schools Controller', function() {
         .returns('a valid token');
       getUserData.withArgs('a valid token')
         .returns({userId: 1, role: 'user'});
+      getRemindersForSchool.withArgs('1', '1', '2017-02-01')
+        .returns(Promise.resolve('generated reminders'));
+      bulkCreate.withArgs('generated reminders')
+        .returns(Promise.resolve('count of new reminders'));
 
       req.body =  {
         name: 'Temple',

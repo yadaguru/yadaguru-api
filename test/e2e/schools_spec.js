@@ -7,48 +7,26 @@ var request = require('supertest');
 var chai = require('chai');
 chai.should();
 var app = require('../../app.js');
+var mockData = require('../mockData');
 var models = require('../../models');
-var School = models.School;
-var User = models.User;
+var moment = require('moment');
 var jwt = require('jsonwebtoken');
 var token = jwt.sign({userId: 1, role: 'user'}, 'development_secret', {noTimestamp: true});
 var tokenWrongRole = jwt.sign({userId: 1, role: 'admin'}, 'development_secret', {noTimestamp: true});
 var tokenWrongUser = jwt.sign({userId: 2, role: 'user'}, 'development_secret', {noTimestamp: true});
 
-
 describe('/api/schools', function() {
-  var schools = [{
-    id: '1',
-    userId: '1',
-    name: 'Temple',
-    dueDate: '2017-02-01',
-    isActive: true
-  }, {
-    id: '2',
-    userId: '1',
-    name: 'Drexel',
-    dueDate: '2017-02-01',
-    isActive: true
-  }];
+  var schools = mockData.schools;
 
-  var user = {
-    phoneNumber: '1234567890'
-  };
+  beforeEach(function(done) {
+    models.sequelize.sync({force: true}).then(function() {
+      mockData.createMockData().then(function() {
+        done();
+      })
+    })
+  });
 
   describe('GET', function() {
-
-    before(function(done) {
-      models.sequelize.sync({force: true}).then(function() {
-        User.create(user).then(function() {
-          School.create(schools[0]).then(function() {
-            School.create(schools[1]).then(function() {
-              done();
-            })
-          })
-        })
-      })
-    });
-
     it('should respond with all schools', function(done) {
       request(app)
         .get('/api/schools')
@@ -142,18 +120,9 @@ describe('/api/schools', function() {
 
 
   describe('POST', function() {
-
-    before(function(done) {
-      models.sequelize.sync({force: true}).then(function() {
-        User.create(user).then(function() {
-          done();
-        });
-      });
-    });
-
     it('should respond with school id when valid data is submitted', function(done) {
       var json = {
-        name: 'Temple',
+        name: 'University of Pennsylvania',
         dueDate: '2017-02-01',
         isActive: 'true'
       };
@@ -166,13 +135,45 @@ describe('/api/schools', function() {
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body[0].should.have.property('id', 1);
+          res.body[0].should.have.property('id', 3);
           res.body[0].should.have.property('userId', 1);
           res.body[0].should.have.property('name', json.name);
           res.body[0].should.have.property('isActive', true);
           res.body[0].should.have.property('dueDate', json.dueDate);
           done();
         });
+    });
+
+    it('should generate reminders for the school, and save them to the reminders table', function(done) {
+      var json = {
+        name: 'University of Pennsylvania',
+        dueDate: '2017-02-01',
+        isActive: 'true'
+      };
+
+      request(app)
+        .post('/api/schools')
+        .set('Bearer', token)
+        .type('json')
+        .send(json)
+        .end(function(err, res) {
+          if (err) return done(err);
+          models.Reminder.findAll().then(function(res) {
+            res[6].dataValues.should.have.property('schoolId', 3);
+            res[6].dataValues.should.have.property('userId', 1);
+            res[6].dataValues.should.have.property('baseReminderId', 1);
+            res[7].dataValues.should.have.property('baseReminderId', 1);
+            res[8].dataValues.should.have.property('baseReminderId', 2);
+            res[6].dataValues.should.have.property('timeframe', 'Today');
+            res[7].dataValues.should.have.property('timeframe', '30 Days Before');
+            res[8].dataValues.should.have.property('timeframe', 'January 1');
+            moment.utc(res[6].dataValues.dueDate).format('YYYY-MM-DD').should.equal(moment.utc().format('YYYY-MM-DD'));
+            moment.utc(res[7].dataValues.dueDate).format('YYYY-MM-DD').should.equal('2017-01-02');
+            moment.utc(res[8].dataValues.dueDate).format('YYYY-MM-DD').should.equal('2017-01-01');
+            done();
+          })
+        })
+
     });
 
     it('should respond with error if all required fields is not present', function(done) {
@@ -252,17 +253,6 @@ describe('/api/schools', function() {
   });
 
   describe('PUT', function() {
-
-    before(function(done) {
-      models.sequelize.sync({force: true}).then(function() {
-        User.create(user).then(function() {
-          School.create(schools[0]).then(function() {
-            done();
-          })
-        });
-      });
-    });
-
     it('should respond with the updated school on successful update', function(done) {
       var json = {
         name: 'Drexel'
@@ -288,14 +278,14 @@ describe('/api/schools', function() {
       };
 
       request(app)
-        .put('/api/schools/2')
+        .put('/api/schools/3')
         .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body.message.should.be.equal('School with id 2 not found');
+          res.body.message.should.be.equal('School with id 3 not found');
           done();
         });
     });
@@ -312,7 +302,7 @@ describe('/api/schools', function() {
         .end(function(err, res) {
           if (err) return done(err);
           res.body[0].should.have.property('id', 1);
-          res.body[0].should.have.property('name', 'Drexel');
+          res.body[0].should.have.property('name', 'Temple');
           done();
         });
     });
@@ -390,17 +380,6 @@ describe('/api/schools', function() {
   });
 
   describe('DELETE', function() {
-
-    before(function(done) {
-      models.sequelize.sync({force: true}).then(function() {
-        User.create(user).then(function() {
-          School.create(schools[0]).then(function() {
-            done();
-          })
-        });
-      });
-    });
-
     it('should respond with the deleted school id on successful delete', function(done) {
       request(app)
         .delete('/api/schools/1')
@@ -413,14 +392,27 @@ describe('/api/schools', function() {
         });
     });
 
+    it('should delete associated reminders when school is deleted', function(done) {
+      request(app)
+        .delete('/api/schools/1')
+        .set('Bearer', token)
+        .expect(200)
+        .end(function(err, res) {
+          models.Reminder.findAll({where: {schoolId: 1}}).then(function(res) {
+            res.should.deep.equal([]);
+            done();
+          })
+        });
+    });
+
     it('should respond with a 404 if the school does not exist', function(done) {
       request(app)
-        .delete('/api/schools/2')
+        .delete('/api/schools/3')
         .set('Bearer', token)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body.message.should.equal('School with id 2 not found');
+          res.body.message.should.equal('School with id 3 not found');
           done();
         });
     });
@@ -471,6 +463,5 @@ describe('/api/schools', function() {
           done();
         })
     });
-
   });
 });

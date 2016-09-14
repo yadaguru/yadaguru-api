@@ -8,66 +8,25 @@ var chai = require('chai');
 chai.should();
 var app = require('../../app.js');
 var models = require('../../models');
+var mockData = require('../mockData');
 var BaseReminder = models.BaseReminder;
-var Timeframe = models.Timeframe;
-var Category = models.Category;
 var jwt = require('jsonwebtoken');
 var token = jwt.sign({userId: 1, role: 'admin'}, 'development_secret', {noTimestamp: true});
 var tokenWrongRole = jwt.sign({userId: 1, role: 'user'}, 'development_secret', {noTimestamp: true});
 
 
 describe('/api/base_reminders', function() {
-  var timeframes = [{
-    name: 'Today',
-    type: 'now'
-  }, {
-    name: '7 Days Before',
-    type: 'relative',
-    formula: '7'
-  }];
+  var baseReminders = mockData.baseReminders;
 
-  var categories = [{
-    name: 'Essays'
-  }, {
-    name: 'Recommendations'
-  }];
-
-  var baseReminders = [{
-    name: 'Write Essay',
-    message: 'Better get writing!',
-    detail: 'Some help for writing your essay',
-    lateMessage: 'Too late',
-    lateDetail: 'Should have started sooner',
-    categoryId: 1
-  }, {
-    name: 'Get Recommendations',
-    message: 'Ask your counselor',
-    detail: 'Tips for asking your counselor',
-    lateMessage: 'Too late',
-    lateDetail: '',
-    categoryId: 2
-  }];
+  beforeEach(function(done) {
+    models.sequelize.sync({force: true}).then(function() {
+      mockData.createMockData().then(function() {
+        done();
+      })
+    })
+  });
 
   describe('GET', function() {
-
-    before(function(done) {
-      models.sequelize.sync({force: true}).then(function() {
-        Timeframe.bulkCreate(timeframes).then(function() {
-          Category.bulkCreate(categories).then(function() {
-            BaseReminder.create(baseReminders[0]).then(function(br) {
-              br.setTimeframes([1, 2]).then(function() {
-                BaseReminder.create(baseReminders[1]).then(function(br) {
-                  br.setTimeframes([1]).then(function() {
-                    done();
-                  })
-                })
-              })
-            })
-          })
-        })
-      })
-    });
-
     it('should respond with all baseReminders', function(done) {
       request(app)
         .get('/api/base_reminders')
@@ -76,10 +35,10 @@ describe('/api/base_reminders', function() {
         .end(function(err, res) {
           if (err) return done(err);
           res.body.should.have.lengthOf(2);
-          res.body[0].should.have.property('name', 'Write Essay');
-          res.body[0].should.have.property('categoryId', 1);
-          res.body[1].should.have.property('name', 'Get Recommendations');
-          res.body[1].timeframeIds.should.deep.equal([1]);
+          res.body[0].should.have.property('name', baseReminders[0].name);
+          res.body[0].should.have.property('categoryId', baseReminders[0].categoryId);
+          res.body[1].should.have.property('name', baseReminders[1].name);
+          res.body[1].timeframeIds.should.deep.equal([3]);
           done();
         });
     });
@@ -107,7 +66,7 @@ describe('/api/base_reminders', function() {
           res.body.message.should.equal('BaseReminder with id 3 not found');
           done();
         })
-    })
+    });
 
     it('should respond with a 401 if there is no user token header', function(done) {
       request(app)
@@ -147,17 +106,6 @@ describe('/api/base_reminders', function() {
 
 
   describe('POST', function() {
-
-    before(function(done) {
-      models.sequelize.sync({force: true}).then(function() {
-        Timeframe.bulkCreate(timeframes).then(function() {
-          Category.bulkCreate(categories).then(function() {
-            done();
-          })
-        })
-      })
-    });
-
     it('should respond with baseReminder id when valid data is submitted', function(done) {
       var json = {
         name: 'Write Essay',
@@ -177,7 +125,7 @@ describe('/api/base_reminders', function() {
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body[0].should.have.property('id');
+          res.body[0].should.have.property('id', 3);
           res.body[0].should.have.property('name', 'Write Essay');
           res.body[0].timeframeIds.should.deep.equal([1, 2]);
           done();
@@ -268,23 +216,8 @@ describe('/api/base_reminders', function() {
   });
 
   describe('PUT', function() {
-
-    before(function(done) {
-      models.sequelize.sync({force: true}).then(function() {
-        Timeframe.bulkCreate(timeframes).then(function() {
-          Category.bulkCreate(categories).then(function() {
-            BaseReminder.create(baseReminders[0]).then(function(br) {
-              br.setTimeframes([1, 2]).then(function() {
-                done();
-              })
-            })
-          })
-        })
-      })
-    });
-
     it('should respond with the updated baseReminder on successful update', function(done) {
-      var json = { name: 'Write Essays' };
+      var json = { name: 'Write Essay' };
 
       request(app)
         .put('/api/base_reminders/1')
@@ -295,7 +228,7 @@ describe('/api/base_reminders', function() {
         .end(function(err, res) {
           if (err) return done(err);
           res.body[0].should.have.property('id', 1);
-          res.body[0].should.have.property('name', 'Write Essays');
+          res.body[0].should.have.property('name', 'Write Essay');
           done();
         });
     });
@@ -304,14 +237,14 @@ describe('/api/base_reminders', function() {
       var json = { name: 'Write Essays' };
 
       request(app)
-        .put('/api/base_reminders/2')
+        .put('/api/base_reminders/3')
         .set('Bearer', token)
         .type('json')
         .send(json)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body.message.should.be.equal('BaseReminder with id 2 not found');
+          res.body.message.should.be.equal('BaseReminder with id 3 not found');
           done();
         });
     });
@@ -328,7 +261,7 @@ describe('/api/base_reminders', function() {
         .end(function(err, res) {
           if (err) return done(err);
           res.body[0].should.have.property('id', 1);
-          res.body[0].should.have.property('name', 'Write Essays');
+          res.body[0].should.have.property('name', 'Write Essay');
           done();
         });
     });
@@ -370,21 +303,6 @@ describe('/api/base_reminders', function() {
   });
 
   describe('DELETE', function() {
-
-    before(function(done) {
-      models.sequelize.sync({force: true}).then(function() {
-        Timeframe.bulkCreate(timeframes).then(function() {
-          Category.bulkCreate(categories).then(function() {
-            BaseReminder.create(baseReminders[0]).then(function(br) {
-              br.setTimeframes([1, 2]).then(function() {
-                done();
-              })
-            })
-          })
-        })
-      })
-    });
-
     it('should respond with the deleted baseReminder id on successful delete', function(done) {
       request(app)
         .delete('/api/base_reminders/1')
@@ -397,14 +315,28 @@ describe('/api/base_reminders', function() {
         });
     });
 
+    it('should delete reminders associated with this baseReminder', function(done) {
+      request(app)
+        .delete('/api/base_reminders/1')
+        .set('Bearer', token)
+        .expect(200)
+        .end(function(err, res) {
+          if (err) return done(err);
+          models.Reminder.findAll({where: {baseReminderId: 1}}).then(function(res) {
+            res.should.deep.equal([]);
+            done();
+          });
+        });
+    });
+
     it('should respond with a 404 if the baseReminder does not exist', function(done) {
       request(app)
-        .delete('/api/base_reminders/2')
+        .delete('/api/base_reminders/3')
         .set('Bearer', token)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body.message.should.equal('BaseReminder with id 2 not found');
+          res.body.message.should.equal('BaseReminder with id 3 not found');
           done();
         });
     });

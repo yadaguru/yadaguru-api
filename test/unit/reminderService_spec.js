@@ -15,22 +15,14 @@ describe('The Reminders Service', function() {
     id: '1',
     userId: '1',
     schoolId: '1',
-    name: 'Write Essays',
-    message: 'Write Your Essays',
-    detail: 'More detail about essays',
-    lateMessage: 'Your Essays are late',
-    lateDetail: 'What to do about late essays',
+    baseReminderId: '1',
     dueDate: '2017-02-01',
     timeframe: 'One week before'
   }, {
     id: '2',
     userId: '1',
     schoolId: '1',
-    name: 'Get Recommendations',
-    message: 'Ask counselor for recommendations',
-    detail: 'More detail about recommendations',
-    lateMessage: 'Your recommendations are late',
-    lateDetail: 'What to do about late recommendations',
+    baseReminderId: '2',
     dueDate: '2017-02-01',
     timeframe: 'One week before'
   }];
