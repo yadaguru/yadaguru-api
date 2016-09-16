@@ -14,24 +14,24 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "chai": "^3.5.0",
-    "chai-as-promised": "^5.3.0",
-    "mocha": "^2.2.5",
-    "sequelize-cli": "^2.4.0",
-    "sinon": "^1.17.3",
-    "sinon-chai": "^2.8.0",
-    "supertest": "^1.2.0"
+    "chai": "3.5.0",
+    "chai-as-promised": "5.3.0",
+    "mocha": "2.2.5",
+    "sequelize-cli": "2.4.0",
+    "sinon": "1.17.3",
+    "sinon-chai": "2.8.0",
+    "supertest": "1.2.0"
   },
   "dependencies": {
-    "bcryptjs": "^2.3.0",
-    "bluebird": "^3.4.1",
-    "body-parser": "^1.15.0",
-    "express": "^4.12.3",
-    "jsonwebtoken": "^7.1.9",
-    "moment": "^2.14.1",
-    "pg": "^6.0.1",
-    "pg-hstore": "^2.3.2",
-    "sequelize": "^3.23.4",
-    "validator": "^5.4.0"
+    "bcryptjs": "2.3.0",
+    "bluebird": "3.4.1",
+    "body-parser": "1.15.0",
+    "express": "4.12.3",
+    "jsonwebtoken": "7.1.9",
+    "moment": "2.14.1",
+    "pg": "6.0.1",
+    "pg-hstore": "2.3.2",
+    "sequelize": "3.23.4",
+    "validator": "5.4.0"
   }
 }
