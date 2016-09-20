@@ -43,10 +43,11 @@ reminderService.findByUserWithBaseReminders = function(userId) {
   })
 };
 
-reminderService.findByIdWithBaseReminders = function(id) {
+reminderService.findByIdForUserWithBaseReminders = function(id, userId) {
   return Reminder.findAll({
     where: {
-      id: id
+      id: id,
+      userId: userId
     },
     include: {
       model: BaseReminder,
@@ -62,7 +63,7 @@ reminderService.findByIdWithBaseReminders = function(id) {
   })
 };
 
-reminderService.findByUserForSchoolWithBaseReminders = function(userId, schoolId) {
+reminderService.findByUserForSchoolWithBaseReminders = function(schoolId, userId) {
   return Reminder.findAll({
     where: {
       userId: userId,

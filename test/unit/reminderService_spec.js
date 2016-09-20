@@ -168,7 +168,7 @@ describe('The Reminders Service', function() {
     });
   });
 
-  describe('The findByIdWithBaseReminders function', function() {
+  describe('The findByIdForUserWithBaseReminders function', function() {
     var findAll;
 
     beforeEach(function() {
@@ -182,7 +182,8 @@ describe('The Reminders Service', function() {
     it('should resolve with a flattened array of reminder matching the id, joined with base reminders, joined with categories', function() {
       findAll.withArgs({
         where: {
-          id: 1
+          id: 1,
+          userId: 1
         },
         include: {
           model: BaseReminder,
@@ -192,13 +193,13 @@ describe('The Reminders Service', function() {
         }
       }).returns(Promise.resolve(dbResponse[0]));
 
-      return reminderService.findByIdWithBaseReminders(1).should.eventually.deep.equal([returnedResult[0]]);
+      return reminderService.findByIdForUserWithBaseReminders(1, 1).should.eventually.deep.equal([returnedResult[0]]);
     });
 
     it('should resolve with an empty array there are no reminders', function() {
       findAll.returns(Promise.resolve([]));
 
-      return reminderService.findByIdWithBaseReminders(1).should.eventually.deep.equal([]);
+      return reminderService.findByIdForUserWithBaseReminders(1).should.eventually.deep.equal([]);
     });
   });
 
