@@ -8,9 +8,81 @@ chai.should();
 
 var models = require('../../models');
 var Reminder = models.Reminder;
+var BaseReminder = models.BaseReminder;
+var Category = models.Category;
 var reminderService = require('../../services/reminderService');
 
 describe('The Reminders Service', function() {
+  var dbResponse = [{
+    dataValues: {
+      id: '1',
+      dueDate: '2017-02-01',
+      timeframe: 'One week before',
+      BaseReminder: {
+        dataValues: {
+          id: '1',
+          name: 'Write Essay',
+          message: 'Better get writing!',
+          detail: 'Some help for writing your essay',
+          lateMessage: 'Too late',
+          lateDetail: 'Should have started sooner',
+          categoryId: 1,
+          Category: {
+            dataValues: {
+              id: 1,
+              name: 'Essays'
+            }
+          }
+        }
+      }
+    }
+  }, {
+    dataValues: {
+      id: '2',
+      dueDate: '2017-02-01',
+      timeframe: 'One week before',
+      BaseReminder: {
+        dataValues: {
+          id: '2',
+          name: 'Get Recommendations',
+          message: 'Ask your counselor',
+          detail: 'Tips for asking your counselor',
+          lateMessage: 'Too late',
+          lateDetail: '',
+          categoryId: '2',
+          Category: {
+            dataValues: {
+              id: '2',
+              name: 'Recommendations'
+            }
+          }
+        }
+      }
+    }
+  }];
+
+  var returnedResult = [{
+    id: '1',
+    dueDate: '2017-02-01',
+    timeframe: 'One week before',
+    name: 'Write Essay',
+    message: 'Better get writing!',
+    detail: 'Some help for writing your essay',
+    lateMessage: 'Too late',
+    lateDetail: 'Should have started sooner',
+    category: 'Essays'
+  }, {
+    id: '2',
+    dueDate: '2017-02-01',
+    timeframe: 'One week before',
+    name: 'Get Recommendations',
+    message: 'Ask your counselor',
+    detail: 'Tips for asking your counselor',
+    lateMessage: 'Too late',
+    lateDetail: '',
+    category: 'Recommendations'
+  }];
+
   var reminders =[{
     id: '1',
     userId: '1',
@@ -27,85 +99,106 @@ describe('The Reminders Service', function() {
     timeframe: 'One week before'
   }];
 
-  describe('The findByUser function', function() {
+  describe('The findByUserWithBaseReminders function', function() {
     var findAll;
 
-    before(function() {
-      findAll = sinon.stub(Reminder, 'findAll');
+    beforeEach(function() {
+      findAll = sinon.stub(Reminder, 'findAll')
     });
 
-    after(function() {
+    afterEach(function() {
       findAll.restore();
     });
 
-    it('should resolve with an array of objects representing reminders', function() {
-      findAll.returns(Promise.resolve(reminders.map(
-        function(reminder) {
-          return {dataValues: reminder};
-        }
-      )));
+    it('should resolve with a flattened array of reminders joined with base reminders, joined with categories', function() {
+      findAll.withArgs({
+          where: {
+            userId: 1
+          },
+          include: {
+            model: BaseReminder,
+            include: {
+              model: Category
+            }
+          }
+      }).returns(Promise.resolve(dbResponse));
 
-      return reminderService.findByUser(1).should.eventually.deep.equal(reminders);
+      return reminderService.findByUserWithBaseReminders(1).should.eventually.deep.equal(returnedResult);
     });
 
     it('should resolve with an empty array there are no reminders', function() {
       findAll.returns(Promise.resolve([]));
 
-      return reminderService.findAll().should.eventually.deep.equal([]);
+      return reminderService.findByUserWithBaseReminders(1).should.eventually.deep.equal([]);
     });
   });
 
-  describe('The findByResourceForUser (find by school for user) function', function() {
+  describe('The findByUserForSchoolWithBaseReminders function', function() {
     var findAll;
 
-    before(function() {
-      findAll = sinon.stub(Reminder, 'findAll');
+    beforeEach(function() {
+      findAll = sinon.stub(Reminder, 'findAll')
     });
 
-    after(function() {
+    afterEach(function() {
       findAll.restore();
     });
 
-    it('should resolve with an array of objects representing reminders', function() {
-      findAll.returns(Promise.resolve(reminders.map(
-        function(reminder) {
-          return {dataValues: reminder};
+    it('should resolve with a flattened array of reminders for a school, joined with base reminders, joined with categories', function() {
+      findAll.withArgs({
+        where: {
+          userId: 1,
+          schoolId: 1
+        },
+        include: {
+          model: BaseReminder,
+          include: {
+            model: Category
+          }
         }
-      )));
+      }).returns(Promise.resolve(dbResponse));
 
-      return reminderService.findByResourceForUser('School', 1, 1).should.eventually.deep.equal(reminders);
+      return reminderService.findByUserForSchoolWithBaseReminders(1, 1).should.eventually.deep.equal(returnedResult);
     });
 
     it('should resolve with an empty array there are no reminders', function() {
       findAll.returns(Promise.resolve([]));
 
-      return reminderService.findAll().should.eventually.deep.equal([]);
+      return reminderService.findByUserForSchoolWithBaseReminders().should.eventually.deep.equal([]);
     });
   });
 
-  describe('The findById function', function() {
-    var findById;
+  describe('The findByIdWithBaseReminders function', function() {
+    var findAll;
 
-    before(function() {
-      findById = sinon.stub(Reminder, 'findById');
+    beforeEach(function() {
+      findAll = sinon.stub(Reminder, 'findAll')
     });
 
-    after(function() {
-      findById.restore();
+    afterEach(function() {
+      findAll.restore();
     });
 
-    it('should resolve with an array with the matching reminder object', function() {
-      findById.withArgs(1)
-        .returns(Promise.resolve({dataValues: reminders[0]}));
+    it('should resolve with a flattened array of reminder matching the id, joined with base reminders, joined with categories', function() {
+      findAll.withArgs({
+        where: {
+          id: 1
+        },
+        include: {
+          model: BaseReminder,
+          include: {
+            model: Category
+          }
+        }
+      }).returns(Promise.resolve(dbResponse[0]));
 
-      return reminderService.findById(1).should.eventually.deep.equal([reminders[0]]);
+      return reminderService.findByIdWithBaseReminders(1).should.eventually.deep.equal([returnedResult[0]]);
     });
 
-    it('should resolve with an empty array if no reminders were found', function() {
-      findById.withArgs(3)
-        .returns(Promise.resolve(null));
+    it('should resolve with an empty array there are no reminders', function() {
+      findAll.returns(Promise.resolve([]));
 
-      return reminderService.findById(3).should.eventually.deep.equal([]);
+      return reminderService.findByIdWithBaseReminders(1).should.eventually.deep.equal([]);
     });
   });
 
@@ -128,5 +221,4 @@ describe('The Reminders Service', function() {
       return reminderService.bulkCreate(newReminders).should.eventually.equal(2);
     });
   });
-
 });
