@@ -16,7 +16,7 @@ var tokenWrongUser = jwt.sign({userId: 2, role: 'user'}, 'development_secret', {
 
 
 describe('/api/reminders', function() {
-  var reminders = mockData.reminders;
+  var reminders = mockData.groupedReminders;
 
   beforeEach(function(done) {
     models.sequelize.sync({force: true}).then(function() {
@@ -27,33 +27,44 @@ describe('/api/reminders', function() {
   });
 
   describe('GET', function() {
-    it('should respond with all reminders', function(done) {
+    it('should respond with all grouped & sorted by duedate reminders', function(done) {
       request(app)
         .get('/api/reminders')
         .set('Bearer', token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body[0].should.have.property('userId', Number(reminders[0].userId));
-          res.body[1].should.have.property('schoolId', Number(reminders[1].schoolId));
-          res.body[2].should.have.property('baseReminderId', Number(reminders[2].baseReminderId));
-          res.body[3].should.have.property('dueDate', reminders[3].dueDate);
-          res.body[4].should.have.property('timeframe', reminders[4].timeframe);
-          res.body[5].should.have.property('timeframe', reminders[5].timeframe);
+          res.body[0].should.have.property('dueDate', '2016-09-01');
+          res.body[1].should.have.property('dueDate', '2017-01-01');
+          res.body[2].should.have.property('dueDate', '2017-01-02');
+          res.body[0].reminders[0].should.have.property('timeframe', 'Today');
+          res.body[0].reminders[1].should.have.property('name', 'Write Essay');
+          res.body[1].reminders[0].should.have.property('message', 'Ask your counselor');
+          res.body[1].reminders[1].should.have.property('detail', 'Tips for asking your counselor');
+          res.body[2].reminders[0].should.have.property('lateMessage', 'Too late');
+          res.body[2].reminders[1].should.have.property('lateDetail', 'Should have started sooner');
+          res.body[2].reminders[1].should.have.property('category', 'Essays');
           done();
         });
     });
 
-    it('should respond with all reminders for the school id', function(done) {
+    it('should respond with all reminders grouped and sorted by dueDate for the school id', function(done) {
       request(app)
         .get('/api/reminders/school/1')
         .set('Bearer', token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body[0].should.have.property('userId', Number(reminders[0].userId));
-          res.body[1].should.have.property('schoolId', Number(reminders[1].schoolId));
-          res.body[2].should.have.property('baseReminderId', Number(reminders[2].baseReminderId));
+          res.body[0].should.have.property('dueDate', '2016-09-01');
+          res.body[1].should.have.property('dueDate', '2017-01-01');
+          res.body[2].should.have.property('dueDate', '2017-01-02');
+          res.body[0].reminders[0].should.have.property('timeframe', 'Today');
+          res.body[0].reminders[0].should.have.property('name', 'Write Essay');
+          res.body[1].reminders[0].should.have.property('message', 'Ask your counselor');
+          res.body[1].reminders[0].should.have.property('detail', 'Tips for asking your counselor');
+          res.body[2].reminders[0].should.have.property('lateMessage', 'Too late');
+          res.body[2].reminders[0].should.have.property('lateDetail', 'Should have started sooner');
+          res.body[2].reminders[0].should.have.property('category', 'Essays');
           done();
         });
     });
@@ -65,11 +76,13 @@ describe('/api/reminders', function() {
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body[0].should.have.property('userId', Number(reminders[0].userId));
-          res.body[0].should.have.property('schoolId', Number(reminders[0].schoolId));
-          res.body[0].should.have.property('baseReminderId', Number(reminders[0].baseReminderId));
-          res.body[0].should.have.property('dueDate', reminders[0].dueDate);
-          res.body[0].should.have.property('timeframe', reminders[0].timeframe);
+          res.body[0].should.have.property('timeframe', 'Today');
+          res.body[0].should.have.property('name', 'Write Essay');
+          res.body[0].should.have.property('message', 'Better get writing!');
+          res.body[0].should.have.property('detail', 'Some help for writing your essay');
+          res.body[0].should.have.property('lateMessage', 'Too late');
+          res.body[0].should.have.property('lateDetail', 'Should have started sooner');
+          res.body[0].should.have.property('category', 'Essays');
           done();
         });
     });

@@ -191,7 +191,7 @@ describe('The Reminders Service', function() {
             model: Category
           }
         }
-      }).returns(Promise.resolve(dbResponse[0]));
+      }).returns(Promise.resolve([dbResponse[0]]));
 
       return reminderService.findByIdForUserWithBaseReminders(1, 1).should.eventually.deep.equal([returnedResult[0]]);
     });

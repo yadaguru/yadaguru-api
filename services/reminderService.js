@@ -55,11 +55,10 @@ reminderService.findByIdForUserWithBaseReminders = function(id, userId) {
         model: Category
       }
     }
-  }).then(function(row) {
-    if (row.length < 1) {
-      return [];
-    }
-    return [getReminderResponse(row)];
+  }).then(function(rows) {
+    return rows.map(function(row) {
+      return getReminderResponse(row);
+    });
   })
 };
 
