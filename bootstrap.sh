@@ -2,6 +2,8 @@
 
 # Edit the following to change the name of the database that is created (defaults to the user name)
 APP_DB_NAME=yadaguru
+APP_DB_USER=yadaguru
+APP_DB_PASS=yadaguru
 
 # Edit the following to change the version of PostgreSQL that is installed
 PG_VERSION=9.4
@@ -38,15 +40,19 @@ cat << EOF | su - postgres -c psql
 -- Drop existing DBs and user
 DROP DATABASE IF EXISTS $APP_DB_NAME;
 DROP DATABASE IF EXISTS ${APP_DB_NAME}_test;
+DROP USER IF EXISTS $APP_DB_USER;
+
+-- Create user:
+CREATE USER $APP_DB_USER WITH PASSWORD '${APP_DB_PASS}';
 
 -- Create the database:
-CREATE DATABASE $APP_DB_NAME WITH OWNER=postgres
+CREATE DATABASE $APP_DB_NAME WITH OWNER=${APP_DB_USER}
                                   LC_COLLATE='en_US.utf8'
                                   LC_CTYPE='en_US.utf8'
                                   ENCODING='UTF8'
                                   TEMPLATE=template0;
 -- Create test database:
-CREATE DATABASE ${APP_DB_NAME}_test WITH OWNER=postgres
+CREATE DATABASE ${APP_DB_NAME}_test WITH OWNER=${APP_DB_USER}
                                         LC_COLLATE='en_US.utf8'
                                         LC_CTYPE='en_US.utf8'
                                         ENCODING='UTF8'

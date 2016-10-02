@@ -1,14 +1,14 @@
 {
   "development": {
-    "username": "postgres",
-    "password": "postgres",
+    "username": "yadaguru",
+    "password": "yadaguru",
     "database": "yadaguru",
     "host": "127.0.0.1",
     "dialect": "postgresql"
   },
   "test": {
-    "username": "postgres",
-    "password": "postgres",
+    "username": "yadaguru",
+    "password": "yadaguru",
     "database": "yadaguru_test",
     "host": "127.0.0.1",
     "dialect": "postgresql",
