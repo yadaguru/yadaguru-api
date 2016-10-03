@@ -3,6 +3,8 @@ var express = require('express');
 var http = require('http');
 var https = require('https');
 var bodyParser = require('body-parser');
+var cors = require('cors');
+var morgan = require('morgan');
 var env       = process.env.NODE_ENV || 'development';
 var config    = require('./config/config.json')[env];
 var Sequelize = require('sequelize');
@@ -12,6 +14,16 @@ var sequelize;
 var app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+
+/* Setup cross-origin resource sharing */
+// TODO make origin configurable depending on environment
+app.use(cors({
+  origin: 'http://localhost:9000'
+}));
+
+/* Setup logging */
+// TODO make this configurable depending on environment
+app.use(morgan('dev'));
 
 /* Setup database connection */
 if (config.use_env_variable) {

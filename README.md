@@ -60,6 +60,8 @@ Run `vagrant up`, this will bring up the PostgreSQL database server (this will t
 
 Run `sequelize db:migrate` to setup the database tables.
 
+Run `sequelize db:seed:all` to add initial data to the database.
+
 ##Starting the server
 
 Run `npm start` to start the server. You can confirm that it is working with this command:
