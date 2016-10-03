@@ -16,11 +16,13 @@ var tokenUser = jwt.sign({userId: 1, role: 'user'}, 'development_secret', {noTim
 describe('/api/content_items', function() {
   describe('GET', function() {
     var contentItems = [{
-      name: 'Some Tip',
-      content: 'Here is a tip'
+      id: 1,
+      name: 'faqs',
+      content: 'Some frequently asked questions...'
     }, {
-      name: 'Another Tip',
-      content: 'Here is another tip'
+      id: 2,
+      name: 'privacy',
+      content: 'Our privacy policy...'
     }];
 
     before(function(done) {
@@ -49,25 +51,11 @@ describe('/api/content_items', function() {
 
     it('should respond with requested content item object', function(done) {
       request(app)
-        .get('/api/content_items/1')
-        .set('Bearer', tokenAdmin)
+        .get('/api/content_items/faqs')
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body[0].should.have.property('id', 1);
-          res.body[0].should.have.property('name', contentItems[0].name);
-          res.body[0].should.have.property('content', contentItems[0].content);
-          done();
-        });
-    });
-
-    it('should respond with requested content item object, even if the request comes from a user', function(done) {
-      request(app)
-        .get('/api/content_items/1')
-        .set('Bearer', tokenUser)
-        .expect(200)
-        .end(function(err, res) {
-          if (err) return done(err);
+          console.log(res.body);
           res.body[0].should.have.property('id', 1);
           res.body[0].should.have.property('name', contentItems[0].name);
           res.body[0].should.have.property('content', contentItems[0].content);
@@ -77,47 +65,12 @@ describe('/api/content_items', function() {
 
     it('should respond with a 404 if the content item object does not exist', function(done) {
       request(app)
-        .get('/api/content_items/3')
+        .get('/api/content_items/foobar')
         .set('Bearer', tokenAdmin)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body.message.should.equal('ContentItem with id 3 not found');
-          done();
-        })
-    })
-
-    it('should respond with a 401 if there is no user token header', function(done) {
-      request(app)
-        .get('/api/content_items/3')
-        .expect(401)
-        .end(function(err, res) {
-          if (err) return done(err);
-          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
-          done();
-        })
-    });
-
-    it('should respond with a 401 if the token is invalid', function(done) {
-      request(app)
-        .get('/api/content_items/3')
-        .set('Bearer', 'not a valid token')
-        .expect(401)
-        .end(function(err, res) {
-          if (err) return done(err);
-          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
-          done();
-        })
-    });
-
-    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
-      request(app)
-        .get('/api/content_items')
-        .set('Bearer', tokenUser)
-        .expect(401)
-        .end(function(err, res) {
-          if (err) return done(err);
-          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          res.body.message.should.equal('ContentItem with id foobar not found');
           done();
         })
     });

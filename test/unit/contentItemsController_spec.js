@@ -47,13 +47,13 @@ describe('Content Items Controller', function() {
 
     it('should respond with an array of all content items and a 200 status', function() {
       var contentItems = [{
-        id: '1',
-        name: 'Help Tip',
-        content: 'Here is some help'
+        id: 1,
+        name: 'faqs',
+        content: 'Some frequently asked questions...'
       }, {
-        id: '2',
-        name: 'Another help Tip',
-        content: 'Here is another help tip'
+        id: 2,
+        name: 'privacy',
+        content: 'Our privacy policy...'
       }];
       reqGet.withArgs('Bearer')
         .returns('a valid token');
@@ -122,68 +122,40 @@ describe('Content Items Controller', function() {
     });
   });
 
-  describe('GET /content_items/:id', function() {
-    var findById;
+  describe('GET /content_items/:name', function() {
+    var findByName;
 
     beforeEach(function() {
-      findById = sinon.stub(contentItemService, 'findById');
+      findByName = sinon.stub(contentItemService, 'findByName');
     });
 
     afterEach(function() {
-      findById.restore();
+      findByName.restore();
     });
 
     it('should respond with an array with the matching content item and a 200 status', function() {
-      req.params = {id: 1};
+      req.params = {name: 'faqs'};
       var contentItem = {
-        id: '1',
-        name: 'Help Tip',
-        content: 'Here is some help'
+        id: 1,
+        name: 'faqs',
+        content: 'Some frequently asked questions...'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
-        .returns({userId: 1, role: 'admin'});
-      findById.withArgs(1)
+      findByName.withArgs('faqs')
         .returns(Promise.resolve([contentItem]));
 
-      return contentItemsController.getById(req, res).then(function() {
-        res.json.should.have.been.calledWith([contentItem]);
-        res.status.should.have.been.calledWith(200);
-      });
-    });
-
-    it('should also allow users to access.', function() {
-      req.params = {id: 1};
-      var contentItem = {
-        id: '1',
-        name: 'Help Tip',
-        content: 'Here is some help'
-      };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
-        .returns({userId: 1, role: 'user'});
-      findById.withArgs(1)
-        .returns(Promise.resolve([contentItem]));
-
-      return contentItemsController.getById(req, res).then(function() {
+      return contentItemsController.getByName(req, res).then(function() {
         res.json.should.have.been.calledWith([contentItem]);
         res.status.should.have.been.calledWith(200);
       });
     });
 
     it('should an error object and a 404 status if the content item does not exist', function() {
-      req.params = {id: 2};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
-        .returns({userId: 1, role: 'admin'});
-      var error = new errors.ResourceNotFoundError('ContentItem', req.params.id);
-      findById.withArgs(2)
+      req.params = {name: 'foobar'};
+      var error = new errors.ResourceNotFoundError('ContentItem', req.params.name);
+      findByName.withArgs('foobar')
         .returns(Promise.resolve([]));
 
-      return contentItemsController.getById(req, res).then(function() {
+      return contentItemsController.getByName(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
         res.status.should.have.been.calledWith(404);
       });
@@ -197,37 +169,13 @@ describe('Content Items Controller', function() {
       getUserData.withArgs('a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new Error('database error');
-      findById.returns(Promise.reject(error));
+      findByName.returns(Promise.reject(error));
 
-      return contentItemsController.getById(req, res).then(function() {
+      return contentItemsController.getByName(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
         res.status.should.have.been.calledWith(500);
       });
 
-    });
-
-    it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
-        .returns({userId: 1, role: 'some other role'});
-
-      return contentItemsController.getById(req, res).then(function() {
-        res.json.should.have.been.calledWith(new errors.NotAuthorizedError());
-        res.status.should.have.been.calledWith(401);
-      });
-    });
-
-    it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
-        .returns(false);
-
-      return contentItemsController.getById(req, res).then(function() {
-        res.json.should.have.been.calledWith(new errors.NotAuthorizedError());
-        res.status.should.have.been.calledWith(401);
-      });
     });
   });
 

@@ -140,6 +140,30 @@ var resourceControllerFactory = function(name, modelService, schema, requiredRol
     })
   };
 
+  /**
+   * GET /resources/:name
+   */
+  var getByName = function(req, res) {
+    if (!isUserAuthorized(req, 'getByName', requiredRoles)) {
+      res.status(401);
+      res.json(new errors.NotAuthorizedError());
+      return Promise.resolve();
+    }
+
+    return modelService.findByName(req.params.name).then(function(resource) {
+      if (resource.length === 0) {
+        res.status(404);
+        res.json(new errors.ResourceNotFoundError(name, req.params.name));
+        return;
+      }
+      res.status(200);
+      res.json(resource);
+    }).catch(function(error) {
+      res.status(500);
+      res.json(error);
+    })
+  };
+
   var getByIdForUser = function(req, res) {
     var userData = getAuthorizedUser(req, 'getByIdForUser', requiredRoles);
     if (!userData) {
@@ -348,6 +372,7 @@ var resourceControllerFactory = function(name, modelService, schema, requiredRol
     getAll: getAll,
     getAllForUser: getAllForUser,
     getById: getById,
+    getByName: getByName,
     getByIdForUser: getByIdForUser,
     getAllForResource: getAllForResource,
     getAllForResourceForUser: getAllForResourceForUser,

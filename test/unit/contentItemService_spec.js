@@ -13,12 +13,12 @@ var contentItemService = require('../../services/contentItemService');
 describe('The ContentItems Service', function() {
   var contentItems =[{
     id: 1,
-    name: 'A tip',
-    content: 'Some details'
+    name: 'faqs',
+    content: 'Some frequently asked questions...'
   }, {
     id: 2,
-    name: 'Another tip',
-    content: 'Some more details'
+    name: 'privacy',
+    content: 'Our privacy policy...'
   }];
 
   describe('The findAll function', function() {
@@ -50,28 +50,28 @@ describe('The ContentItems Service', function() {
   });
 
   describe('The findById function', function() {
-    var findById;
+    var findAll;
 
     before(function() {
-      findById = sinon.stub(ContentItem, 'findById');
+      findAll = sinon.stub(ContentItem, 'findAll');
     });
 
     after(function() {
-      findById.restore();
+      findAll.restore();
     });
 
     it('should resolve with an array with the matching contentItem object', function() {
-      findById.withArgs(1)
-        .returns(Promise.resolve({dataValues: contentItems[0]}));
+      findAll.withArgs({where: {name: 'faqs'}})
+        .returns(Promise.resolve([{dataValues: contentItems[0]}]));
 
-      return contentItemService.findById(1).should.eventually.deep.equal([contentItems[0]]);
+      return contentItemService.findByName('faqs').should.eventually.deep.equal([contentItems[0]]);
     });
 
     it('should resolve with an empty array if no contentItems were found', function() {
-      findById.withArgs(3)
-        .returns(Promise.resolve(null));
+      findAll.withArgs({where: {name: 'foobar'}})
+        .returns(Promise.resolve([]));
 
-      return contentItemService.findById(3).should.eventually.deep.equal([]);
+      return contentItemService.findByName('foobar').should.eventually.deep.equal([]);
     });
   });
 

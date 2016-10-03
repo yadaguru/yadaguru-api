@@ -9,9 +9,11 @@ var routes = function() {
     .post(contentItemsController.post);
 
   router.route('/:id')
-    .get(contentItemsController.getById)
     .put(contentItemsController.putOnId)
     .delete(contentItemsController.removeById);
+
+  router.route('/:name')
+    .get(contentItemsController.getByName);
 
   return router;
 };

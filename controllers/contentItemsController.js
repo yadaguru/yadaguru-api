@@ -12,7 +12,6 @@ var schema = {
 var requiredRoles = {
   getAll: ['admin'],
   post: ['admin'],
-  getById: ['user', 'admin'],
   putOnId: ['admin'],
   removeById: ['admin']
 };

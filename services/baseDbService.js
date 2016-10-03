@@ -60,6 +60,15 @@ var baseDbService = function(Model, outputSanitizer) {
     })
   };
 
+  var findByName = function(name) {
+    return Model.findAll({where: {name: name}}).then(function(row) {
+      if (row.length === 0) {
+        return [];
+      }
+      return _sanitizeOutput(row[0].dataValues);
+    })
+  };
+
   var findByUser = function(userId) {
     return Model.findAll({where: {userId: userId}}).then(function(rows) {
       return _sanitizeOutput(rows.map(function(row) {
@@ -138,6 +147,7 @@ var baseDbService = function(Model, outputSanitizer) {
     findByResource: findByResource,
     findByResourceForUser: findByResourceForUser,
     findById: findById,
+    findByName: findByName,
     findByIdForUser: findByIdForUser,
     findByUser: findByUser,
     create: create,
