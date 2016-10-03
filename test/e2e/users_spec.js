@@ -229,7 +229,6 @@ describe('/api/users', function() {
           if (err) return done(err);
           res.body[0].should.have.property('id', 1);
           res.body[0].should.have.property('phoneNumber', '1234567890');
-          res.body[0].should.have.property('confirmCode', '123456');
           done();
         });
     });

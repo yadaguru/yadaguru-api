@@ -196,9 +196,9 @@ describe('Users Controller', function() {
       var updatedUser = {
         id: 1,
         phoneNumber: '1234567890',
-        confirmCode: '123456',
-        confirmCodeTimestamp: '1970-01-01T00:00:00Z',
-        sponsorCode: '123456'
+        sponsorCode: '123456',
+        createdAt: 'ISO timestamp',
+        updatedAt: 'ISO timestamp'
       };
 
       reqGet.withArgs('Bearer')

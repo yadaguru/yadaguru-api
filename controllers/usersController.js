@@ -115,8 +115,15 @@ module.exports = function() {
         res.json(new errors.ResourceNotFoundError('User', id));
         return;
       }
+      updatedUser = updatedUser[0];
       res.status(200);
-      res.json(updatedUser);
+      res.json([{
+        id: updatedUser.id,
+        phoneNumber: updatedUser.phoneNumber,
+        sponsorCode: updatedUser.sponsorCode,
+        createdAt: updatedUser.createdAt,
+        updatedAt: updatedUser.updatedAt
+      }]);
     }).catch(function(error) {
       res.status(500);
       res.json(error);
