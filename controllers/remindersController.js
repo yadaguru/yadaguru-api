@@ -23,6 +23,7 @@ remindersController.getAllForUser = function(req, res) {
   var userId = userData.userId;
 
   return reminderService.findByUserWithBaseReminders(userId).then(function(reminders) {
+    reminders = reminderGen.replaceVariablesInReminders(reminders);
     reminders = reminderGen.groupAndSortByDueDate(reminders);
     res.status(200);
     res.json(reminders);
@@ -45,6 +46,7 @@ remindersController.getAllForSchoolForUser = function(req, res) {
   var schoolId = req.params.id;
 
   return reminderService.findByUserForSchoolWithBaseReminders(schoolId, userId).then(function(reminders) {
+    reminders = reminderGen.replaceVariablesInReminders(reminders);
     reminders = reminderGen.groupAndSortByDueDate(reminders);
     res.status(200);
     res.json(reminders);
@@ -72,6 +74,7 @@ remindersController.getByIdForUser = function(req, res) {
       res.json(new errors.ResourceNotFoundError('Reminder', reminderId));
       return Promise.resolve();
     }
+    reminders = reminderGen.replaceVariablesInReminders(reminders);
     res.status(200);
     res.json(reminders);
   }).catch(function(error) {

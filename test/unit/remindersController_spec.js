@@ -17,21 +17,27 @@ describe('Reminders Controller', function() {
     dueDate: '2017-02-06',
     timeframe: 'One day before',
     name: 'Write Essay',
-    message: 'Better get writing!',
-    detail: 'Some help for writing your essay',
+    message: 'Better get writing for %SCHOOL%!',
+    detail: 'Some help for writing your essay that is due on %REMINDER_DATE%',
     lateMessage: 'Too late',
     lateDetail: 'Should have started sooner',
-    category: 'Essays'
+    category: 'Essays',
+    schoolId: '1',
+    schoolName: 'Temple',
+    schoolDueDate: '2017-02-07'
   }, {
     id: '2',
     dueDate: '2017-02-01',
     timeframe: 'One week before',
     name: 'Get Recommendations',
-    message: 'Ask your counselor',
+    message: 'Ask your counselor. Application is due on %APPLICATION_DATE%',
     detail: 'Tips for asking your counselor',
     lateMessage: 'Too late',
     lateDetail: '',
-    category: 'Recommendations'
+    category: 'Recommendations',
+    schoolId: '1',
+    schoolName: 'Temple',
+    schoolDueDate: '2017-02-07'
   }];
 
   var reminderControllerResponse = [{
@@ -39,7 +45,7 @@ describe('Reminders Controller', function() {
     reminders: [{
       id: '2',
       name: 'Get Recommendations',
-      message: 'Ask your counselor',
+      message: 'Ask your counselor. Application is due on 2/7/2017',
       detail: 'Tips for asking your counselor',
       lateMessage: 'Too late',
       lateDetail: '',
@@ -51,8 +57,8 @@ describe('Reminders Controller', function() {
     reminders: [{
       id: '1',
       name: 'Write Essay',
-      message: 'Better get writing!',
-      detail: 'Some help for writing your essay',
+      message: 'Better get writing for Temple!',
+      detail: 'Some help for writing your essay that is due on 2/6/2017',
       lateMessage: 'Too late',
       lateDetail: 'Should have started sooner',
       category: 'Essays',

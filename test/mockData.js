@@ -22,13 +22,13 @@ module.exports = (function() {
     baseReminders: [{
       name: 'Write Essay',
       message: 'Better get writing!',
-      detail: 'Some help for writing your essay',
-      lateMessage: 'Too late',
+      detail: 'Some help for writing your %SCHOOL% essay for %SCHOOL%',
+      lateMessage: 'Too late. Application was due on %APPLICATION_DATE%',
       lateDetail: 'Should have started sooner',
       categoryId: 1
     }, {
       name: 'Get Recommendations',
-      message: 'Ask your counselor',
+      message: 'Ask your counselor by %REMINDER_DATE%',
       detail: 'Tips for asking your counselor',
       lateMessage: 'Too late',
       lateDetail: '',

@@ -5,6 +5,27 @@ module.exports = (function() {
 
   'use strict';
 
+  /**
+   * @see http://momentjs.com/docs/#/displaying/
+   */
+  var DATE_FORMAT = 'M/D/Y';
+
+  function _getDateFormatterForField(field) {
+    return function(reminder) {
+      return moment.utc(reminder[field]).format(DATE_FORMAT);
+    }
+  }
+
+  var VARIABLES = {
+    '%SCHOOL%': 'schoolName',
+    '%DATE%': _getDateFormatterForField('schoolDueDate'),
+    '%APPLICATION_DATE%': _getDateFormatterForField('schoolDueDate'),
+    '%REMINDER_DATE%': _getDateFormatterForField('dueDate'),
+    '%REGISTRATION_DATE%': _getDateFormatterForField('registrationDate'),
+    '%ADMIN_DATE%': _getDateFormatterForField('adminDate')
+  };
+
+
   function getRemindersForSchool(schoolId, userId, dueDate) {
     return baseReminderService.findAllIncludingTimeframes().then(function(baseReminders) {
       return baseReminders.reduce(function(allTimeframes, baseReminder) {
@@ -81,9 +102,35 @@ module.exports = (function() {
     }, []);
   }
 
+  function replaceVariablesInReminders(reminders) {
+    var fieldsToSearch = ['message', 'detail', 'lateMessage', 'lateDetail'];
+    return reminders.map(function(reminder) {
+      fieldsToSearch.forEach(function(field) {
+        reminder[field] = _replaceVariables(reminder[field], reminder);
+      });
+      return reminder;
+    });
+  }
+
+  function _replaceVariables(content, reminder) {
+    for (var variable in VARIABLES) {
+      if (VARIABLES.hasOwnProperty(variable)) {
+        var field = VARIABLES[variable];
+        var re = new RegExp(variable, 'g');
+        if (typeof field === 'function') {
+          content = content.replace(re, field(reminder))
+        } else {
+          content = content.replace(re, reminder[field]);
+        }
+      }
+    }
+    return content;
+  }
+
   return {
     getRemindersForSchool: getRemindersForSchool,
-    groupAndSortByDueDate: groupAndSortByDueDate
+    groupAndSortByDueDate: groupAndSortByDueDate,
+    replaceVariablesInReminders: replaceVariablesInReminders
   }
 
 })();

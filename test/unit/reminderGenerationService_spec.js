@@ -355,4 +355,93 @@ describe('The reminderGenerationService', function() {
       reminderGenerator.groupAndSortByDueDate(input).should.deep.equal(output);
     });
   });
+
+  describe('the replaceVariablesInReminders function', function() {
+    it('should replace all variables in the message, detail, lateMessage, and lateDetail fields with their mapped values', function() {
+      var input = [{
+        id: '1',
+        dueDate: '2017-02-06',
+        timeframe: 'One day before',
+        name: 'Write Essay',
+        message: 'Better get writing!',
+        detail: 'Some help for writing your %SCHOOL% essay for %SCHOOL%',
+        lateMessage: 'Too late',
+        lateDetail: 'Should have started sooner',
+        category: 'Essays',
+        schoolId: '1',
+        schoolName: 'Temple',
+        schoolDueDate: '2017-02-07'
+      }, {
+        id: '2',
+        dueDate: '2017-02-06',
+        timeframe: 'One day before',
+        name: 'Get Recommendations',
+        message: 'Ask your counselor by %REMINDER_DATE%',
+        detail: 'Tips for asking your counselor',
+        lateMessage: 'Too late. It is past %APPLICATION_DATE%',
+        lateDetail: '',
+        category: 'Recommendations',
+        schoolId: '1',
+        schoolName: 'Temple',
+        schoolDueDate: '2017-02-07'
+      }];
+
+      var output = [{
+        id: '1',
+        dueDate: '2017-02-06',
+        timeframe: 'One day before',
+        name: 'Write Essay',
+        message: 'Better get writing!',
+        detail: 'Some help for writing your Temple essay for Temple',
+        lateMessage: 'Too late',
+        lateDetail: 'Should have started sooner',
+        category: 'Essays',
+        schoolId: '1',
+        schoolName: 'Temple',
+        schoolDueDate: '2017-02-07'
+      }, {
+        id: '2',
+        dueDate: '2017-02-06',
+        timeframe: 'One day before',
+        name: 'Get Recommendations',
+        message: 'Ask your counselor by 2/6/2017',
+        detail: 'Tips for asking your counselor',
+        lateMessage: 'Too late. It is past 2/7/2017',
+        lateDetail: '',
+        category: 'Recommendations',
+        schoolId: '1',
+        schoolName: 'Temple',
+        schoolDueDate: '2017-02-07'
+      }];
+
+      reminderGenerator.replaceVariablesInReminders(input).should.deep.equal(output);
+    });
+
+    it('should return the same string if no variables are found', function() {
+      var input = [{
+        id: '1',
+        dueDate: '2017-02-06',
+        timeframe: 'One day before',
+        name: 'Write Essay',
+        message: 'Better get writing!',
+        detail: 'Some help for writing your essay',
+        lateMessage: 'Too late',
+        lateDetail: 'Should have started sooner',
+        category: 'Essays'
+      }, {
+        id: '2',
+        dueDate: '2017-02-06',
+        timeframe: 'One day before',
+        name: 'Get Recommendations',
+        message: 'Ask your counselor',
+        detail: 'Tips for asking your counselor',
+        lateMessage: 'Too late',
+        lateDetail: '',
+        category: 'Recommendations'
+      }];
+
+      reminderGenerator.replaceVariablesInReminders(input).should.deep.equal(input);
+    })
+  });
 });
+
