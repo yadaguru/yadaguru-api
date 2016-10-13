@@ -10,6 +10,7 @@ var models = require('../../models');
 var Reminder = models.Reminder;
 var BaseReminder = models.BaseReminder;
 var Category = models.Category;
+var School = models.School;
 var reminderService = require('../../services/reminderService');
 
 describe('The Reminders Service', function() {
@@ -34,6 +35,13 @@ describe('The Reminders Service', function() {
             }
           }
         }
+      },
+      School: {
+        dataValues: {
+          id: '1',
+          name: 'Temple',
+          dueDate: '2017-02-01'
+        }
       }
     }
   }, {
@@ -57,6 +65,13 @@ describe('The Reminders Service', function() {
             }
           }
         }
+      },
+      School: {
+        dataValues: {
+          id: '1',
+          name: 'Temple',
+          dueDate: '2017-02-01'
+        }
       }
     }
   }];
@@ -70,7 +85,10 @@ describe('The Reminders Service', function() {
     detail: 'Some help for writing your essay',
     lateMessage: 'Too late',
     lateDetail: 'Should have started sooner',
-    category: 'Essays'
+    category: 'Essays',
+    schoolName: 'Temple',
+    schoolId: '1',
+    schoolDueDate: '2017-02-01'
   }, {
     id: '2',
     dueDate: '2017-02-01',
@@ -80,7 +98,10 @@ describe('The Reminders Service', function() {
     detail: 'Tips for asking your counselor',
     lateMessage: 'Too late',
     lateDetail: '',
-    category: 'Recommendations'
+    category: 'Recommendations',
+    schoolName: 'Temple',
+    schoolId: '1',
+    schoolDueDate: '2017-02-01'
   }];
 
   var reminders =[{
@@ -115,12 +136,14 @@ describe('The Reminders Service', function() {
           where: {
             userId: 1
           },
-          include: {
+          include: [{
             model: BaseReminder,
             include: {
               model: Category
             }
-          }
+          }, {
+            model: School
+          }]
       }).returns(Promise.resolve(dbResponse));
 
       return reminderService.findByUserWithBaseReminders(1).should.eventually.deep.equal(returnedResult);
@@ -150,12 +173,14 @@ describe('The Reminders Service', function() {
           userId: 1,
           schoolId: 1
         },
-        include: {
+        include: [{
           model: BaseReminder,
           include: {
             model: Category
           }
-        }
+        }, {
+          model: School
+        }]
       }).returns(Promise.resolve(dbResponse));
 
       return reminderService.findByUserForSchoolWithBaseReminders(1, 1).should.eventually.deep.equal(returnedResult);
@@ -185,12 +210,14 @@ describe('The Reminders Service', function() {
           id: 1,
           userId: 1
         },
-        include: {
+        include: [{
           model: BaseReminder,
           include: {
             model: Category
           }
-        }
+        }, {
+          model: School
+        }]
       }).returns(Promise.resolve([dbResponse[0]]));
 
       return reminderService.findByIdForUserWithBaseReminders(1, 1).should.eventually.deep.equal([returnedResult[0]]);
