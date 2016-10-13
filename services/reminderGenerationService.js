@@ -37,8 +37,53 @@ module.exports = (function() {
     }
   }
 
+  function groupAndSortByDueDate(reminders) {
+    reminders.sort(function(a, b) {
+      if (a.dueDate > b.dueDate) {
+        return 1;
+      }
+      if (a.dueDate < b.dueDate) {
+        return -1;
+      }
+      return 0;
+    });
+
+    return reminders.reduce(function(groupedReminders, reminder) {
+      var currentGroup = false;
+
+      for (var i = 0; i < groupedReminders.length; i++) {
+        if (groupedReminders[i].dueDate === reminder.dueDate) {
+          currentGroup = groupedReminders[i];
+          break;
+        }
+      }
+
+      if (!currentGroup) {
+        currentGroup = {
+          dueDate: reminder.dueDate,
+          reminders: []
+        };
+        groupedReminders.push(currentGroup);
+      }
+
+      currentGroup.reminders.push({
+        id: reminder.id,
+        name: reminder.name,
+        message: reminder.message,
+        detail: reminder.detail,
+        lateMessage: reminder.lateMessage,
+        lateDetail: reminder.lateDetail,
+        category: reminder.category,
+        timeframe: reminder.timeframe
+      });
+
+      return groupedReminders;
+    }, []);
+  }
+
   return {
-    getRemindersForSchool: getRemindersForSchool
+    getRemindersForSchool: getRemindersForSchool,
+    groupAndSortByDueDate: groupAndSortByDueDate
   }
 
 })();

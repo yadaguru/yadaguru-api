@@ -1,4 +1,5 @@
 var reminderService = require('../services/reminderService');
+var reminderGen = require('../services/reminderGenerationService');
 var auth = require('../services/authService');
 var errors = require('../services/errorService');
 
@@ -22,7 +23,7 @@ remindersController.getAllForUser = function(req, res) {
   var userId = userData.userId;
 
   return reminderService.findByUserWithBaseReminders(userId).then(function(reminders) {
-    reminders = groupAndSortByDueDate(reminders);
+    reminders = reminderGen.groupAndSortByDueDate(reminders);
     res.status(200);
     res.json(reminders);
   }).catch(function(error) {
@@ -44,7 +45,7 @@ remindersController.getAllForSchoolForUser = function(req, res) {
   var schoolId = req.params.id;
 
   return reminderService.findByUserForSchoolWithBaseReminders(schoolId, userId).then(function(reminders) {
-    reminders = groupAndSortByDueDate(reminders);
+    reminders = reminderGen.groupAndSortByDueDate(reminders);
     res.status(200);
     res.json(reminders);
   }).catch(function(error) {
@@ -78,51 +79,5 @@ remindersController.getByIdForUser = function(req, res) {
     res.json(error);
   });
 };
-
-
-
-function groupAndSortByDueDate(reminders) {
-  reminders.sort(function(a, b) {
-    if (a.dueDate > b.dueDate) {
-      return 1;
-    }
-    if (a.dueDate < b.dueDate) {
-      return -1;
-    }
-    return 0;
-  });
-
-  return reminders.reduce(function(groupedReminders, reminder) {
-    var currentGroup = false;
-
-    for (var i = 0; i < groupedReminders.length; i++) {
-      if (groupedReminders[i].dueDate === reminder.dueDate) {
-        currentGroup = groupedReminders[i];
-        break;
-      }
-    }
-
-    if (!currentGroup) {
-      currentGroup = {
-        dueDate: reminder.dueDate,
-        reminders: []
-      };
-      groupedReminders.push(currentGroup);
-    }
-
-    currentGroup.reminders.push({
-      id: reminder.id,
-      name: reminder.name,
-      message: reminder.message,
-      detail: reminder.detail,
-      lateMessage: reminder.lateMessage,
-      lateDetail: reminder.lateDetail,
-      category: reminder.category,
-      timeframe: reminder.timeframe
-    });
-
-    return groupedReminders;
-  }, []);
-}
 
 module.exports = remindersController;

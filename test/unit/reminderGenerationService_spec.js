@@ -203,4 +203,156 @@ describe('The reminderGenerationService', function() {
         .should.eventually.deep.equal(generatedReminders);
     });
   });
+
+  describe('the groupAndSortByDueDate function', function() {
+    it('should return an array of objects containing a dueDate property, and a reminders[] property', function() {
+      var input = [{
+        id: '1',
+        dueDate: '2017-02-06',
+        timeframe: 'One day before',
+        name: 'Write Essay',
+        message: 'Better get writing!',
+        detail: 'Some help for writing your essay',
+        lateMessage: 'Too late',
+        lateDetail: 'Should have started sooner',
+        category: 'Essays'
+      }];
+
+      var output = [{
+        dueDate: '2017-02-06',
+        reminders: [{
+          id: '1',
+          timeframe: 'One day before',
+          name: 'Write Essay',
+          message: 'Better get writing!',
+          detail: 'Some help for writing your essay',
+          lateMessage: 'Too late',
+          lateDetail: 'Should have started sooner',
+          category: 'Essays'
+        }]
+      }];
+
+      reminderGenerator.groupAndSortByDueDate(input).should.deep.equal(output);
+    });
+
+    it('should group multiple reminders into the same object if they share a due date.', function() {
+      var input = [{
+        id: '1',
+        dueDate: '2017-02-06',
+        timeframe: 'One day before',
+        name: 'Write Essay',
+        message: 'Better get writing!',
+        detail: 'Some help for writing your essay',
+        lateMessage: 'Too late',
+        lateDetail: 'Should have started sooner',
+        category: 'Essays'
+      }, {
+        id: '2',
+        dueDate: '2017-02-06',
+        timeframe: 'One day before',
+        name: 'Get Recommendations',
+        message: 'Ask your counselor',
+        detail: 'Tips for asking your counselor',
+        lateMessage: 'Too late',
+        lateDetail: '',
+        category: 'Recommendations'
+      }];
+
+      var output = [{
+        dueDate: '2017-02-06',
+        reminders: [{
+          id: '1',
+          timeframe: 'One day before',
+          name: 'Write Essay',
+          message: 'Better get writing!',
+          detail: 'Some help for writing your essay',
+          lateMessage: 'Too late',
+          lateDetail: 'Should have started sooner',
+          category: 'Essays'
+        }, {
+          id: '2',
+          timeframe: 'One day before',
+          name: 'Get Recommendations',
+          message: 'Ask your counselor',
+          detail: 'Tips for asking your counselor',
+          lateMessage: 'Too late',
+          lateDetail: '',
+          category: 'Recommendations'
+        }]
+      }];
+
+      reminderGenerator.groupAndSortByDueDate(input).should.deep.equal(output);
+    });
+
+    it('should return grouped reminder objects sorted by due date', function() {
+      var input = [{
+        id: '1',
+        dueDate: '2017-02-06',
+        timeframe: 'One day before',
+        name: 'Write Essay',
+        message: 'Better get writing!',
+        detail: 'Some help for writing your essay',
+        lateMessage: 'Too late',
+        lateDetail: 'Should have started sooner',
+        category: 'Essays'
+      }, {
+        id: '2',
+        dueDate: '2017-02-06',
+        timeframe: 'One day before',
+        name: 'Get Recommendations',
+        message: 'Ask your counselor',
+        detail: 'Tips for asking your counselor',
+        lateMessage: 'Too late',
+        lateDetail: '',
+        category: 'Recommendations'
+      }, {
+        id: '3',
+        dueDate: '2017-01-31',
+        timeframe: 'One week before',
+        name: 'Complete application',
+        message: 'Fill it out',
+        detail: 'Do not forget anything',
+        lateMessage: 'You are late!',
+        lateDetail: 'Whoops',
+        category: 'Application'
+      }];
+
+      var output = [{
+        dueDate: '2017-01-31',
+        reminders: [{
+          id: '3',
+          timeframe: 'One week before',
+          name: 'Complete application',
+          message: 'Fill it out',
+          detail: 'Do not forget anything',
+          lateMessage: 'You are late!',
+          lateDetail: 'Whoops',
+          category: 'Application'
+        }]
+      }, {
+        dueDate: '2017-02-06',
+        reminders: [{
+          id: '1',
+          timeframe: 'One day before',
+          name: 'Write Essay',
+          message: 'Better get writing!',
+          detail: 'Some help for writing your essay',
+          lateMessage: 'Too late',
+          lateDetail: 'Should have started sooner',
+          category: 'Essays'
+        }, {
+          id: '2',
+          timeframe: 'One day before',
+          name: 'Get Recommendations',
+          message: 'Ask your counselor',
+          detail: 'Tips for asking your counselor',
+          lateMessage: 'Too late',
+          lateDetail: '',
+          category: 'Recommendations'
+        }]
+      }];
+
+      reminderGenerator.groupAndSortByDueDate(input).should.deep.equal(output);
+    });
+  });
 });
