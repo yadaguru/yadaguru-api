@@ -86,6 +86,7 @@ describe('The Reminders Service', function() {
     lateMessage: 'Too late',
     lateDetail: 'Should have started sooner',
     category: 'Essays',
+    baseReminderId: '1',
     schoolName: 'Temple',
     schoolId: '1',
     schoolDueDate: '2017-02-01'
@@ -99,6 +100,7 @@ describe('The Reminders Service', function() {
     lateMessage: 'Too late',
     lateDetail: '',
     category: 'Recommendations',
+    baseReminderId: '2',
     schoolName: 'Temple',
     schoolId: '1',
     schoolDueDate: '2017-02-01'

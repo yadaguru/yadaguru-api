@@ -23,6 +23,7 @@ function getReminderResponse(row) {
     lateMessage: row.dataValues.BaseReminder.dataValues.lateMessage,
     lateDetail: row.dataValues.BaseReminder.dataValues.lateDetail,
     category: row.dataValues.BaseReminder.dataValues.Category.dataValues.name,
+    baseReminderId: row.dataValues.BaseReminder.dataValues.id,
     schoolName: row.dataValues.School.dataValues.name,
     schoolId: row.dataValues.School.dataValues.id,
     schoolDueDate: row.dataValues.School.dataValues.dueDate

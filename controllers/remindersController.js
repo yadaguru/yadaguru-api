@@ -23,6 +23,7 @@ remindersController.getAllForUser = function(req, res) {
   var userId = userData.userId;
 
   return reminderService.findByUserWithBaseReminders(userId).then(function(reminders) {
+    reminders = reminderGen.deDuplicateReminders(reminders);
     reminders = reminderGen.replaceVariablesInReminders(reminders);
     reminders = reminderGen.groupAndSortByDueDate(reminders);
     res.status(200);

@@ -12,63 +12,88 @@ var reminderService = require('../../services/reminderService');
 var auth = require('../../services/authService');
 
 describe('Reminders Controller', function() {
-  var reminderServiceResponse = [{
-    id: '1',
-    dueDate: '2017-02-06',
-    timeframe: 'One day before',
-    name: 'Write Essay',
-    message: 'Better get writing for %SCHOOL%!',
-    detail: 'Some help for writing your essay that is due on %REMINDER_DATE%',
-    lateMessage: 'Too late',
-    lateDetail: 'Should have started sooner',
-    category: 'Essays',
-    schoolId: '1',
-    schoolName: 'Temple',
-    schoolDueDate: '2017-02-07'
-  }, {
-    id: '2',
-    dueDate: '2017-02-01',
-    timeframe: 'One week before',
-    name: 'Get Recommendations',
-    message: 'Ask your counselor. Application is due on %APPLICATION_DATE%',
-    detail: 'Tips for asking your counselor',
-    lateMessage: 'Too late',
-    lateDetail: '',
-    category: 'Recommendations',
-    schoolId: '1',
-    schoolName: 'Temple',
-    schoolDueDate: '2017-02-07'
-  }];
+  var reminderServiceResponse, reminderControllerResponse;
+  var req, res, remindersController, reqGet, getUserData;
 
-  var reminderControllerResponse = [{
-    dueDate: '2017-02-01',
-    reminders: [{
+  beforeEach(function() {
+    reminderServiceResponse = [{
+      id: '1',
+      dueDate: '2017-02-06',
+      timeframe: 'One day before',
+      name: 'Write Essay',
+      message: 'Better get writing for %SCHOOL%!',
+      detail: 'Some help for writing your essay that is due on %REMINDER_DATE%',
+      lateMessage: 'Too late',
+      lateDetail: 'Should have started sooner',
+      category: 'Essays',
+      baseReminderId: '1',
+      schoolId: '1',
+      schoolName: 'Temple',
+      schoolDueDate: '2017-02-07'
+    }, {
       id: '2',
+      dueDate: '2017-02-01',
+      timeframe: 'One week before',
       name: 'Get Recommendations',
-      message: 'Ask your counselor. Application is due on 2/7/2017',
+      message: 'Ask your counselor. Application is due on %APPLICATION_DATE%',
       detail: 'Tips for asking your counselor',
       lateMessage: 'Too late',
       lateDetail: '',
       category: 'Recommendations',
-      timeframe: 'One week before'
-    }]
-  }, {
-    dueDate: '2017-02-06',
-    reminders: [{
-      id: '1',
-      name: 'Write Essay',
-      message: 'Better get writing for Temple!',
-      detail: 'Some help for writing your essay that is due on 2/6/2017',
+      baseReminderId: '2',
+      schoolId: '1',
+      schoolName: 'Temple',
+      schoolDueDate: '2017-02-07'
+    }, {
+      id: '3',
+      dueDate: '2017-02-01',
+      timeframe: 'One week before',
+      name: 'Get Recommendations',
+      message: 'Ask your counselor. Application is due on %APPLICATION_DATE%',
+      detail: 'Tips for asking your counselor',
       lateMessage: 'Too late',
-      lateDetail: 'Should have started sooner',
-      category: 'Essays',
-      timeframe: 'One day before'
-    }]
-  }];
+      lateDetail: '',
+      category: 'Recommendations',
+      baseReminderId: '2',
+      schoolId: '2',
+      schoolName: 'Drexel',
+      schoolDueDate: '2017-02-07'
+    }];
 
-  var req, res, remindersController, reqGet, getUserData;
+    reminderControllerResponse = [{
+      dueDate: '2017-02-01',
+      reminders: [{
+        id: ['2', '3'],
+        timeframe: 'One week before',
+        name: 'Get Recommendations',
+        message: 'Ask your counselor. Application is due on 2/7/2017',
+        detail: 'Tips for asking your counselor',
+        lateMessage: 'Too late',
+        lateDetail: '',
+        category: 'Recommendations',
+        baseReminderId: '2',
+        schoolId: ['1', '2'],
+        schoolName: 'Temple and Drexel',
+        schoolDueDate: '2017-02-07'
+      }]
+    }, {
+      dueDate: '2017-02-06',
+      reminders: [{
+        id: '1',
+        name: 'Write Essay',
+        message: 'Better get writing for Temple!',
+        detail: 'Some help for writing your essay that is due on 2/6/2017',
+        lateMessage: 'Too late',
+        lateDetail: 'Should have started sooner',
+        category: 'Essays',
+        timeframe: 'One day before',
+        baseReminderId: '1',
+        schoolId: '1',
+        schoolName: 'Temple',
+        schoolDueDate: '2017-02-07'
+      }]
+    }];
 
-  beforeEach(function() {
     req = {
       get: function(){}
     };
@@ -171,9 +196,45 @@ describe('Reminders Controller', function() {
   });
 
   describe('GET /reminders/school/:id', function() {
-    var findByUserForSchoolWithBaseReminders;
+    var findByUserForSchoolWithBaseReminders, reminderServiceResponseForSchool, reminderControllerResponseForSchool;
+
 
     beforeEach(function() {
+      reminderServiceResponseForSchool = [reminderServiceResponse[0], reminderServiceResponse[1]];
+
+      reminderControllerResponseForSchool = [{
+        dueDate: '2017-02-01',
+        reminders: [{
+          id: '2',
+          name: 'Get Recommendations',
+          message: 'Ask your counselor. Application is due on 2/7/2017',
+          detail: 'Tips for asking your counselor',
+          lateMessage: 'Too late',
+          lateDetail: '',
+          category: 'Recommendations',
+          baseReminderId: '2',
+          timeframe: 'One week before',
+          schoolId: '1',
+          schoolName: 'Temple',
+          schoolDueDate: '2017-02-07'
+        }]
+      }, {
+        dueDate: '2017-02-06',
+        reminders: [{
+          id: '1',
+          name: 'Write Essay',
+          message: 'Better get writing for Temple!',
+          detail: 'Some help for writing your essay that is due on 2/6/2017',
+          lateMessage: 'Too late',
+          lateDetail: 'Should have started sooner',
+          category: 'Essays',
+          timeframe: 'One day before',
+          baseReminderId: '1',
+          schoolId: '1',
+          schoolName: 'Temple',
+          schoolDueDate: '2017-02-07'
+        }]
+      }];
       req.params = {id: 1};
       findByUserForSchoolWithBaseReminders = sinon.stub(reminderService, 'findByUserForSchoolWithBaseReminders');
     });
@@ -188,10 +249,10 @@ describe('Reminders Controller', function() {
       getUserData.withArgs('a valid token')
         .returns({userId: 1, role: 'user'});
       findByUserForSchoolWithBaseReminders.withArgs(1, 1)
-        .returns(Promise.resolve(reminderServiceResponse));
+        .returns(Promise.resolve(reminderServiceResponseForSchool));
 
       return remindersController.getAllForSchoolForUser(req, res).then(function() {
-        res.json.should.have.been.calledWith(reminderControllerResponse);
+        res.json.should.have.been.calledWith(reminderControllerResponseForSchool);
         res.status.should.have.been.calledWith(200);
       });
 
@@ -276,7 +337,11 @@ describe('Reminders Controller', function() {
         detail: 'Some help for writing your essay',
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',
-        category: 'Essays'
+        category: 'Essays',
+        baseReminderId: '1',
+        schoolId: '1',
+        schoolName: 'Temple',
+        schoolDueDate: '2017-02-07'
       };
       reqGet.withArgs('Bearer')
         .returns('a valid token');

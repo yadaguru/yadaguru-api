@@ -58,16 +58,20 @@ module.exports = (function() {
     }
   }
 
-  function groupAndSortByDueDate(reminders) {
+  function _sortBy(reminders, key) {
     reminders.sort(function(a, b) {
-      if (a.dueDate > b.dueDate) {
+      if (a[key] > b[key]) {
         return 1;
       }
-      if (a.dueDate < b.dueDate) {
+      if (a[key] < b[key]) {
         return -1;
       }
       return 0;
     });
+  }
+
+  function groupAndSortByDueDate(reminders) {
+    _sortBy(reminders, 'dueDate');
 
     return reminders.reduce(function(groupedReminders, reminder) {
       var currentGroup = false;
@@ -95,7 +99,11 @@ module.exports = (function() {
         lateMessage: reminder.lateMessage,
         lateDetail: reminder.lateDetail,
         category: reminder.category,
-        timeframe: reminder.timeframe
+        timeframe: reminder.timeframe,
+        baseReminderId: reminder.baseReminderId,
+        schoolId: reminder.schoolId,
+        schoolName: reminder.schoolName,
+        schoolDueDate: reminder.schoolDueDate
       });
 
       return groupedReminders;
@@ -127,10 +135,60 @@ module.exports = (function() {
     return content;
   }
 
+  function deDuplicateReminders(reminders) {
+    _sortBy(reminders, 'baseReminderId');
+    _sortBy(reminders, 'dueDate');
+
+    var deDupedReminders = reminders.reduce(function(deDupedReminders, reminder) {
+      if (deDupedReminders.length === 0) {
+        deDupedReminders.push(reminder);
+        return deDupedReminders;
+      }
+
+      var previousReminder = deDupedReminders[deDupedReminders.length - 1];
+      if (previousReminder.dueDate === reminder.dueDate && previousReminder.baseReminderId === reminder.baseReminderId) {
+        _mergeReminders(previousReminder, reminder);
+        return deDupedReminders;
+      }
+
+      deDupedReminders.push(reminder);
+      return deDupedReminders;
+    }, []);
+
+    return deDupedReminders.map(function(reminder) {
+      if (Array.isArray(reminder.schoolName)) {
+        reminder.schoolName = _concatenateSchoolNames(reminder.schoolName);
+      }
+      return reminder;
+    });
+  }
+
+  function _mergeReminders(reminder1, reminder2) {
+    reminder1.id = _mergeValues(reminder1.id, reminder2.id);
+    reminder1.schoolId = _mergeValues(reminder1.schoolId, reminder2.schoolId);
+    reminder1.schoolName = _mergeValues(reminder1.schoolName, reminder2.schoolName);
+  }
+
+  function _mergeValues(arrayOrString1, string2) {
+    var array1 = Array.isArray(arrayOrString1) ? arrayOrString1 : [arrayOrString1];
+    return array1.concat([string2]);
+  }
+
+  function _concatenateSchoolNames(schoolNames) {
+    if (schoolNames.length === 2) {
+      return schoolNames.join(' and ');
+    }
+
+    var lastSchool = schoolNames.pop();
+    var firstSchools = schoolNames.join(', ');
+    return firstSchools + ', and ' + lastSchool;
+  }
+
   return {
     getRemindersForSchool: getRemindersForSchool,
     groupAndSortByDueDate: groupAndSortByDueDate,
-    replaceVariablesInReminders: replaceVariablesInReminders
+    replaceVariablesInReminders: replaceVariablesInReminders,
+    deDuplicateReminders: deDuplicateReminders
   }
 
 })();
