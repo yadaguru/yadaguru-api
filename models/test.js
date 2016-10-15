@@ -5,11 +5,21 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       type: DataTypes.STRING
     },
-    message: {
+    registrationMessage: {
+      allowNull: false,
+      type: DataTypes.TEXT,
+      defaultValue: ''
+    },
+    registrationDetail: {
+      allowNull: false,
+      type: DataTypes.TEXT,
+      defaultValue: ''
+    },
+    adminMessage: {
       allowNull: false,
       type: DataTypes.TEXT
     },
-    detail: {
+    adminDetail: {
       allowNull: false,
       type: DataTypes.TEXT
     }
