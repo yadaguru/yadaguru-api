@@ -18,12 +18,16 @@ var tokenWrongRole = jwt.sign({userId: 1, role: 'user'}, 'development_secret', {
 describe('/api/tests', function() {
   var tests = [{
     type: 'SAT',
-    message: 'A message',
-    detail: 'Some details'
+    registrationMessage: 'A message',
+    registrationDetail: 'Some details',
+    adminMessage: 'A message about the test',
+    adminDetail: 'Some details'
   }, {
     type: 'ACT',
-    message: 'A message',
-    detail: 'Some details'
+    registrationMessage: 'A message',
+    registrationDetail: 'Some details',
+    adminMessage: 'A message about the test',
+    adminDetail: 'Some details'
   }];
 
   describe('GET', function() {
@@ -47,8 +51,10 @@ describe('/api/tests', function() {
           if (err) return done(err);
           res.body.should.have.lengthOf(2);
           res.body[0].should.have.property('type', tests[0].type);
-          res.body[1].should.have.property('message', tests[1].message);
-          res.body[0].should.have.property('detail', tests[0].detail);
+          res.body[1].should.have.property('registrationMessage', tests[1].registrationMessage);
+          res.body[0].should.have.property('registrationDetail', tests[0].registrationDetail);
+          res.body[1].should.have.property('adminMessage', tests[1].adminMessage);
+          res.body[0].should.have.property('adminDetail', tests[0].adminDetail);
           done();
         });
     });
@@ -62,8 +68,10 @@ describe('/api/tests', function() {
           if (err) return done(err);
           res.body[0].should.have.property('id', 1);
           res.body[0].should.have.property('type', tests[0].type);
-          res.body[0].should.have.property('message', tests[0].message);
-          res.body[0].should.have.property('detail', tests[0].detail);
+          res.body[0].should.have.property('registrationMessage', tests[0].registrationMessage);
+          res.body[0].should.have.property('registrationDetail', tests[0].registrationDetail);
+          res.body[0].should.have.property('adminMessage', tests[0].adminMessage);
+          res.body[0].should.have.property('adminDetail', tests[0].adminDetail);
           done();
         });
     });
@@ -78,7 +86,7 @@ describe('/api/tests', function() {
           res.body.message.should.equal('Test with id 3 not found');
           done();
         })
-    })
+    });
 
     it('should respond with a 401 if there is no user token header', function(done) {
       request(app)
@@ -128,8 +136,10 @@ describe('/api/tests', function() {
     it('should respond with test id when valid data is submitted', function(done) {
       var json = {
         type: 'SAT',
-        message: 'A message',
-        detail: 'Some details'
+        registrationMessage: 'A message',
+        registrationDetail: 'Some details',
+        adminMessage: 'A message',
+        adminDetail: 'Some details'
       };
 
       request(app)
@@ -142,8 +152,10 @@ describe('/api/tests', function() {
           if (err) return done(err);
           res.body[0].should.have.property('id', 1);
           res.body[0].should.have.property('type', json.type);
-          res.body[0].should.have.property('message', json.message);
-          res.body[0].should.have.property('detail', json.detail);
+          res.body[0].should.have.property('registrationMessage', json.registrationMessage);
+          res.body[0].should.have.property('registrationDetail', json.registrationDetail);
+          res.body[0].should.have.property('adminMessage', json.adminMessage);
+          res.body[0].should.have.property('adminDetail', json.adminDetail);
           done();
         });
     });
@@ -151,7 +163,9 @@ describe('/api/tests', function() {
     it('should respond with error if all required fields is not present', function(done) {
       var json = {
         type: 'SAT',
-        message: 'A message'
+        registrationMessage: 'A message',
+        registrationDetail: 'Some details',
+        adminMessage: 'A message'
       };
 
       request(app)
@@ -162,7 +176,7 @@ describe('/api/tests', function() {
         .expect(400)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body.message.should.be.equal('detail is required. ');
+          res.body.message.should.be.equal('adminDetail is required. ');
           done();
         });
     });
@@ -215,7 +229,7 @@ describe('/api/tests', function() {
 
     it('should respond with the updated test on successful update', function(done) {
       var json = {
-        message: 'An updated message'
+        registrationMessage: 'An updated message'
       };
 
       request(app)
@@ -228,15 +242,17 @@ describe('/api/tests', function() {
           if (err) return done(err);
           res.body[0].should.have.property('id', 1);
           res.body[0].should.have.property('type', 'SAT');
-          res.body[0].should.have.property('message', 'An updated message');
-          res.body[0].should.have.property('detail', 'Some details');
+          res.body[0].should.have.property('registrationMessage', 'An updated message');
+          res.body[0].should.have.property('registrationDetail', 'Some details');
+          res.body[0].should.have.property('adminMessage', 'A message about the test');
+          res.body[0].should.have.property('adminDetail', 'Some details');
           done();
         });
     });
 
     it('should respond with a 404 if the test does not exist', function(done) {
       var json = {
-        message: 'An updated message'
+        registrationMessage: 'An updated message'
       };
 
       request(app)
@@ -265,8 +281,10 @@ describe('/api/tests', function() {
           if (err) return done(err);
           res.body[0].should.have.property('id', 1);
           res.body[0].should.have.property('type', 'SAT');
-          res.body[0].should.have.property('message', 'An updated message');
-          res.body[0].should.have.property('detail', 'Some details');
+          res.body[0].should.have.property('registrationMessage', 'An updated message');
+          res.body[0].should.have.property('registrationDetail', 'Some details');
+          res.body[0].should.have.property('adminMessage', 'A message about the test');
+          res.body[0].should.have.property('adminDetail', 'Some details');
           done();
         });
     });

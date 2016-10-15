@@ -49,13 +49,17 @@ describe('Tests Controller', function() {
       var tests = [{
         id: 1,
         type: 'SAT',
-        message: 'A message',
-        detail: 'Some details'
+        registrationMessage: 'A message',
+        registrationDetail: 'Some details',
+        adminMessage: 'A message about the test',
+        adminDetail: 'Some details'
       }, {
         id: 2,
         type: 'ACT',
-        message: 'A message',
-        detail: 'Some details'
+        registrationMessage: 'A message',
+        registrationDetail: 'Some details',
+        adminMessage: 'A message about the test',
+        adminDetail: 'Some details'
       }];
       reqGet.withArgs('Bearer')
         .returns('a valid token');
@@ -140,8 +144,10 @@ describe('Tests Controller', function() {
       var test = {
         id: 1,
         type: 'SAT',
-        message: 'A message',
-        detail: 'Some details'
+        registrationMessage: 'A message',
+        registrationDetail: 'Some details',
+        adminMessage: 'A message about the test',
+        adminDetail: 'Some details'
       };
       reqGet.withArgs('Bearer')
         .returns('a valid token');
@@ -228,14 +234,18 @@ describe('Tests Controller', function() {
     it('should respond with new test object and 200 status on success', function() {
       req.body = {
         type: 'SAT',
-        message: 'A message',
-        detail: 'Some details'
+        registrationMessage: 'A message',
+        registrationDetail: 'Some details',
+        adminMessage: 'A message about the test',
+        adminDetail: 'Some details'
       };
       var successfulCreateResponse = {
         id: '2',
         type: req.body.type,
-        message: req.body.message,
-        detail: req.body.detail
+        registrationMessage: req.body.registrationMessage,
+        registrationDetail: req.body.registrationDetail,
+        adminMessage: req.body.adminMessage,
+        adminDetail: req.body.adminDetail
       };
       reqGet.withArgs('Bearer')
         .returns('a valid token');
@@ -249,10 +259,12 @@ describe('Tests Controller', function() {
       });
     });
 
-    it('should respond with an error and 400 status on if name is missing', function() {
+    it('should respond with an error and 400 status on if type is missing', function() {
       req.body = {
-        message: 'A message',
-        detail: 'Some details'
+        registrationMessage: 'A message',
+        registrationDetail: 'Some details',
+        adminMessage: 'A message about the test',
+        adminDetail: 'Some details'
       };
       reqGet.withArgs('Bearer')
         .returns('a valid token');
@@ -269,17 +281,19 @@ describe('Tests Controller', function() {
       });
     });
 
-    it('should respond with an error and 400 status on if message is missing', function() {
+    it('should respond with an error and 400 status on if registrationMessage is missing', function() {
       req.body = {
         type: 'SAT',
-        detail: 'Some details'
+        registrationDetail: 'Some details',
+        adminMessage: 'A message about the test',
+        adminDetail: 'Some details'
       };
       reqGet.withArgs('Bearer')
         .returns('a valid token');
       getUserData.withArgs('a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ValidationError([{
-        field: 'message',
+        field: 'registrationMessage',
         message: 'is required'
       }]);
 
@@ -289,17 +303,63 @@ describe('Tests Controller', function() {
       });
     });
 
-    it('should respond with an error and 400 status on if detail is missing', function() {
+    it('should respond with an error and 400 status on if registrationDetail is missing', function() {
       req.body = {
         type: 'SAT',
-        message: 'A message'
+        registrationMessage: 'A message',
+        adminMessage: 'A message about the test',
+        adminDetail: 'Some details'
       };
       reqGet.withArgs('Bearer')
         .returns('a valid token');
       getUserData.withArgs('a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ValidationError([{
-        field: 'detail',
+        field: 'registrationDetail',
+        message: 'is required'
+      }]);
+
+      return testsController.post(req, res).then(function() {
+        res.json.should.have.been.calledWith(error);
+        res.status.should.have.been.calledWith(400);
+      });
+    });
+
+    it('should respond with an error and 400 status on if adminMessage is missing', function() {
+      req.body = {
+        type: 'SAT',
+        registrationMessage: 'A message',
+        registrationDetail: 'Some details',
+        adminDetail: 'Some details'
+      };
+      reqGet.withArgs('Bearer')
+        .returns('a valid token');
+      getUserData.withArgs('a valid token')
+        .returns({userId: 1, role: 'admin'});
+      var error = new errors.ValidationError([{
+        field: 'adminMessage',
+        message: 'is required'
+      }]);
+
+      return testsController.post(req, res).then(function() {
+        res.json.should.have.been.calledWith(error);
+        res.status.should.have.been.calledWith(400);
+      });
+    });
+
+    it('should respond with an error and 400 status on if adminDetail is missing', function() {
+      req.body = {
+        type: 'SAT',
+        registrationMessage: 'A message',
+        registrationDetail: 'Some details',
+        adminMessage: 'A message about the test',
+      };
+      reqGet.withArgs('Bearer')
+        .returns('a valid token');
+      getUserData.withArgs('a valid token')
+        .returns({userId: 1, role: 'admin'});
+      var error = new errors.ValidationError([{
+        field: 'adminDetail',
         message: 'is required'
       }]);
 
@@ -336,8 +396,10 @@ describe('Tests Controller', function() {
     it('should respond with an error and a 500 status on a database error', function() {
       req.body = {
         type: 'SAT',
-        message: 'A message',
-        detail: 'Some details'
+        registrationMessage: 'A message',
+        registrationDetail: 'Some details',
+        adminMessage: 'A message about the test',
+        adminDetail: 'Some details'
       };
       reqGet.withArgs('Bearer')
         .returns('a valid token');
@@ -367,15 +429,19 @@ describe('Tests Controller', function() {
     it('should respond with the updated test object and 200 status on success', function() {
       req.body = {
         type: 'SAT',
-        message: 'A message',
-        detail: 'Some details'
+        registrationMessage: 'A message',
+        registrationDetail: 'Some details',
+        adminMessage: 'A message about the test',
+        adminDetail: 'Some details'
       };
       req.params = {id: 1};
       var updatedTest = {
         id: '1',
         type: req.body.type,
-        message: req.body.message,
-        detail: req.body.detail
+        registrationMessage: req.body.registrationMessage,
+        registrationDetail: req.body.registrationDetail,
+        adminMessage: req.body.adminMessage,
+        adminDetail: req.body.adminDetail
       };
       reqGet.withArgs('Bearer')
         .returns('a valid token');
@@ -392,15 +458,15 @@ describe('Tests Controller', function() {
 
     it('should respond with the updated test object and 200 status on success even if required fields are missing', function() {
       req.body = {
-        message: 'A message',
-        detail: 'Some details'
+        registrationMessage: 'A message',
+        registrationDetail: 'Some details'
       };
       req.params = {id: 1};
       var updatedTest = {
         id: '1',
         type: 'SAT',
-        message: req.body.message,
-        detail: req.body.detail
+        registrationMessage: req.body.registrationMessage,
+        registrationDetail: req.body.registrationDetail
       };
       reqGet.withArgs('Bearer')
         .returns('a valid token');
@@ -419,8 +485,8 @@ describe('Tests Controller', function() {
     it('should respond with an error and 404 status if test does not exist', function() {
       req.body = {
         type: 'SAT',
-        message: 'A message',
-        detail: 'Some details'
+        registrationMessage: 'A message',
+        registrationDetail: 'Some details'
       };
       req.params = {id: 2};
       reqGet.withArgs('Bearer')
@@ -464,8 +530,8 @@ describe('Tests Controller', function() {
     it('should respond with an error and a 500 status on a database error', function() {
       req.body = {
         type: 'SAT',
-        message: 'A message',
-        detail: 'Some details'
+        registrationMessage: 'A message',
+        registrationDetail: 'Some details'
       };
       req.params = {id: 1};
       reqGet.withArgs('Bearer')

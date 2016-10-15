@@ -18,12 +18,16 @@ describe('/api/test_dates', function() {
 
   var tests = [{
     type: 'SAT',
-    message: 'A message',
-    detail: 'Some details'
+    registrationMessage: 'A message',
+    registrationDetail: 'Some details',
+    adminMessage: 'A message',
+    adminDetail: 'Some details'
   }, {
     type: 'ACT',
-    message: 'A message',
-    detail: 'Some details'
+    registrationMessage: 'A message',
+    registrationDetail: 'Some details',
+    adminMessage: 'A message',
+    adminDetail: 'Some details'
   }];
 
   var testDates = [{

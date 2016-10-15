@@ -14,13 +14,17 @@ describe('The Tests Service', function() {
   var tests =[{
     id: 1,
     type: 'SAT',
-    message: 'A message',
-    detail: 'Some details'
+    registrationMessage: 'A message about registering',
+    registrationDetail: 'Some details',
+    adminMessage: 'A message about the test',
+    adminDetail: 'Some details'
   }, {
     id: 2,
     type: 'ACT',
-    message: 'A message',
-    detail: 'Some details'
+    registrationMessage: 'A message about registering',
+    registrationDetail: 'Some details',
+    adminMessage: 'A message about the test',
+    adminDetail: 'Some details'
   }];
 
   describe('The findAll function', function() {
@@ -82,8 +86,10 @@ describe('The Tests Service', function() {
 
     var newTest = {
       type: 'SAT',
-      message: 'A message',
-      detail: 'Some details'
+      registrationMessage: 'A message about registering',
+      registrationDetail: 'Some details',
+      adminMessage: 'A message about the test',
+      adminDetail: 'Some details'
     };
 
     before(function() {
@@ -107,8 +113,10 @@ describe('The Tests Service', function() {
 
     var updatedTest = {
       type: 'SAT',
-      message: 'A message',
-      detail: 'Some details'
+      registrationMessage: 'A message about registering',
+      registrationDetail: 'Some details',
+      adminMessage: 'A message about the test',
+      adminDetail: 'Some details'
     };
 
     idToUpdate = 1;

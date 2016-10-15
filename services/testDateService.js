@@ -7,6 +7,10 @@ var outputSanitizer = function(testDate) {
   return testDate;
 };
 
-var testService = require('./baseDbService')(TestDate, outputSanitizer);
+var testDateService = require('./baseDbService')(TestDate, outputSanitizer);
 
-module.exports = testService;
+testDateService.getTestDateReminders = function() {
+
+};
+
+module.exports = testDateService;

@@ -4,10 +4,16 @@ var schema = {
   type: {
     required: true
   },
-  message: {
+  registrationMessage: {
     required: true
   },
-  detail: {
+  registrationDetail: {
+    required: true
+  },
+  adminMessage: {
+    required: true
+  },
+  adminDetail: {
     required: true
   }
 };
