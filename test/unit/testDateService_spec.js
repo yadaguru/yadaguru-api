@@ -8,6 +8,7 @@ chai.should();
 
 var models = require('../../models');
 var TestDate = models.TestDate;
+var Test = models.Test;
 var testDateService = require('../../services/testDateService');
 
 describe('The TestDates Service', function() {
@@ -35,7 +36,6 @@ describe('The TestDates Service', function() {
     });
 
     it('should resolve with an array of objects representing testDates', function() {
-      console.log(testDates);
       findAll.returns(Promise.resolve(testDates.map(
         function(testDate) {
           return {dataValues: testDate};
@@ -75,6 +75,133 @@ describe('The TestDates Service', function() {
         .returns(Promise.resolve(null));
 
       return testDateService.findById(3).should.eventually.deep.equal([]);
+    });
+  });
+
+  describe('The findAllWithTests function', function() {
+    var findAll, dbResponse;
+
+    beforeEach(function() {
+      var tests =[{
+        id: 1,
+        type: 'SAT',
+        registrationMessage: 'A message about registering',
+        registrationDetail: 'Some details',
+        adminMessage: 'A message about the test',
+        adminDetail: 'Some details'
+      }, {
+        id: 2,
+        type: 'ACT',
+        registrationMessage: 'A message about registering',
+        registrationDetail: 'Some details',
+        adminMessage: 'A message about the test',
+        adminDetail: 'Some details'
+      }];
+
+      dbResponse = [{
+        dataValues: {
+          id: '1',
+          testId: '1',
+          registrationDate: '2016-09-01',
+          adminDate: '2016-10-01',
+          Test: {
+            dataValues: tests[0]
+          }
+        }
+      }, {
+        dataValues: {
+          id: '2',
+          testId: '1',
+          registrationDate: '2016-09-15',
+          adminDate: '2016-10-15',
+          Test: {
+            dataValues: tests[0]
+          }
+        }
+      }, {
+        dataValues: {
+          id: '3',
+          testId: '2',
+          registrationDate: '2017-01-01',
+          adminDate: '2016-02-01',
+          Test: {
+            dataValues: tests[1]
+          }
+        }
+      }, {
+        dataValues: {
+          id: '4',
+          testId: '2',
+          registrationDate: '2017-01-15',
+          adminDate: '2016-02-15',
+          Test: {
+            dataValues: tests[1]
+          }
+        }
+      }];
+
+      findAll = sinon.stub(TestDate, 'findAll');
+    });
+
+    afterEach(function() {
+      findAll.restore();
+    });
+
+    it('should return all testDates including its associated test data', function() {
+      findAll.withArgs({
+        include: Test
+      }).returns(Promise.resolve(dbResponse));
+
+      var returnedResult = [{
+        id: '1',
+        testId: '1',
+        registrationDate: '2016-09-01',
+        adminDate: '2016-10-01',
+        type: 'SAT',
+        registrationMessage: 'A message about registering',
+        registrationDetail: 'Some details',
+        adminMessage: 'A message about the test',
+        adminDetail: 'Some details'
+      }, {
+        id: '2',
+        testId: '1',
+        registrationDate: '2016-09-15',
+        adminDate: '2016-10-15',
+        type: 'SAT',
+        registrationMessage: 'A message about registering',
+        registrationDetail: 'Some details',
+        adminMessage: 'A message about the test',
+        adminDetail: 'Some details'
+      }, {
+        id: '3',
+        testId: '2',
+        registrationDate: '2017-01-01',
+        adminDate: '2016-02-01',
+        type: 'ACT',
+        registrationMessage: 'A message about registering',
+        registrationDetail: 'Some details',
+        adminMessage: 'A message about the test',
+        adminDetail: 'Some details'
+      }, {
+        id: '4',
+        testId: '2',
+        registrationDate: '2017-01-15',
+        adminDate: '2016-02-15',
+        type: 'ACT',
+        registrationMessage: 'A message about registering',
+        registrationDetail: 'Some details',
+        adminMessage: 'A message about the test',
+        adminDetail: 'Some details'
+      }];
+
+      return testDateService.findAllWithTests().should.eventually.deep.equal(returnedResult);
+    });
+
+    it('should resolve with an empty array there are no testDates', function() {
+      findAll.withArgs({include: Test})
+        .returns(Promise.resolve([]));
+
+      return testDateService.findAllWithTests().should.eventually.deep.equal([]);
     });
   });
 
