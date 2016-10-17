@@ -1,4 +1,5 @@
 var baseReminderService = require('./baseReminderService');
+var testDateService = require('./testDateService');
 var moment = require('moment');
 
 module.exports = (function() {
@@ -11,8 +12,11 @@ module.exports = (function() {
   var DATE_FORMAT = 'M/D/Y';
 
   function _getDateFormatterForField(field) {
-    return function(reminder) {
-      return moment.utc(reminder[field]).format(DATE_FORMAT);
+    return function(reminder, variable) {
+      if (typeof reminder[field] !== 'undefined') {
+        return moment.utc(reminder[field]).format(DATE_FORMAT);
+      }
+      return variable;
     }
   }
 
@@ -96,14 +100,8 @@ module.exports = (function() {
         name: reminder.name,
         message: reminder.message,
         detail: reminder.detail,
-        lateMessage: reminder.lateMessage,
-        lateDetail: reminder.lateDetail,
-        category: reminder.category,
-        timeframe: reminder.timeframe,
-        baseReminderId: reminder.baseReminderId,
-        schoolId: reminder.schoolId,
-        schoolName: reminder.schoolName,
-        schoolDueDate: reminder.schoolDueDate
+        lateMessage: reminder.lateMessage || '',
+        lateDetail: reminder.lateDetail || ''
       });
 
       return groupedReminders;
@@ -114,7 +112,9 @@ module.exports = (function() {
     var fieldsToSearch = ['message', 'detail', 'lateMessage', 'lateDetail'];
     return reminders.map(function(reminder) {
       fieldsToSearch.forEach(function(field) {
-        reminder[field] = _replaceVariables(reminder[field], reminder);
+        if (typeof reminder[field] !== 'undefined') {
+          reminder[field] = _replaceVariables(reminder[field], reminder);
+        }
       });
       return reminder;
     });
@@ -126,9 +126,11 @@ module.exports = (function() {
         var field = VARIABLES[variable];
         var re = new RegExp(variable, 'g');
         if (typeof field === 'function') {
-          content = content.replace(re, field(reminder))
+          content = content.replace(re, field(reminder, variable));
         } else {
-          content = content.replace(re, reminder[field]);
+          if (typeof reminder[field] !== 'undefined') {
+            content = content.replace(re, reminder[field]);
+          }
         }
       }
     }
@@ -184,11 +186,47 @@ module.exports = (function() {
     return firstSchools + ', and ' + lastSchool;
   }
 
+  function getTestReminders(currentDate) {
+    return testDateService.findAllWithTests().then(function(testDates) {
+      var testDateReminders = testDates.reduce(function(testDateReminders, testDate) {
+        if (moment(testDate.registrationDate).isSameOrAfter(currentDate)) {
+          testDateReminders.push({
+            id: testDate.id,
+            dueDate: testDate.registrationDate,
+            name: testDate.type + ' registration due today',
+            message: testDate.registrationMessage,
+            detail: testDate.registrationDetail,
+            registrationDate: testDate.registrationDate,
+            adminDate: testDate.adminDate
+          });
+        }
+
+        if (moment(testDate.adminDate).isSameOrAfter(currentDate)) {
+          testDateReminders.push({
+            id: testDate.id,
+            dueDate: testDate.adminDate,
+            name: testDate.type + ' test today',
+            message: testDate.adminMessage,
+            detail: testDate.adminDetail,
+            registrationDate: testDate.registrationDate,
+            adminDate: testDate.adminDate
+          });
+        }
+
+        return testDateReminders;
+      }, []);
+
+      _sortBy(testDateReminders, 'dueDate');
+      return testDateReminders;
+    });
+  }
+
   return {
     getRemindersForSchool: getRemindersForSchool,
     groupAndSortByDueDate: groupAndSortByDueDate,
     replaceVariablesInReminders: replaceVariablesInReminders,
-    deDuplicateReminders: deDuplicateReminders
+    deDuplicateReminders: deDuplicateReminders,
+    getTestReminders: getTestReminders
   }
 
 })();

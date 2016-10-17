@@ -64,17 +64,11 @@ describe('Reminders Controller', function() {
       dueDate: '2017-02-01',
       reminders: [{
         id: ['2', '3'],
-        timeframe: 'One week before',
         name: 'Get Recommendations',
         message: 'Ask your counselor. Application is due on 2/7/2017',
         detail: 'Tips for asking your counselor',
         lateMessage: 'Too late',
-        lateDetail: '',
-        category: 'Recommendations',
-        baseReminderId: '2',
-        schoolId: ['1', '2'],
-        schoolName: 'Temple and Drexel',
-        schoolDueDate: '2017-02-07'
+        lateDetail: ''
       }]
     }, {
       dueDate: '2017-02-06',
@@ -84,13 +78,7 @@ describe('Reminders Controller', function() {
         message: 'Better get writing for Temple!',
         detail: 'Some help for writing your essay that is due on 2/6/2017',
         lateMessage: 'Too late',
-        lateDetail: 'Should have started sooner',
-        category: 'Essays',
-        timeframe: 'One day before',
-        baseReminderId: '1',
-        schoolId: '1',
-        schoolName: 'Temple',
-        schoolDueDate: '2017-02-07'
+        lateDetail: 'Should have started sooner'
       }]
     }];
 
@@ -210,13 +198,7 @@ describe('Reminders Controller', function() {
           message: 'Ask your counselor. Application is due on 2/7/2017',
           detail: 'Tips for asking your counselor',
           lateMessage: 'Too late',
-          lateDetail: '',
-          category: 'Recommendations',
-          baseReminderId: '2',
-          timeframe: 'One week before',
-          schoolId: '1',
-          schoolName: 'Temple',
-          schoolDueDate: '2017-02-07'
+          lateDetail: ''
         }]
       }, {
         dueDate: '2017-02-06',
@@ -226,13 +208,7 @@ describe('Reminders Controller', function() {
           message: 'Better get writing for Temple!',
           detail: 'Some help for writing your essay that is due on 2/6/2017',
           lateMessage: 'Too late',
-          lateDetail: 'Should have started sooner',
-          category: 'Essays',
-          timeframe: 'One day before',
-          baseReminderId: '1',
-          schoolId: '1',
-          schoolName: 'Temple',
-          schoolDueDate: '2017-02-07'
+          lateDetail: 'Should have started sooner'
         }]
       }];
       req.params = {id: 1};
@@ -331,17 +307,11 @@ describe('Reminders Controller', function() {
       var reminder = {
         id: '1',
         dueDate: '2017-02-06',
-        timeframe: 'One day before',
         name: 'Write Essay',
         message: 'Better get writing!',
         detail: 'Some help for writing your essay',
         lateMessage: 'Too late',
-        lateDetail: 'Should have started sooner',
-        category: 'Essays',
-        baseReminderId: '1',
-        schoolId: '1',
-        schoolName: 'Temple',
-        schoolDueDate: '2017-02-07'
+        lateDetail: 'Should have started sooner'
       };
       reqGet.withArgs('Bearer')
         .returns('a valid token');

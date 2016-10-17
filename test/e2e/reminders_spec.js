@@ -37,7 +37,6 @@ describe('/api/reminders', function() {
           res.body[0].should.have.property('dueDate', '2016-09-01');
           res.body[1].should.have.property('dueDate', '2017-01-01');
           res.body[2].should.have.property('dueDate', '2017-01-02');
-          res.body[0].reminders[0].should.have.property('timeframe', 'Today');
           res.body[0].reminders[0].should.have.property('detail', 'Some help for writing your Temple and Drexel essay for Temple and Drexel');
           res.body[0].reminders[0].should.have.property('lateMessage', 'Too late. Application was due on 2/1/2017');
           res.body[0].reminders[0].should.have.property('name', 'Write Essay');
@@ -45,7 +44,6 @@ describe('/api/reminders', function() {
           res.body[1].reminders[0].should.have.property('detail', 'Tips for asking your counselor');
           res.body[0].reminders[0].should.have.property('lateMessage', 'Too late. Application was due on 2/1/2017');
           res.body[2].reminders[0].should.have.property('lateDetail', 'Should have started sooner');
-          res.body[2].reminders[0].should.have.property('category', 'Essays');
           done();
         });
     });
@@ -60,7 +58,6 @@ describe('/api/reminders', function() {
           res.body[0].should.have.property('dueDate', '2016-09-01');
           res.body[1].should.have.property('dueDate', '2017-01-01');
           res.body[2].should.have.property('dueDate', '2017-01-02');
-          res.body[0].reminders[0].should.have.property('timeframe', 'Today');
           res.body[0].reminders[0].should.have.property('detail', 'Some help for writing your Temple essay for Temple');
           res.body[0].reminders[0].should.have.property('lateMessage', 'Too late. Application was due on 2/1/2017');
           res.body[0].reminders[0].should.have.property('name', 'Write Essay');
@@ -68,7 +65,6 @@ describe('/api/reminders', function() {
           res.body[1].reminders[0].should.have.property('detail', 'Tips for asking your counselor');
           res.body[0].reminders[0].should.have.property('lateMessage', 'Too late. Application was due on 2/1/2017');
           res.body[2].reminders[0].should.have.property('lateDetail', 'Should have started sooner');
-          res.body[2].reminders[0].should.have.property('category', 'Essays');
           done();
         });
     });
@@ -80,13 +76,11 @@ describe('/api/reminders', function() {
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body[0].should.have.property('timeframe', 'Today');
           res.body[0].should.have.property('name', 'Write Essay');
           res.body[0].should.have.property('message', 'Better get writing!');
           res.body[0].should.have.property('detail', 'Some help for writing your Temple essay for Temple');
           res.body[0].should.have.property('lateMessage', 'Too late. Application was due on 2/1/2017');
           res.body[0].should.have.property('lateDetail', 'Should have started sooner');
-          res.body[0].should.have.property('category', 'Essays');
           done();
         });
     });

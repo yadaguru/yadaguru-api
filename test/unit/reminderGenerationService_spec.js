@@ -226,17 +226,11 @@ describe('The reminderGenerationService', function() {
         dueDate: '2017-02-06',
         reminders: [{
           id: '1',
-          timeframe: 'One day before',
           name: 'Write Essay',
           message: 'Better get writing!',
           detail: 'Some help for writing your essay',
           lateMessage: 'Too late',
-          lateDetail: 'Should have started sooner',
-          category: 'Essays',
-          baseReminderId: '1',
-          schoolId: '1',
-          schoolName: 'Temple',
-          schoolDueDate: '2017-02-07'
+          lateDetail: 'Should have started sooner'
         }]
       }];
 
@@ -278,30 +272,18 @@ describe('The reminderGenerationService', function() {
         dueDate: '2017-02-06',
         reminders: [{
           id: '1',
-          timeframe: 'One day before',
           name: 'Write Essay',
           message: 'Better get writing!',
           detail: 'Some help for writing your essay',
           lateMessage: 'Too late',
-          lateDetail: 'Should have started sooner',
-          category: 'Essays',
-          baseReminderId: '1',
-          schoolId: '1',
-          schoolName: 'Temple',
-          schoolDueDate: '2017-02-07'
+          lateDetail: 'Should have started sooner'
         }, {
           id: '2',
-          timeframe: 'One day before',
           name: 'Get Recommendations',
           message: 'Ask your counselor',
           detail: 'Tips for asking your counselor',
           lateMessage: 'Too late',
-          lateDetail: '',
-          category: 'Recommendations',
-          baseReminderId: '2',
-          schoolId: '1',
-          schoolName: 'Temple',
-          schoolDueDate: '2017-02-07'
+          lateDetail: ''
         }]
       }];
 
@@ -357,46 +339,102 @@ describe('The reminderGenerationService', function() {
         dueDate: '2017-01-31',
         reminders: [{
           id: '3',
-          timeframe: 'One week before',
           name: 'Complete application',
           message: 'Fill it out',
           detail: 'Do not forget anything',
           lateMessage: 'You are late!',
-          lateDetail: 'Whoops',
-          category: 'Application',
-          baseReminderId: '3',
-          schoolId: '1',
-          schoolName: 'Temple',
-          schoolDueDate: '2017-02-07'
+          lateDetail: 'Whoops'
         }]
       }, {
         dueDate: '2017-02-06',
         reminders: [{
           id: '1',
-          timeframe: 'One day before',
           name: 'Write Essay',
           message: 'Better get writing!',
           detail: 'Some help for writing your essay',
           lateMessage: 'Too late',
-          lateDetail: 'Should have started sooner',
-          category: 'Essays',
-          baseReminderId: '1',
-          schoolId: '1',
-          schoolName: 'Temple',
-          schoolDueDate: '2017-02-07'
+          lateDetail: 'Should have started sooner'
         }, {
           id: '2',
-          timeframe: 'One day before',
           name: 'Get Recommendations',
           message: 'Ask your counselor',
           detail: 'Tips for asking your counselor',
           lateMessage: 'Too late',
-          lateDetail: '',
-          category: 'Recommendations',
-          baseReminderId: '2',
-          schoolId: '1',
-          schoolName: 'Temple',
-          schoolDueDate: '2017-02-07'
+          lateDetail: ''
+        }]
+      }];
+
+      reminderGenerator.groupAndSortByDueDate(input).should.deep.equal(output);
+    });
+
+    it('can also handle grouping of testDate reminders', function() {
+      var input = [{
+        dueDate: '2017-01-01',
+        id: '3',
+        name: 'ACT registration due today',
+        message: 'A message about registering',
+        detail: 'Some details',
+        registrationDate: '2017-01-01',
+        adminDate: '2017-02-01'
+      }, {
+        dueDate: '2017-01-01',
+        id: '4',
+        name: 'ACT registration due today',
+        message: 'A message about registering',
+        detail: 'Some details',
+        registrationDate: '2017-01-15',
+        adminDate: '2017-02-15'
+      }, {
+        dueDate: '2017-02-01',
+        id: '3',
+        name: 'ACT test today',
+        message: 'A message about the test',
+        detail: 'Some details',
+        registrationDate: '2017-01-01',
+        adminDate: '2017-02-01'
+      }, {
+        dueDate: '2017-02-01',
+        id: '4',
+        name: 'ACT test today',
+        message: 'A message about the test',
+        detail: 'Some details',
+        registrationDate: '2017-01-15',
+        adminDate: '2017-02-15'
+      }];
+
+      var output = [{
+        dueDate: '2017-01-01',
+        reminders: [{
+          id: '3',
+          name: 'ACT registration due today',
+          message: 'A message about registering',
+          detail: 'Some details',
+          lateMessage: '',
+          lateDetail: ''
+        }, {
+          id: '4',
+          name: 'ACT registration due today',
+          message: 'A message about registering',
+          detail: 'Some details',
+          lateMessage: '',
+          lateDetail: ''
+        }]
+      }, {
+        dueDate: '2017-02-01',
+        reminders: [{
+          id: '3',
+          name: 'ACT test today',
+          message: 'A message about the test',
+          detail: 'Some details',
+          lateMessage: '',
+          lateDetail: ''
+        }, {
+          id: '4',
+          name: 'ACT test today',
+          message: 'A message about the test',
+          detail: 'Some details',
+          lateMessage: '',
+          lateDetail: ''
         }]
       }];
 
@@ -501,7 +539,59 @@ describe('The reminderGenerationService', function() {
       }];
 
       reminderGenerator.replaceVariablesInReminders(input).should.deep.equal(input);
-    })
+    });
+
+    it('it should not do the replacement if the reminder does not have data for the field available', function() {
+      var input = [{
+        id: '1',
+        dueDate: '2017-02-06',
+        timeframe: 'One day before',
+        name: 'Write Essay',
+        message: 'Better get writing!',
+        detail: 'Some help for writing your %SCHOOL% essay for %SCHOOL%',
+        lateMessage: 'Too late it is %ADMIN_DATE%',
+        lateDetail: 'Should have started sooner',
+        category: 'Essays',
+        baseReminderId: '1',
+        schoolId: '1',
+        schoolName: 'Temple',
+        schoolDueDate: '2017-02-07'
+      }, {
+        dueDate: '2017-02-01',
+        id: '3',
+        name: 'ACT test today',
+        message: 'A message about the test on %ADMIN_DATE%',
+        detail: 'Some details about %SCHOOL%',
+        registrationDate: '2017-01-01',
+        adminDate: '2017-02-01'
+      }];
+
+      var output = [{
+        id: '1',
+        dueDate: '2017-02-06',
+        timeframe: 'One day before',
+        name: 'Write Essay',
+        message: 'Better get writing!',
+        detail: 'Some help for writing your Temple essay for Temple',
+        lateMessage: 'Too late it is %ADMIN_DATE%',
+        lateDetail: 'Should have started sooner',
+        category: 'Essays',
+        baseReminderId: '1',
+        schoolId: '1',
+        schoolName: 'Temple',
+        schoolDueDate: '2017-02-07'
+      }, {
+        dueDate: '2017-02-01',
+        id: '3',
+        name: 'ACT test today',
+        message: 'A message about the test on 2/1/2017',
+        detail: 'Some details about %SCHOOL%',
+        registrationDate: '2017-01-01',
+        adminDate: '2017-02-01'
+      }];
+
+      reminderGenerator.replaceVariablesInReminders(input).should.deep.equal(output);
+    });
   });
 
   describe('the deDuplicateReminders function', function() {
@@ -853,5 +943,117 @@ describe('The reminderGenerationService', function() {
       reminderGenerator.deDuplicateReminders(input).should.deep.equal(output);
     });
   });
+
+  describe('the getTestReminders function', function() {
+    var findAllWithTests, serviceResponse;
+    var testDateService = require('../../services/testDateService');
+
+    beforeEach(function() {
+      findAllWithTests = sinon.stub(testDateService, 'findAllWithTests');
+      serviceResponse = [{
+        id: '1',
+        testId: '1',
+        registrationDate: '2016-09-01',
+        adminDate: '2016-10-01',
+        type: 'SAT',
+        registrationMessage: 'A message about registering',
+        registrationDetail: 'Some details',
+        adminMessage: 'A message about the test',
+        adminDetail: 'Some details'
+      }, {
+        id: '2',
+        testId: '1',
+        registrationDate: '2016-09-15',
+        adminDate: '2016-10-15',
+        type: 'SAT',
+        registrationMessage: 'A message about registering',
+        registrationDetail: 'Some details',
+        adminMessage: 'A message about the test',
+        adminDetail: 'Some details'
+      }, {
+        id: '3',
+        testId: '2',
+        registrationDate: '2017-01-01',
+        adminDate: '2017-02-01',
+        type: 'ACT',
+        registrationMessage: 'A message about registering',
+        registrationDetail: 'Some details',
+        adminMessage: 'A message about the test',
+        adminDetail: 'Some details'
+      }, {
+        id: '4',
+        testId: '2',
+        registrationDate: '2017-01-15',
+        adminDate: '2017-02-15',
+        type: 'ACT',
+        registrationMessage: 'A message about registering',
+        registrationDetail: 'Some details',
+        adminMessage: 'A message about the test',
+        adminDetail: 'Some details'
+      }];
+    });
+
+    afterEach(function() {
+      findAllWithTests.restore();
+    });
+
+    it('should return test reminders, split into admin and registration dates, from the current date forward', function() {
+      findAllWithTests.withArgs()
+        .returns(Promise.resolve(serviceResponse));
+
+      var expectedResponse = [{
+        dueDate: '2016-10-01',
+        id: '1',
+        name: 'SAT test today',
+        message: 'A message about the test',
+        detail: 'Some details',
+        registrationDate: '2016-09-01',
+        adminDate: '2016-10-01'
+      }, {
+        dueDate: '2016-10-15',
+        id: '2',
+        name: 'SAT test today',
+        message: 'A message about the test',
+        detail: 'Some details',
+        registrationDate: '2016-09-15',
+        adminDate: '2016-10-15'
+      }, {
+        dueDate: '2017-01-01',
+        id: '3',
+        name: 'ACT registration due today',
+        message: 'A message about registering',
+        detail: 'Some details',
+        registrationDate: '2017-01-01',
+        adminDate: '2017-02-01'
+      }, {
+        dueDate: '2017-01-15',
+        id: '4',
+        name: 'ACT registration due today',
+        message: 'A message about registering',
+        detail: 'Some details',
+        registrationDate: '2017-01-15',
+        adminDate: '2017-02-15'
+      }, {
+        dueDate: '2017-02-01',
+        id: '3',
+        name: 'ACT test today',
+        message: 'A message about the test',
+        detail: 'Some details',
+        registrationDate: '2017-01-01',
+        adminDate: '2017-02-01'
+      }, {
+        dueDate: '2017-02-15',
+        id: '4',
+        name: 'ACT test today',
+        message: 'A message about the test',
+        detail: 'Some details',
+        registrationDate: '2017-01-15',
+        adminDate: '2017-02-15'
+      }];
+
+      return reminderGenerator.getTestReminders(moment.utc('2016-10-01'))
+        .should.eventually.deep.equal(expectedResponse);
+    });
+  })
 });
 
