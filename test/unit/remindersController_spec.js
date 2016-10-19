@@ -9,11 +9,12 @@ chai.should();
 var errors = require('../../services/errorService');
 var Promise = require('bluebird');
 var reminderService = require('../../services/reminderService');
+var reminderGen = require('../../services/reminderGenerationService');
 var auth = require('../../services/authService');
 
 describe('Reminders Controller', function() {
-  var reminderServiceResponse, reminderControllerResponse;
-  var req, res, remindersController, reqGet, getUserData;
+  var reminderServiceResponse, reminderControllerResponse, getTestRemindersResponse;
+  var req, res, remindersController, reqGet, getUserData, getTestReminders;
 
   beforeEach(function() {
     reminderServiceResponse = [{
@@ -69,6 +70,13 @@ describe('Reminders Controller', function() {
         detail: 'Tips for asking your counselor',
         lateMessage: 'Too late',
         lateDetail: ''
+      }, {
+        id: '3',
+        name: 'ACT test today',
+        message: 'A message about the test',
+        detail: 'Some details',
+        lateMessage: '',
+        lateDetail: ''
       }]
     }, {
       dueDate: '2017-02-06',
@@ -80,6 +88,34 @@ describe('Reminders Controller', function() {
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner'
       }]
+    }, {
+      dueDate: '2017-02-15',
+      reminders: [{
+        id: '4',
+        name: 'ACT test today',
+        message: 'A message about the test',
+        detail: 'Some details',
+        lateMessage: '',
+        lateDetail: ''
+      }]
+    }];
+
+    getTestRemindersResponse = [{
+      dueDate: '2017-02-01',
+      id: '3',
+      name: 'ACT test today',
+      message: 'A message about the test',
+      detail: 'Some details',
+      registrationDate: '2017-01-01',
+      adminDate: '2017-02-01'
+    }, {
+      dueDate: '2017-02-15',
+      id: '4',
+      name: 'ACT test today',
+      message: 'A message about the test',
+      detail: 'Some details',
+      registrationDate: '2017-01-15',
+      adminDate: '2017-02-15'
     }];
 
     req = {
@@ -92,6 +128,7 @@ describe('Reminders Controller', function() {
     reqGet = sinon.stub(req, 'get');
     getUserData = sinon.stub(auth, 'getUserData');
     remindersController = require('../../controllers/remindersController');
+    getTestReminders = sinon.stub(reminderGen, 'getTestReminders');
   });
 
   afterEach(function() {
@@ -99,6 +136,7 @@ describe('Reminders Controller', function() {
     res.json.reset();
     reqGet.restore();
     getUserData.restore();
+    getTestReminders.restore();
   });
 
   describe('GET /reminders', function() {
@@ -119,6 +157,8 @@ describe('Reminders Controller', function() {
         .returns({userId: 1, role: 'user'});
       findByUserWithBaseReminders.withArgs(1)
         .returns(Promise.resolve(reminderServiceResponse));
+      getTestReminders
+        .returns(Promise.resolve(getTestRemindersResponse));
 
       return remindersController.getAllForUser(req, res).then(function() {
         res.json.should.have.been.calledWith(reminderControllerResponse);
@@ -133,6 +173,8 @@ describe('Reminders Controller', function() {
       getUserData.withArgs('a valid token')
         .returns({userId: 1, role: 'user'});
       findByUserWithBaseReminders.withArgs(1)
+        .returns(Promise.resolve([]));
+      getTestReminders
         .returns(Promise.resolve([]));
 
       return remindersController.getAllForUser(req, res).then(function() {
@@ -199,6 +241,13 @@ describe('Reminders Controller', function() {
           detail: 'Tips for asking your counselor',
           lateMessage: 'Too late',
           lateDetail: ''
+        }, {
+          id: '3',
+          name: 'ACT test today',
+          message: 'A message about the test',
+          detail: 'Some details',
+          lateMessage: '',
+          lateDetail: ''
         }]
       }, {
         dueDate: '2017-02-06',
@@ -209,6 +258,16 @@ describe('Reminders Controller', function() {
           detail: 'Some help for writing your essay that is due on 2/6/2017',
           lateMessage: 'Too late',
           lateDetail: 'Should have started sooner'
+        }]
+      }, {
+        dueDate: '2017-02-15',
+        reminders: [{
+          id: '4',
+          name: 'ACT test today',
+          message: 'A message about the test',
+          detail: 'Some details',
+          lateMessage: '',
+          lateDetail: ''
         }]
       }];
       req.params = {id: 1};
@@ -226,6 +285,8 @@ describe('Reminders Controller', function() {
         .returns({userId: 1, role: 'user'});
       findByUserForSchoolWithBaseReminders.withArgs(1, 1)
         .returns(Promise.resolve(reminderServiceResponseForSchool));
+      getTestReminders
+        .returns(Promise.resolve(getTestRemindersResponse));
 
       return remindersController.getAllForSchoolForUser(req, res).then(function() {
         res.json.should.have.been.calledWith(reminderControllerResponseForSchool);
@@ -240,6 +301,8 @@ describe('Reminders Controller', function() {
       getUserData.withArgs('a valid token')
         .returns({userId: 1, role: 'user'});
       findByUserForSchoolWithBaseReminders.withArgs(1, 1)
+        .returns(Promise.resolve([]));
+      getTestReminders
         .returns(Promise.resolve([]));
 
       return remindersController.getAllForSchoolForUser(req, res).then(function() {

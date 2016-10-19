@@ -2,6 +2,7 @@ var reminderService = require('../services/reminderService');
 var reminderGen = require('../services/reminderGenerationService');
 var auth = require('../services/authService');
 var errors = require('../services/errorService');
+var moment = require('moment');
 
 var requiredRoles = {
   getAllForUser: ['user'],
@@ -24,10 +25,13 @@ remindersController.getAllForUser = function(req, res) {
 
   return reminderService.findByUserWithBaseReminders(userId).then(function(reminders) {
     reminders = reminderGen.deDuplicateReminders(reminders);
-    reminders = reminderGen.replaceVariablesInReminders(reminders);
-    reminders = reminderGen.groupAndSortByDueDate(reminders);
-    res.status(200);
-    res.json(reminders);
+    reminderGen.getTestReminders(moment.utc()).then(function(testReminders) {
+      reminders = reminders.concat(testReminders);
+      reminders = reminderGen.replaceVariablesInReminders(reminders);
+      reminders = reminderGen.groupAndSortByDueDate(reminders);
+      res.status(200);
+      res.json(reminders);
+    });
   }).catch(function(error) {
     res.status(500);
     res.json(error);
@@ -47,10 +51,13 @@ remindersController.getAllForSchoolForUser = function(req, res) {
   var schoolId = req.params.id;
 
   return reminderService.findByUserForSchoolWithBaseReminders(schoolId, userId).then(function(reminders) {
-    reminders = reminderGen.replaceVariablesInReminders(reminders);
-    reminders = reminderGen.groupAndSortByDueDate(reminders);
-    res.status(200);
-    res.json(reminders);
+    reminderGen.getTestReminders(moment.utc()).then(function(testReminders) {
+      reminders = reminders.concat(testReminders);
+      reminders = reminderGen.replaceVariablesInReminders(reminders);
+      reminders = reminderGen.groupAndSortByDueDate(reminders);
+      res.status(200);
+      res.json(reminders);
+    });
   }).catch(function(error) {
     res.status(500);
     res.json(error);

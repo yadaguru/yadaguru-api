@@ -87,6 +87,30 @@ module.exports = (function() {
     }, {
       phoneNumber: '9876543210'
     }],
+    tests: [{
+      id: '1',
+      type: 'SAT',
+      registrationMessage: 'SAT registration message',
+      registrationDetail: 'SAT registration detail',
+      adminMessage: 'SAT admin message',
+      adminDetail: 'SAT admin detail'
+    }, {
+      id: '2',
+      type: 'ACT',
+      registrationMessage: 'ACT registration message',
+      registrationDetail: 'ACT registration detail',
+      adminMessage: 'ACT admin message',
+      adminDetail: 'ACT admin detail'
+    }],
+    testDates: [{
+      testId: '1',
+      registrationDate: '2017-01-01',
+      adminDate: '2017-02-01',
+    }, {
+      testId: '2',
+      registrationDate: '2017-01-15',
+      adminDate: '2017-02-15'
+    }],
     createMockData: function() {
       var self = this;
       return models.User.bulkCreate(self.users).then(function() {
@@ -97,7 +121,11 @@ module.exports = (function() {
                 return br.setTimeframes([1, 2]).then(function() {
                   return models.BaseReminder.create(self.baseReminders[1]).then(function(br) {
                     return br.setTimeframes([3]).then(function() {
-                      return models.Reminder.bulkCreate(self.reminders);
+                      return models.Reminder.bulkCreate(self.reminders).then(function() {
+                        return models.Test.bulkCreate(self.tests).then(function() {
+                          return models.TestDate.bulkCreate(self.testDates);
+                        })
+                      });
                     });
                   })
                 })

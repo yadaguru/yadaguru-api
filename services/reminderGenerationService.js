@@ -192,24 +192,24 @@ module.exports = (function() {
         if (moment(testDate.registrationDate).isSameOrAfter(currentDate)) {
           testDateReminders.push({
             id: testDate.id,
-            dueDate: testDate.registrationDate,
+            dueDate: _formatDate(testDate.registrationDate),
             name: testDate.type + ' registration due today',
             message: testDate.registrationMessage,
             detail: testDate.registrationDetail,
-            registrationDate: testDate.registrationDate,
-            adminDate: testDate.adminDate
+            registrationDate: _formatDate(testDate.registrationDate),
+            adminDate: _formatDate(testDate.adminDate)
           });
         }
 
         if (moment(testDate.adminDate).isSameOrAfter(currentDate)) {
           testDateReminders.push({
             id: testDate.id,
-            dueDate: testDate.adminDate,
+            dueDate: _formatDate(testDate.adminDate),
             name: testDate.type + ' test today',
             message: testDate.adminMessage,
             detail: testDate.adminDetail,
-            registrationDate: testDate.registrationDate,
-            adminDate: testDate.adminDate
+            registrationDate: _formatDate(testDate.registrationDate),
+            adminDate: _formatDate(testDate.adminDate)
           });
         }
 
@@ -219,6 +219,10 @@ module.exports = (function() {
       _sortBy(testDateReminders, 'dueDate');
       return testDateReminders;
     });
+  }
+
+  function _formatDate(date) {
+    return moment.utc(date).format('YYYY-MM-DD');
   }
 
   return {
