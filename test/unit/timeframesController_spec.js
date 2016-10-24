@@ -62,9 +62,9 @@ describe('Timeframes Controller', function() {
         type: 'absolute',
         formula: '2017-01-01'
       }];
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       findAll.returns(Promise.resolve(timeframes));
 
@@ -76,9 +76,9 @@ describe('Timeframes Controller', function() {
     });
 
     it('should respond with an empty array and a 200 status if there are no timeframes', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       findAll.returns(Promise.resolve([]));
 
@@ -90,9 +90,9 @@ describe('Timeframes Controller', function() {
     });
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       return timeframesController.getAll(req, res).then(function() {
@@ -102,9 +102,9 @@ describe('Timeframes Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return timeframesController.getAll(req, res).then(function() {
@@ -114,9 +114,9 @@ describe('Timeframes Controller', function() {
     });
 
     it('should respond with an error object and a 500 status on a database error', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new Error('database error');
       findAll.returns(Promise.reject(error));
@@ -148,9 +148,9 @@ describe('Timeframes Controller', function() {
         type: 'now',
         formula: undefined
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       findById.withArgs(1)
         .returns(Promise.resolve([timeframe]));
@@ -163,9 +163,9 @@ describe('Timeframes Controller', function() {
 
     it('should an error object and a 404 status if the timeframe does not exist', function() {
       req.params = {id: 2};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ResourceNotFoundError('Timeframe', req.params.id);
       findById.withArgs(2)
@@ -178,9 +178,9 @@ describe('Timeframes Controller', function() {
     });
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       return timeframesController.getById(req, res).then(function() {
@@ -190,9 +190,9 @@ describe('Timeframes Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return timeframesController.getById(req, res).then(function() {
@@ -203,9 +203,9 @@ describe('Timeframes Controller', function() {
 
     it('should respond with an error object and a 500 status on a database error', function() {
       req.params = {id: 1};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new Error('database error');
       findById.returns(Promise.reject(error));
@@ -240,9 +240,9 @@ describe('Timeframes Controller', function() {
         name: req.body.name,
         content: req.body.content
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       create.returns(Promise.resolve([successfulCreateResponse]));
 
@@ -257,9 +257,9 @@ describe('Timeframes Controller', function() {
         type: 'relative',
         formula: '30'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ValidationError([{
         field: 'name',
@@ -277,9 +277,9 @@ describe('Timeframes Controller', function() {
         name: 'In 30 Days',
         formula: '30'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ValidationError([{
         field: 'type',
@@ -298,9 +298,9 @@ describe('Timeframes Controller', function() {
         type: 'relative',
         formula: 'not a number'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ValidationError([{
         field: 'formula',
@@ -320,9 +320,9 @@ describe('Timeframes Controller', function() {
         type: 'absolute',
         formula: 'not a date'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ValidationError([{
         field: 'formula',
@@ -337,9 +337,9 @@ describe('Timeframes Controller', function() {
     });
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       return timeframesController.post(req, res).then(function() {
@@ -349,9 +349,9 @@ describe('Timeframes Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return timeframesController.post(req, res).then(function() {
@@ -366,9 +366,9 @@ describe('Timeframes Controller', function() {
         type: 'relative',
         formula: '30'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var databaseError = new Error('some database error');
       create.returns(Promise.reject(databaseError));
@@ -404,9 +404,9 @@ describe('Timeframes Controller', function() {
         type: req.body.type,
         formula: req.body.formula
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       update.withArgs(req.params.id, req.body)
         .returns(Promise.resolve([updatedTimeframe]));
@@ -425,9 +425,9 @@ describe('Timeframes Controller', function() {
       };
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('Timeframe', req.params.id);
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       update.withArgs(2)
         .returns(Promise.resolve(false));
@@ -439,9 +439,9 @@ describe('Timeframes Controller', function() {
     });
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       return timeframesController.putOnId(req, res).then(function() {
@@ -451,9 +451,9 @@ describe('Timeframes Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return timeframesController.putOnId(req, res).then(function() {
@@ -466,9 +466,9 @@ describe('Timeframes Controller', function() {
       req.body = {name: 'Essay'};
       req.params = {id: 1};
       var error = new Error('database error');
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       update.withArgs(req.params.id, req.body)
         .returns(Promise.reject(error));
@@ -493,9 +493,9 @@ describe('Timeframes Controller', function() {
 
     it('should respond with the timeframe ID and 200 status on success', function() {
       req.params = {id: 1};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       destroy.withArgs(req.params.id)
         .returns(Promise.resolve(true));
@@ -509,9 +509,9 @@ describe('Timeframes Controller', function() {
     it('should respond with an error and 404 status if timeframe does not exist', function() {
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('Timeframe', req.params.id);
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       destroy.withArgs(req.params.id)
         .returns(Promise.resolve(false));
@@ -527,9 +527,9 @@ describe('Timeframes Controller', function() {
       var dbError = new Error();
       dbError.name = 'SequelizeForeignKeyConstraintError';
       var error = new errors.ForeignConstraintError('Timeframe');
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       destroy.withArgs(req.params.id)
         .returns(Promise.reject(dbError));
@@ -541,9 +541,9 @@ describe('Timeframes Controller', function() {
     });
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       return timeframesController.removeById(req, res).then(function() {
@@ -553,9 +553,9 @@ describe('Timeframes Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return timeframesController.removeById(req, res).then(function() {
@@ -566,9 +566,9 @@ describe('Timeframes Controller', function() {
 
     it('should respond with an error and a 500 status on a database error', function() {
       req.params = {id: 1};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new Error('database error');
       destroy.withArgs(req.params.id)

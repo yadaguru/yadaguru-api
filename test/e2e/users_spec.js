@@ -172,7 +172,7 @@ describe('/api/users', function() {
 
       request(app)
         .put('/api/users/1')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .type('json')
         .send(json)
         .expect(200)
@@ -221,7 +221,7 @@ describe('/api/users', function() {
 
       request(app)
         .put('/api/users/1')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .type('json')
         .send(json)
         .expect(200)
@@ -257,7 +257,7 @@ describe('/api/users', function() {
 
       request(app)
         .put('/api/users/1')
-        .set('Bearer', 'not a valid token')
+        .set('Authorization', 'Bearer not a valid token')
         .type('json')
         .send(json)
         .expect(401)
@@ -275,7 +275,7 @@ describe('/api/users', function() {
 
       request(app)
         .put('/api/users/1')
-        .set('Bearer', tokenWrongRole)
+        .set('Authorization', 'Bearer ' + tokenWrongRole)
         .type('json')
         .send(json)
         .expect(401)
@@ -293,7 +293,7 @@ describe('/api/users', function() {
 
       request(app)
         .put('/api/users/1')
-        .set('Bearer', tokenWrongUser)
+        .set('Authorization', 'Bearer ' + tokenWrongUser)
         .type('json')
         .send(json)
         .expect(401)
@@ -309,7 +309,7 @@ describe('/api/users', function() {
     it('should respond with the deleted user id on successful delete', function(done) {
       request(app)
         .delete('/api/users/1')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -321,7 +321,7 @@ describe('/api/users', function() {
     it('should delete reminders and schools associated with the user', function(done) {
       request(app)
         .delete('/api/users/1')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -359,7 +359,7 @@ describe('/api/users', function() {
 
       request(app)
         .delete('/api/users/1')
-        .set('Bearer', 'not a valid token')
+        .set('Authorization', 'Bearer not a valid token')
         .type('json')
         .send(json)
         .expect(401)
@@ -377,7 +377,7 @@ describe('/api/users', function() {
 
       request(app)
         .delete('/api/users/1')
-        .set('Bearer', tokenWrongRole)
+        .set('Authorization', 'Bearer ' + tokenWrongRole)
         .type('json')
         .send(json)
         .expect(401)
@@ -395,7 +395,7 @@ describe('/api/users', function() {
 
       request(app)
         .delete('/api/users/1')
-        .set('Bearer', tokenWrongUser)
+        .set('Authorization', 'Bearer ' + tokenWrongUser)
         .type('json')
         .send(json)
         .expect(401)

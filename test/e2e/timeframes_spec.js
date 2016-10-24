@@ -46,7 +46,7 @@ describe('/api/timeframes', function() {
     it('should respond with all timeframes', function(done) {
       request(app)
         .get('/api/timeframes')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -61,7 +61,7 @@ describe('/api/timeframes', function() {
     it('should respond with requested timeframe object', function(done) {
       request(app)
         .get('/api/timeframes/2')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -76,7 +76,7 @@ describe('/api/timeframes', function() {
     it('should respond with a 404 if the timeframe object does not exist', function(done) {
       request(app)
         .get('/api/timeframes/4')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
@@ -99,7 +99,7 @@ describe('/api/timeframes', function() {
     it('should respond with a 401 if the token is invalid', function(done) {
       request(app)
         .get('/api/timeframes/2')
-        .set('Bearer', 'not a valid token')
+        .set('Authorization', 'Bearer not a valid token')
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
@@ -111,7 +111,7 @@ describe('/api/timeframes', function() {
     it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
       request(app)
         .get('/api/timeframes/2')
-        .set('Bearer', tokenWrongRole)
+        .set('Authorization', 'Bearer ' + tokenWrongRole)
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
@@ -138,7 +138,7 @@ describe('/api/timeframes', function() {
 
       request(app)
         .post('/api/timeframes')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .type('json')
         .send(json)
         .expect(200)
@@ -160,7 +160,7 @@ describe('/api/timeframes', function() {
 
       request(app)
         .post('/api/timeframes')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .type('json')
         .send(json)
         .expect(400)
@@ -185,7 +185,7 @@ describe('/api/timeframes', function() {
     it('should respond with a 401 if the token is invalid', function(done) {
       request(app)
         .post('/api/timeframes')
-        .set('Bearer', 'not a valid token')
+        .set('Authorization', 'Bearer not a valid token')
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
@@ -197,7 +197,7 @@ describe('/api/timeframes', function() {
     it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
       request(app)
         .post('/api/timeframes')
-        .set('Bearer', tokenWrongRole)
+        .set('Authorization', 'Bearer ' + tokenWrongRole)
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
@@ -229,7 +229,7 @@ describe('/api/timeframes', function() {
 
       request(app)
         .put('/api/timeframes/1')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .type('json')
         .send(json)
         .expect(200)
@@ -251,7 +251,7 @@ describe('/api/timeframes', function() {
 
       request(app)
         .put('/api/timeframes/2')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .type('json')
         .send(json)
         .expect(404)
@@ -267,7 +267,7 @@ describe('/api/timeframes', function() {
 
       request(app)
         .put('/api/timeframes/1')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .type('json')
         .send(json)
         .expect(200)
@@ -295,7 +295,7 @@ describe('/api/timeframes', function() {
     it('should respond with a 401 if the token is invalid', function(done) {
       request(app)
         .put('/api/timeframes/1')
-        .set('Bearer', 'not a valid token')
+        .set('Authorization', 'Bearer not a valid token')
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
@@ -307,7 +307,7 @@ describe('/api/timeframes', function() {
     it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
       request(app)
         .put('/api/timeframes/1')
-        .set('Bearer', tokenWrongRole)
+        .set('Authorization', 'Bearer ' + tokenWrongRole)
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
@@ -334,7 +334,7 @@ describe('/api/timeframes', function() {
     it('should respond with the deleted timeframe id on successful delete', function(done) {
       request(app)
         .delete('/api/timeframes/1')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -354,7 +354,7 @@ describe('/api/timeframes', function() {
           newBaseReminder.setTimeframes([1]).then (function() {
             request(app)
               .delete('/api/timeframes/1')
-              .set('Bearer', token)
+              .set('Authorization', 'Bearer ' + token)
               .expect(409)
               .end(function(err, res) {
                 if (err) return done(err);
@@ -369,7 +369,7 @@ describe('/api/timeframes', function() {
     it('should respond with a 404 if the timeframe does not exist', function(done) {
       request(app)
         .delete('/api/timeframes/2')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
@@ -392,7 +392,7 @@ describe('/api/timeframes', function() {
     it('should respond with a 401 if the token is invalid', function(done) {
       request(app)
         .delete('/api/timeframes/1')
-        .set('Bearer', 'not a valid token')
+        .set('Authorization', 'Bearer not a valid token')
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
@@ -404,7 +404,7 @@ describe('/api/timeframes', function() {
     it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
       request(app)
         .delete('/api/timeframes/1')
-        .set('Bearer', tokenWrongRole)
+        .set('Authorization', 'Bearer ' + tokenWrongRole)
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);

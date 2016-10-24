@@ -39,7 +39,7 @@ describe('/api/reminders', function() {
     it('should respond with all grouped & sorted by duedate reminders', function(done) {
       request(app)
         .get('/api/reminders')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -101,7 +101,7 @@ describe('/api/reminders', function() {
     it('should respond with all reminders grouped and sorted by dueDate for the school id', function(done) {
       request(app)
         .get('/api/reminders/school/1')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -163,7 +163,7 @@ describe('/api/reminders', function() {
     it('should respond with requested reminder object', function(done) {
       request(app)
         .get('/api/reminders/1')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -179,7 +179,7 @@ describe('/api/reminders', function() {
     it('should respond with a 404 if the reminder object does not exist', function(done) {
       request(app)
         .get('/api/reminders/7')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
@@ -191,7 +191,7 @@ describe('/api/reminders', function() {
     it('should respond with an empty array if no reminders belong to the school ID (but will still return test reminders', function(done) {
       request(app)
         .get('/api/reminders/school/3')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -234,7 +234,7 @@ describe('/api/reminders', function() {
     it('should respond with a 401 if the token is invalid', function(done) {
       request(app)
         .get('/api/reminders/1')
-        .set('Bearer', 'not a valid token')
+        .set('Authorization', 'Bearer not a valid token')
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
@@ -246,7 +246,7 @@ describe('/api/reminders', function() {
     it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
       request(app)
         .get('/api/reminders/1')
-        .set('Bearer', tokenWrongRole)
+        .set('Authorization', 'Bearer ' + tokenWrongRole)
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
@@ -258,7 +258,7 @@ describe('/api/reminders', function() {
     it('should respond with a 404 if the user attempts to access a reminder that does not belong to them', function(done) {
       request(app)
         .get('/api/reminders/1')
-        .set('Bearer', tokenWrongUser)
+        .set('Authorization', 'Bearer ' + tokenWrongUser)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);

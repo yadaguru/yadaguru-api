@@ -83,7 +83,7 @@ module.exports = function() {
     }
 
     // If no confirm code, we are updating user data, verify token and proceed with update
-    var userData = auth.getUserData(req.get('Bearer'));
+    var userData = auth.getUserData(req.get('Authorization'));
     if (!userData || userData.role !== 'user' || userData.userId != id) {
       res.status(401);
       res.json(new errors.NotAuthorizedError());
@@ -168,7 +168,7 @@ module.exports = function() {
 
   usersController.removeById = function(req, res) {
     var id = req.params.id;
-    var userData = auth.getUserData(req.get('Bearer'));
+    var userData = auth.getUserData(req.get('Authorization'));
     if (!userData || userData.role !== 'user' || userData.userId != id) {
       res.status(401);
       res.json(new errors.NotAuthorizedError());

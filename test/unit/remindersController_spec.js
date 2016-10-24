@@ -151,9 +151,9 @@ describe('Reminders Controller', function() {
     });
 
     it('should respond with an array of all reminders grouped & sorted by dueDate and a 200 status', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
       findByUserWithBaseReminders.withArgs(1)
         .returns(Promise.resolve(reminderServiceResponse));
@@ -168,9 +168,9 @@ describe('Reminders Controller', function() {
     });
 
     it('should respond with an empty array and a 200 status if there are no reminders', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
       findByUserWithBaseReminders.withArgs(1)
         .returns(Promise.resolve([]));
@@ -185,9 +185,9 @@ describe('Reminders Controller', function() {
     });
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
 
       return remindersController.getAllForUser(req, res).then(function() {
@@ -197,9 +197,9 @@ describe('Reminders Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return remindersController.getAllForUser(req, res).then(function() {
@@ -209,9 +209,9 @@ describe('Reminders Controller', function() {
     });
 
     it('should respond with an error object and a 500 status on a database error', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       var error = new Error('database error');
@@ -279,9 +279,9 @@ describe('Reminders Controller', function() {
     });
 
     it('should respond with an array of all reminders belonging to school ID group & sorted by dueDate, and a 200 status', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
       findByUserForSchoolWithBaseReminders.withArgs(1, 1)
         .returns(Promise.resolve(reminderServiceResponseForSchool));
@@ -296,9 +296,9 @@ describe('Reminders Controller', function() {
     });
 
     it('should respond with an empty array and a 200 status if there are no reminders matching the school ID', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
       findByUserForSchoolWithBaseReminders.withArgs(1, 1)
         .returns(Promise.resolve([]));
@@ -313,9 +313,9 @@ describe('Reminders Controller', function() {
     });
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
 
       return remindersController.getAllForSchoolForUser(req, res).then(function() {
@@ -325,9 +325,9 @@ describe('Reminders Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return remindersController.getAllForSchoolForUser(req, res).then(function() {
@@ -337,9 +337,9 @@ describe('Reminders Controller', function() {
     });
 
     it('should respond with an error object and a 500 status on a database error', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       var error = new Error('database error');
@@ -376,9 +376,9 @@ describe('Reminders Controller', function() {
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
       findByIdForUserWithBaseReminders.withArgs(1, 1)
         .returns(Promise.resolve([reminder]));
@@ -390,9 +390,9 @@ describe('Reminders Controller', function() {
     });
 
     it('should an error object and a 404 status if the reminder does not exist', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       var error = new errors.ResourceNotFoundError('Reminder', req.params.id);
@@ -406,9 +406,9 @@ describe('Reminders Controller', function() {
     });
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
 
       return remindersController.getByIdForUser(req, res).then(function() {
@@ -418,9 +418,9 @@ describe('Reminders Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return remindersController.getByIdForUser(req, res).then(function() {
@@ -430,9 +430,9 @@ describe('Reminders Controller', function() {
     });
 
     it('should respond with an error object and a 500 status on a database error', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       var error = new Error('database error');

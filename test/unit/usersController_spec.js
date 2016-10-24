@@ -201,9 +201,9 @@ describe('Users Controller', function() {
         updatedAt: 'ISO timestamp'
       };
 
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       update.withArgs(1, {sponsorCode: '123456'})
@@ -272,9 +272,9 @@ describe('Users Controller', function() {
       req.body = {phoneNumber: '1234567890'};
       req.params = {id: 2};
       var error = new errors.NotAuthorizedError();
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       update.withArgs(req.params.id)
@@ -289,9 +289,9 @@ describe('Users Controller', function() {
     it('should respond a 401 error if the user role is not authorized for this route', function() {
       req.body = {phoneNumber: '1234567890'};
       req.params = {id: 2};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
 
       return usersController.putOnId(req, res).then(function() {
@@ -303,9 +303,9 @@ describe('Users Controller', function() {
     it('should respond a 401 error if the user token is invalid', function() {
       req.body = {phoneNumber: '1234567890'};
       req.params = {id: 2};
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return usersController.putOnId(req, res).then(function() {
@@ -318,9 +318,9 @@ describe('Users Controller', function() {
       req.body = {phoneNumber: '1234567890'};
       req.params = {id: 1};
       var error = new Error('database error');
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       update.withArgs(req.params.id, req.body)
@@ -360,9 +360,9 @@ describe('Users Controller', function() {
 
     it('should respond with the user ID and 200 status on success', function() {
       req.params = {id: 1};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
       destroy.withArgs(req.params.id)
         .returns(Promise.resolve(true));
@@ -375,9 +375,9 @@ describe('Users Controller', function() {
 
     it('should respond with an error and a 500 status on a database error', function() {
       req.params = {id: 1};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
       var error = new Error('database error');
       destroy.withArgs(req.params.id)
@@ -390,9 +390,9 @@ describe('Users Controller', function() {
     });
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
 
       req.params = {id: 1};
@@ -403,9 +403,9 @@ describe('Users Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       req.params = {id: 1};

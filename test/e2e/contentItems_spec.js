@@ -38,7 +38,7 @@ describe('/api/content_items', function() {
     it('should respond with all contentItems', function(done) {
       request(app)
         .get('/api/content_items')
-        .set('Bearer', tokenAdmin)
+        .set('Authorization', 'Bearer ' + tokenAdmin)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -66,7 +66,7 @@ describe('/api/content_items', function() {
     it('should respond with a 404 if the content item object does not exist', function(done) {
       request(app)
         .get('/api/content_items/foobar')
-        .set('Bearer', tokenAdmin)
+        .set('Authorization', 'Bearer ' + tokenAdmin)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
@@ -90,7 +90,7 @@ describe('/api/content_items', function() {
 
       request(app)
         .post('/api/content_items')
-        .set('Bearer', tokenAdmin)
+        .set('Authorization', 'Bearer ' + tokenAdmin)
         .type('json')
         .send(json)
         .expect(200)
@@ -108,7 +108,7 @@ describe('/api/content_items', function() {
 
       request(app)
         .post('/api/content_items')
-        .set('Bearer', tokenAdmin)
+        .set('Authorization', 'Bearer ' + tokenAdmin)
         .type('json')
         .send(json)
         .expect(400)
@@ -133,7 +133,7 @@ describe('/api/content_items', function() {
     it('should respond with a 401 if the token is invalid', function(done) {
       request(app)
         .post('/api/content_items')
-        .set('Bearer', 'not a valid token')
+        .set('Authorization', 'Bearer not a valid token')
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
@@ -145,7 +145,7 @@ describe('/api/content_items', function() {
     it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
       request(app)
         .post('/api/content_items')
-        .set('Bearer', tokenUser)
+        .set('Authorization', 'Bearer ' + tokenUser)
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
@@ -170,7 +170,7 @@ describe('/api/content_items', function() {
 
       request(app)
         .put('/api/content_items/1')
-        .set('Bearer', tokenAdmin)
+        .set('Authorization', 'Bearer ' + tokenAdmin)
         .type('json')
         .send(json)
         .expect(200)
@@ -188,7 +188,7 @@ describe('/api/content_items', function() {
 
       request(app)
         .put('/api/content_items/2')
-        .set('Bearer', tokenAdmin)
+        .set('Authorization', 'Bearer ' + tokenAdmin)
         .type('json')
         .send(json)
         .expect(404)
@@ -204,7 +204,7 @@ describe('/api/content_items', function() {
 
       request(app)
         .put('/api/content_items/1')
-        .set('Bearer', tokenAdmin)
+        .set('Authorization', 'Bearer ' + tokenAdmin)
         .type('json')
         .send(json)
         .expect(200)
@@ -230,7 +230,7 @@ describe('/api/content_items', function() {
     it('should respond with a 401 if the token is invalid', function(done) {
       request(app)
         .put('/api/content_items/1')
-        .set('Bearer', 'not a valid token')
+        .set('Authorization', 'Bearer not a valid token')
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
@@ -242,7 +242,7 @@ describe('/api/content_items', function() {
     it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
       request(app)
         .put('/api/content_items/1')
-        .set('Bearer', tokenUser)
+        .set('Authorization', 'Bearer ' + tokenUser)
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
@@ -265,7 +265,7 @@ describe('/api/content_items', function() {
     it('should respond with the deleted content item id on successful delete', function(done) {
       request(app)
         .delete('/api/content_items/1')
-        .set('Bearer', tokenAdmin)
+        .set('Authorization', 'Bearer ' + tokenAdmin)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -277,7 +277,7 @@ describe('/api/content_items', function() {
     it('should respond with a 404 if the content item does not exist', function(done) {
       request(app)
         .delete('/api/content_items/2')
-        .set('Bearer', tokenAdmin)
+        .set('Authorization', 'Bearer ' + tokenAdmin)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
@@ -300,7 +300,7 @@ describe('/api/content_items', function() {
     it('should respond with a 401 if the token is invalid', function(done) {
       request(app)
         .delete('/api/content_items/2')
-        .set('Bearer', 'not a valid token')
+        .set('Authorization', 'Bearer not a valid token')
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
@@ -312,7 +312,7 @@ describe('/api/content_items', function() {
     it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
       request(app)
         .delete('/api/content_items/2')
-        .set('Bearer', tokenUser)
+        .set('Authorization', 'Bearer ' + tokenUser)
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);

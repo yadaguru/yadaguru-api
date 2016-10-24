@@ -13,7 +13,7 @@ var resourceControllerFactory = function(name, modelService, schema, requiredRol
       return true;
     }
 
-    var userData = auth.getUserData(req.get('Bearer'));
+    var userData = auth.getUserData(req.get('Authorization'));
     return userData && roles[method].indexOf(userData.role) > -1;
   }
 
@@ -22,7 +22,7 @@ var resourceControllerFactory = function(name, modelService, schema, requiredRol
       throw new Error('This route requires user data and must be restricted to at least one role.');
     }
 
-    var userData = auth.getUserData(req.get('Bearer'));
+    var userData = auth.getUserData(req.get('Authorization'));
     if (!userData || roles[method].indexOf(userData.role) < 0) {
       return false;
     }

@@ -53,9 +53,9 @@ describe('Categories Controller', function() {
         id: '2',
         name: 'Recommendation Letter'
       }];
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       findAll.returns(Promise.resolve(categories));
 
@@ -68,9 +68,9 @@ describe('Categories Controller', function() {
 
     it('should respond with an empty array and a 200 status if there are no categories', function() {
       findAll.returns(Promise.resolve([]));
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
 
       return categoriesController.getAll(req, res).then(function() {
@@ -81,9 +81,9 @@ describe('Categories Controller', function() {
     });
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       return categoriesController.getAll(req, res).then(function() {
@@ -93,9 +93,9 @@ describe('Categories Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return categoriesController.getAll(req, res).then(function() {
@@ -105,9 +105,9 @@ describe('Categories Controller', function() {
     });
 
     it('should respond with an error object and a 500 status on a database error', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new Error('database error');
       findAll.returns(Promise.reject(error));
@@ -137,9 +137,9 @@ describe('Categories Controller', function() {
         id: '1',
         name: 'Essay'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       findById.withArgs(1)
         .returns(Promise.resolve([category]));
@@ -153,9 +153,9 @@ describe('Categories Controller', function() {
     it('should an error object and a 404 status if the category does not exist', function() {
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('Category', req.params.id);
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       findById.withArgs(2)
         .returns(Promise.resolve([]));
@@ -168,9 +168,9 @@ describe('Categories Controller', function() {
     });
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       return categoriesController.getById(req, res).then(function() {
@@ -180,9 +180,9 @@ describe('Categories Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return categoriesController.getById(req, res).then(function() {
@@ -194,9 +194,9 @@ describe('Categories Controller', function() {
     it('should respond with an error object and a 500 status on a database error', function() {
       req.params = {id: 1};
       var error = new Error('database error');
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       findById.returns(Promise.reject(error));
 
@@ -225,9 +225,9 @@ describe('Categories Controller', function() {
         id: '2',
         name: req.body.name
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       create.returns(Promise.resolve([successfulCreateResponse]));
 
@@ -243,9 +243,9 @@ describe('Categories Controller', function() {
         field: 'name',
         message: 'is required'
       }]);
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
 
       return categoriesController.post(req, res).then(function() {
@@ -256,9 +256,9 @@ describe('Categories Controller', function() {
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
       req.body = {name: 'Essay'};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       return categoriesController.post(req, res).then(function() {
@@ -269,9 +269,9 @@ describe('Categories Controller', function() {
 
     it('should respond a 401 error if the user token is invalid', function() {
       req.body = {name: 'Essay'};
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return categoriesController.post(req, res).then(function() {
@@ -283,9 +283,9 @@ describe('Categories Controller', function() {
     it('should respond with an error and a 500 status on a database error', function() {
       req.body = {name: 'Essay'};
       var databaseError = new Error('some database error');
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       create.returns(Promise.reject(databaseError));
 
@@ -314,9 +314,9 @@ describe('Categories Controller', function() {
         id: '1',
         name: req.body.name
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       update.withArgs(req.params.id, req.body)
         .returns(Promise.resolve([updatedCategory]));
@@ -331,9 +331,9 @@ describe('Categories Controller', function() {
       req.body = {name: 'Essay'};
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('Category', req.params.id);
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       update.withArgs(req.params.id)
         .returns(Promise.resolve(false));
@@ -347,9 +347,9 @@ describe('Categories Controller', function() {
     it('should respond a 401 error if the user role is not authorized for this route', function() {
       req.body = {name: 'Essay'};
       req.params = {id: 2};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       return categoriesController.putOnId(req, res).then(function() {
@@ -361,9 +361,9 @@ describe('Categories Controller', function() {
     it('should respond a 401 error if the user token is invalid', function() {
       req.body = {name: 'Essay'};
       req.params = {id: 2};
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return categoriesController.putOnId(req, res).then(function() {
@@ -376,9 +376,9 @@ describe('Categories Controller', function() {
       req.body = {name: 'Essay'};
       req.params = {id: 1};
       var error = new Error('database error');
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       update.withArgs(req.params.id, req.body)
         .returns(Promise.reject(error));
@@ -403,9 +403,9 @@ describe('Categories Controller', function() {
 
     it('should respond with the categoryService ID and 200 status on success', function() {
       req.params = {id: 1};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       destroy.withArgs(req.params.id)
         .returns(Promise.resolve(true));
@@ -418,9 +418,9 @@ describe('Categories Controller', function() {
 
     it('should respond with an error and 404 status if category does not exist', function() {
       req.params = {id: 2};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ResourceNotFoundError('Category', req.params.id);
       destroy.withArgs(req.params.id)
@@ -434,9 +434,9 @@ describe('Categories Controller', function() {
 
     it('should respond with an error and 409 status if there is a foreign constraint error', function() {
       req.params = {id: 2};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var dbError = new Error();
       dbError.name = 'SequelizeForeignKeyConstraintError';
@@ -453,9 +453,9 @@ describe('Categories Controller', function() {
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
       req.params = {id: 2};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       return categoriesController.removeById(req, res).then(function() {
@@ -466,9 +466,9 @@ describe('Categories Controller', function() {
 
     it('should respond a 401 error if the user token is invalid', function() {
       req.params = {id: 2};
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return categoriesController.removeById(req, res).then(function() {
@@ -479,9 +479,9 @@ describe('Categories Controller', function() {
 
     it('should respond with an error and a 500 status on a database error', function() {
       req.params = {id: 1};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new Error('database error');
       destroy.withArgs(req.params.id)

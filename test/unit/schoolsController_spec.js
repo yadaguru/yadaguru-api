@@ -62,9 +62,9 @@ describe('Schools Controller', function() {
         isActive: true
       }];
 
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       findByUser.withArgs(1)
@@ -78,9 +78,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond with an empty array and a 200 status if there are no schools', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       findByUser.withArgs(1)
@@ -94,9 +94,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
 
       return schoolsController.getAllForUser(req, res).then(function() {
@@ -106,9 +106,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return schoolsController.getAllForUser(req, res).then(function() {
@@ -118,9 +118,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond with an error object and a 500 status on a database error', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       var error = new Error('database error');
@@ -146,9 +146,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond with an array with the matching school and a 200 status', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       req.params = {id: 1};
@@ -168,9 +168,9 @@ describe('Schools Controller', function() {
     });
 
     it('should an error object and a 404 status if the school does not exist', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       req.params = {id: 2};
@@ -186,9 +186,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond with an error object and a 500 status on a database error', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       req.params = {id: 1};
@@ -202,9 +202,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
 
       return schoolsController.getByIdForUser(req, res).then(function() {
@@ -214,9 +214,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return schoolsController.getByIdForUser(req, res).then(function() {
@@ -242,9 +242,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond with new school object and 200 status on success', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
       getRemindersForSchool.withArgs('1', '1', '2017-02-01')
         .returns(Promise.resolve('generated reminders'));
@@ -279,9 +279,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond with an error and 400 status on if name is missing', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       req.body =  {
@@ -300,9 +300,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond with an error and 400 status on if dueDate is missing', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       req.body =  {
@@ -321,9 +321,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond with an error and 400 status on if dueDate is not a date', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       req.body =  {
@@ -344,9 +344,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond with an error and 400 status on if isActive is not boolean', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       req.body =  {
@@ -367,9 +367,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond with an error and a 500 status on a database error', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       req.body =  {
@@ -394,9 +394,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
 
       return schoolsController.postForUser(req, res).then(function() {
@@ -406,9 +406,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return schoolsController.postForUser(req, res).then(function() {
@@ -430,9 +430,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond with the updated school object and 200 status on success', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       req.body = {
@@ -458,9 +458,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond with the updated school object and 200 status on success when required fields are missing', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       req.body = {
@@ -484,9 +484,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond with an error and 404 status if school does not exist', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       req.body = {
@@ -506,9 +506,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond with an error and a 500 status on a database error', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       req.body = {
@@ -528,9 +528,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
 
       return schoolsController.putOnIdForUser(req, res).then(function() {
@@ -540,9 +540,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return schoolsController.putOnIdForUser(req, res).then(function() {
@@ -564,9 +564,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond with the school ID and 200 status on success', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       req.params = {id: 1};
@@ -580,9 +580,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond with an error and 404 status if school does not exist', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       req.params = {id: 2};
@@ -597,9 +597,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond with an error and a 500 status on a database error', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       req.params = {id: 1};
@@ -614,9 +614,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
 
       req.params = {id: 1};
@@ -627,9 +627,9 @@ describe('Schools Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       req.params = {id: 1};

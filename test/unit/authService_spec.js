@@ -118,7 +118,7 @@ describe('The authService', function() {
       verify.withArgs('an invalid token', 'development_secret')
         .throws(new jwt.JsonWebTokenError());
 
-      authService.getUserData('an invalid token').should.be.false;
+      authService.getUserData('Bearer an invalid token').should.be.false;
     });
 
 

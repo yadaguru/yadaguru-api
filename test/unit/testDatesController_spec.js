@@ -57,9 +57,9 @@ describe('Test Dates Controller', function() {
         registrationDate: '2017-01-01',
         adminDate: '2017-02-01'
       }];
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       findAll.returns(Promise.resolve(testDates));
 
@@ -71,9 +71,9 @@ describe('Test Dates Controller', function() {
     });
 
     it('should respond with an empty array and a 200 status if there are no testDates', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       findAll.returns(Promise.resolve([]));
 
@@ -85,9 +85,9 @@ describe('Test Dates Controller', function() {
     });
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       return testDatesController.getAll(req, res).then(function() {
@@ -97,9 +97,9 @@ describe('Test Dates Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return testDatesController.getAll(req, res).then(function() {
@@ -110,9 +110,9 @@ describe('Test Dates Controller', function() {
 
     it('should respond with an error object and a 500 status on a database error', function() {
       var error = new Error('database error');
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       findAll.returns(Promise.reject(error));
 
@@ -143,9 +143,9 @@ describe('Test Dates Controller', function() {
         registrationDate: '2016-09-01',
         adminDate: '2016-10-01'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       findById.withArgs(1)
         .returns(Promise.resolve([testDate]));
@@ -158,9 +158,9 @@ describe('Test Dates Controller', function() {
 
     it('should an error object and a 404 status if the testDate does not exist', function() {
       req.params = {id: 2};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ResourceNotFoundError('TestDate', req.params.id);
       findById.withArgs(2)
@@ -174,9 +174,9 @@ describe('Test Dates Controller', function() {
     });
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       return testDatesController.getById(req, res).then(function() {
@@ -186,9 +186,9 @@ describe('Test Dates Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return testDatesController.getById(req, res).then(function() {
@@ -199,9 +199,9 @@ describe('Test Dates Controller', function() {
 
     it('should respond with an error object and a 500 status on a database error', function() {
       req.params = {id: 1};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new Error('database error');
       findById.returns(Promise.reject(error));
@@ -237,9 +237,9 @@ describe('Test Dates Controller', function() {
         registrationDate: req.body.registrationDate,
         adminDate: req.body.adminDate
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       create.returns(Promise.resolve([successfulCreateResponse]));
 
@@ -254,9 +254,9 @@ describe('Test Dates Controller', function() {
         registrationDate: '2016-09-01',
         adminDate: '2016-10-01'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ValidationError([{
         field: 'testId',
@@ -274,9 +274,9 @@ describe('Test Dates Controller', function() {
         testId: '1',
         adminDate: '2016-10-01'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ValidationError([{
         field: 'registrationDate',
@@ -294,9 +294,9 @@ describe('Test Dates Controller', function() {
         testId: '1',
         registrationDate: '2016-09-01'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ValidationError([{
         field: 'adminDate',
@@ -315,9 +315,9 @@ describe('Test Dates Controller', function() {
         adminDate: '2016-10-01',
         registrationDate: '2016-09-01'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ValidationError([{
         field: 'testId',
@@ -337,9 +337,9 @@ describe('Test Dates Controller', function() {
         adminDate: '2016-10-01',
         registrationDate: 'someday'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ValidationError([{
         field: 'registrationDate',
@@ -359,9 +359,9 @@ describe('Test Dates Controller', function() {
         adminDate: 'whenever',
         registrationDate: '2016-10-01'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ValidationError([{
         field: 'adminDate',
@@ -376,9 +376,9 @@ describe('Test Dates Controller', function() {
     });
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       return testDatesController.post(req, res).then(function() {
@@ -388,9 +388,9 @@ describe('Test Dates Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return testDatesController.post(req, res).then(function() {
@@ -405,9 +405,9 @@ describe('Test Dates Controller', function() {
         registrationDate: '2016-09-01',
         adminDate: '2016-10-01'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var databaseError = new Error('some database error');
       create.returns(Promise.reject(databaseError));
@@ -443,9 +443,9 @@ describe('Test Dates Controller', function() {
         registrationDate: req.body.registrationDate,
         adminDate: req.body.adminDate
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       update.withArgs(req.params.id, req.body)
         .returns(Promise.resolve([updatedTestDate]));
@@ -467,9 +467,9 @@ describe('Test Dates Controller', function() {
         registrationDate: req.body.registrationDate,
         adminDate: '2016-09-01'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       update.withArgs(req.params.id, req.body)
         .returns(Promise.resolve([updatedTestDate]));
@@ -489,9 +489,9 @@ describe('Test Dates Controller', function() {
       };
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('TestDate', req.params.id);
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       update.withArgs(2)
         .returns(Promise.resolve(false));
@@ -503,9 +503,9 @@ describe('Test Dates Controller', function() {
     });
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       return testDatesController.putOnId(req, res).then(function() {
@@ -515,9 +515,9 @@ describe('Test Dates Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return testDatesController.putOnId(req, res).then(function() {
@@ -534,9 +534,9 @@ describe('Test Dates Controller', function() {
       };
       req.params = {id: 1};
       var error = new Error('database error');
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       update.withArgs(req.params.id, req.body)
         .returns(Promise.reject(error));
@@ -561,9 +561,9 @@ describe('Test Dates Controller', function() {
 
     it('should respond with the testDate ID and 200 status on success', function() {
       req.params = {id: 1};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       destroy.withArgs(req.params.id)
         .returns(Promise.resolve(true));
@@ -577,9 +577,9 @@ describe('Test Dates Controller', function() {
     it('should respond with an error and 404 status if testDate does not exist', function() {
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('TestDate', req.params.id);
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       destroy.withArgs(req.params.id)
         .returns(Promise.resolve(false));
@@ -591,9 +591,9 @@ describe('Test Dates Controller', function() {
     });
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       return testDatesController.removeById(req, res).then(function() {
@@ -603,9 +603,9 @@ describe('Test Dates Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return testDatesController.removeById(req, res).then(function() {
@@ -617,9 +617,9 @@ describe('Test Dates Controller', function() {
     it('should respond with an error and a 500 status on a database error', function() {
       req.params = {id: 1};
       var error = new Error('database error');
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       destroy.withArgs(req.params.id)
         .returns(Promise.reject(error));

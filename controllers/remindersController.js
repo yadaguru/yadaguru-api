@@ -13,7 +13,7 @@ var requiredRoles = {
 var remindersController = require('./baseController')('Reminder', reminderService, null, requiredRoles);
 
 remindersController.getAllForUser = function(req, res) {
-  var userData = auth.getUserData(req.get('Bearer'));
+  var userData = auth.getUserData(req.get('Authorization'));
 
   if (!userData || userData.role !== 'user') {
     res.status(401);
@@ -39,7 +39,7 @@ remindersController.getAllForUser = function(req, res) {
 };
 
 remindersController.getAllForSchoolForUser = function(req, res) {
-  var userData = auth.getUserData(req.get('Bearer'));
+  var userData = auth.getUserData(req.get('Authorization'));
 
   if (!userData || userData.role !== 'user') {
     res.status(401);
@@ -65,7 +65,7 @@ remindersController.getAllForSchoolForUser = function(req, res) {
 };
 
 remindersController.getByIdForUser = function(req, res) {
-  var userData = auth.getUserData(req.get('Bearer'));
+  var userData = auth.getUserData(req.get('Authorization'));
 
   if (!userData || userData.role !== 'user') {
     res.status(401);

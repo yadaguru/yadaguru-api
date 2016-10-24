@@ -35,7 +35,7 @@ var requiredRoles = {
 var schoolsController = require('./baseController')('School', schoolService, schema, requiredRoles);
 
 schoolsController.postForUser = function(req, res) {
-  var userData = auth.getUserData(req.get('Bearer'));
+  var userData = auth.getUserData(req.get('Authorization'));
   if (!userData || userData.role !== 'user') {
     res.status(401);
     res.json(new errors.NotAuthorizedError());

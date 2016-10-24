@@ -43,10 +43,10 @@ describe('AdminUsers Controller', function() {
         .returns(Promise.resolve({id: 1}));
 
       getUserToken.withArgs(1, 'admin')
-        .returns('a valid token');
+        .returns('Bearer a valid token');
 
       return adminUsersController.post(req, res).then(function() {
-        res.json.should.have.been.calledWith({token: 'a valid token'});
+        res.json.should.have.been.calledWith({token: 'Bearer a valid token'});
         res.status.should.have.been.calledWith(200);
       });
     });

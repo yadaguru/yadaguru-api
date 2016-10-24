@@ -66,9 +66,9 @@ describe('Base Reminders Controller', function() {
         timeframeIds: [3],
         categoryId: 2
       }];
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       findAll.withArgs()
         .returns(Promise.resolve(baseReminders));
@@ -81,9 +81,9 @@ describe('Base Reminders Controller', function() {
     });
 
     it('should respond with an empty array and a 200 status if there are no baseReminders', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       findAll.withArgs()
         .returns(Promise.resolve([]));
@@ -96,9 +96,9 @@ describe('Base Reminders Controller', function() {
     });
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       return baseRemindersController.getAll(req, res).then(function() {
@@ -108,9 +108,9 @@ describe('Base Reminders Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return baseRemindersController.getAll(req, res).then(function() {
@@ -120,9 +120,9 @@ describe('Base Reminders Controller', function() {
     });
 
     it('should respond with an error object and a 500 status on a database error', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new Error('database error');
       findAll.returns(Promise.reject(error));
@@ -158,9 +158,9 @@ describe('Base Reminders Controller', function() {
         timeframeIds: [1, 2],
         categoryId: 1
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       findById.withArgs(1)
         .returns(Promise.resolve([baseReminder]));
@@ -174,9 +174,9 @@ describe('Base Reminders Controller', function() {
     it('should an error object and a 404 status if the baseReminder does not exist', function() {
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('BaseReminder', req.params.id);
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       findById.withArgs(2)
         .returns(Promise.resolve([]));
@@ -190,9 +190,9 @@ describe('Base Reminders Controller', function() {
 
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       return baseRemindersController.getById(req, res).then(function() {
@@ -202,9 +202,9 @@ describe('Base Reminders Controller', function() {
     });
 
     it('should respond a 401 error if the user token is invalid', function() {
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return baseRemindersController.getById(req, res).then(function() {
@@ -215,9 +215,9 @@ describe('Base Reminders Controller', function() {
 
     it('should respond with an error object and a 500 status on a database error', function() {
       req.params = {id: 1};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new Error('database error');
       findById.returns(Promise.reject(error));
@@ -261,9 +261,9 @@ describe('Base Reminders Controller', function() {
         timeframeIds: req.body.timeframeIds,
         categoryId: req.body.categoryId
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       create.returns(Promise.resolve([successfulCreateResponse]));
 
@@ -292,9 +292,9 @@ describe('Base Reminders Controller', function() {
         timeframeIds: req.body.timeframeIds,
         categoryId: req.body.categoryId
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       create.returns(Promise.resolve([successfulCreateResponse]));
 
@@ -312,9 +312,9 @@ describe('Base Reminders Controller', function() {
         lateDetail: 'Should have started sooner',
         timeframeIds: [1, 2]
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ValidationError([{
         field: 'detail',
@@ -340,9 +340,9 @@ describe('Base Reminders Controller', function() {
         timeframeIds: '1, 2',
         categoryId: '1'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ValidationError([{
         field: 'timeframeIds',
@@ -366,9 +366,9 @@ describe('Base Reminders Controller', function() {
         timeframeIds: [],
         categoryId: '1'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ValidationError([{
         field: 'timeframeIds',
@@ -392,9 +392,9 @@ describe('Base Reminders Controller', function() {
         timeframeIds: ['now'],
         categoryId: '1'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ValidationError([{
         field: 'timeframeIds',
@@ -418,9 +418,9 @@ describe('Base Reminders Controller', function() {
         timeframeIds: [1, 2],
         categoryId: 'Essays'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ValidationError([{
         field: 'categoryId',
@@ -444,9 +444,9 @@ describe('Base Reminders Controller', function() {
         timeframeIds: [1, 2],
         categoryId: '1'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       return baseRemindersController.post(req, res).then(function() {
@@ -465,9 +465,9 @@ describe('Base Reminders Controller', function() {
         timeframeIds: [1, 2],
         categoryId: '1'
       };
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return baseRemindersController.post(req, res).then(function() {
@@ -486,9 +486,9 @@ describe('Base Reminders Controller', function() {
         timeframeIds: [1, 2],
         categoryId: '1'
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var databaseError = new Error('some database error');
       create.returns(Promise.reject(databaseError));
@@ -526,9 +526,9 @@ describe('Base Reminders Controller', function() {
         timeframeIds: [1],
         categoryId: 1
       };
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       update.returns(Promise.resolve([updatedBaseReminder]));
 
@@ -544,9 +544,9 @@ describe('Base Reminders Controller', function() {
       };
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('BaseReminder', req.params.id);
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       update.withArgs(2)
         .returns(Promise.resolve(false));
@@ -560,9 +560,9 @@ describe('Base Reminders Controller', function() {
     it('should respond a 401 error if the user role is not authorized for this route', function() {
       req.body = {name: 'Essay'};
       req.params = {id: 1};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       return baseRemindersController.putOnId(req, res).then(function() {
@@ -574,9 +574,9 @@ describe('Base Reminders Controller', function() {
     it('should respond a 401 error if the user token is invalid', function() {
       req.body = {name: 'Essay'};
       req.params = {id: 1};
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return baseRemindersController.putOnId(req, res).then(function() {
@@ -589,9 +589,9 @@ describe('Base Reminders Controller', function() {
       req.body = {name: 'Essay'};
       req.params = {id: 1};
       var error = new Error('database error');
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       update.withArgs(req.params.id, req.body)
         .returns(Promise.reject(error));
@@ -616,9 +616,9 @@ describe('Base Reminders Controller', function() {
 
     it('should respond with the baseReminder ID and 200 status on success', function() {
       req.params = {id: 1};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       destroy.withArgs(req.params.id)
         .returns(Promise.resolve(true));
@@ -632,9 +632,9 @@ describe('Base Reminders Controller', function() {
     it('should respond with an error and 404 status if baseReminder does not exist', function() {
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('BaseReminder', req.params.id);
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       destroy.withArgs(req.params.id)
         .returns(Promise.resolve(false));
@@ -647,9 +647,9 @@ describe('Base Reminders Controller', function() {
 
     it('should respond a 401 error if the user role is not authorized for this route', function() {
       req.params = {id: 1};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
       return baseRemindersController.removeById(req, res).then(function() {
@@ -660,9 +660,9 @@ describe('Base Reminders Controller', function() {
 
     it('should respond a 401 error if the user token is invalid', function() {
       req.params = {id: 1};
-      reqGet.withArgs('Bearer')
-        .returns('an invalid token');
-      getUserData.withArgs('an invalid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
         .returns(false);
 
       return baseRemindersController.removeById(req, res).then(function() {
@@ -673,9 +673,9 @@ describe('Base Reminders Controller', function() {
 
     it('should respond with an error and a 500 status on a database error', function() {
       req.params = {id: 1};
-      reqGet.withArgs('Bearer')
-        .returns('a valid token');
-      getUserData.withArgs('a valid token')
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new Error('database error');
       destroy.withArgs()

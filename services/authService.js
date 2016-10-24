@@ -38,6 +38,11 @@ module.exports = function() {
   }
 
   function getUserData(token) {
+    if (typeof token === 'undefined') {
+      return false;
+    }
+
+    token = token.replace('Bearer ', '');
     var tokenData;
 
     try {

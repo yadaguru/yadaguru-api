@@ -45,7 +45,7 @@ describe('/api/tests', function() {
     it('should respond with all tests', function(done) {
       request(app)
         .get('/api/tests')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -62,7 +62,7 @@ describe('/api/tests', function() {
     it('should respond with requested test object', function(done) {
       request(app)
         .get('/api/tests/1')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -79,7 +79,7 @@ describe('/api/tests', function() {
     it('should respond with a 404 if the test object does not exist', function(done) {
       request(app)
         .get('/api/tests/3')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
@@ -102,7 +102,7 @@ describe('/api/tests', function() {
     it('should respond with a 401 if the token is invalid', function(done) {
       request(app)
         .get('/api/tests/3')
-        .set('Bearer', 'not a valid token')
+        .set('Authorization', 'Bearer not a valid token')
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
@@ -114,7 +114,7 @@ describe('/api/tests', function() {
     it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
       request(app)
         .get('/api/tests/3')
-        .set('Bearer', tokenWrongRole)
+        .set('Authorization', 'Bearer ' + tokenWrongRole)
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
@@ -144,7 +144,7 @@ describe('/api/tests', function() {
 
       request(app)
         .post('/api/tests')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .type('json')
         .send(json)
         .expect(200)
@@ -170,7 +170,7 @@ describe('/api/tests', function() {
 
       request(app)
         .post('/api/tests')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .type('json')
         .send(json)
         .expect(400)
@@ -195,7 +195,7 @@ describe('/api/tests', function() {
     it('should respond with a 401 if the token is invalid', function(done) {
       request(app)
         .post('/api/tests')
-        .set('Bearer', 'not a valid token')
+        .set('Authorization', 'Bearer not a valid token')
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
@@ -207,7 +207,7 @@ describe('/api/tests', function() {
     it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
       request(app)
         .post('/api/tests')
-        .set('Bearer', tokenWrongRole)
+        .set('Authorization', 'Bearer ' + tokenWrongRole)
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
@@ -234,7 +234,7 @@ describe('/api/tests', function() {
 
       request(app)
         .put('/api/tests/1')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .type('json')
         .send(json)
         .expect(200)
@@ -257,7 +257,7 @@ describe('/api/tests', function() {
 
       request(app)
         .put('/api/tests/2')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .type('json')
         .send(json)
         .expect(404)
@@ -273,7 +273,7 @@ describe('/api/tests', function() {
 
       request(app)
         .put('/api/tests/1')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .type('json')
         .send(json)
         .expect(200)
@@ -303,7 +303,7 @@ describe('/api/tests', function() {
     it('should respond with a 401 if the token is invalid', function(done) {
       request(app)
         .put('/api/tests/1')
-        .set('Bearer', 'not a valid token')
+        .set('Authorization', 'Bearer not a valid token')
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
@@ -315,7 +315,7 @@ describe('/api/tests', function() {
     it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
       request(app)
         .put('/api/tests/1')
-        .set('Bearer', tokenWrongRole)
+        .set('Authorization', 'Bearer ' + tokenWrongRole)
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
@@ -338,7 +338,7 @@ describe('/api/tests', function() {
     it('should respond with the deleted test id on successful delete', function(done) {
       request(app)
         .delete('/api/tests/1')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
@@ -355,7 +355,7 @@ describe('/api/tests', function() {
       }).then(function() {
         request(app)
           .delete('/api/tests/1')
-          .set('Bearer', token)
+          .set('Authorization', 'Bearer ' + token)
           .expect(409)
           .end(function(err, res) {
             if (err) return done(err);
@@ -368,7 +368,7 @@ describe('/api/tests', function() {
     it('should respond with a 404 if the test does not exist', function(done) {
       request(app)
         .delete('/api/tests/2')
-        .set('Bearer', token)
+        .set('Authorization', 'Bearer ' + token)
         .expect(404)
         .end(function(err, res) {
           if (err) return done(err);
@@ -391,7 +391,7 @@ describe('/api/tests', function() {
     it('should respond with a 401 if the token is invalid', function(done) {
       request(app)
         .delete('/api/tests/1')
-        .set('Bearer', 'not a valid token')
+        .set('Authorization', 'Bearer not a valid token')
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
@@ -403,7 +403,7 @@ describe('/api/tests', function() {
     it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
       request(app)
         .delete('/api/tests/1')
-        .set('Bearer', tokenWrongRole)
+        .set('Authorization', 'Bearer ' + tokenWrongRole)
         .expect(401)
         .end(function(err, res) {
           if (err) return done(err);
