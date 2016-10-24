@@ -43,13 +43,23 @@ module.exports = function() {
         return _loginUser(user).then(function(user) {
           _sendConfirmCode(user.confirmCode);
           res.status(200);
-          res.json({userId: user.id})
+          if (env === 'development') {
+            // send confirm code in response for developer convenience
+            res.json({userId: user.id, confirmCode: user.confirmCode});
+          } else {
+            res.json({userId: user.id})
+          }
         });
       }
       return _createUser(validation.sanitizedData).then(function(user) {
         _sendConfirmCode(user.confirmCode);
         res.status(200);
-        res.json({userId: user.id});
+        if (env === 'development') {
+          // send confirm code in response for developer convenience
+          res.json({userId: user.id, confirmCode: user.confirmCode});
+        } else {
+          res.json({userId: user.id})
+        }
       })
     }).catch(function(error) {
       res.status(500);
