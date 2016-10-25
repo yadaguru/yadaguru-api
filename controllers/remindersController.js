@@ -54,9 +54,15 @@ remindersController.getAllForSchoolForUser = function(req, res) {
     reminderGen.getTestReminders(moment.utc()).then(function(testReminders) {
       reminders = reminders.concat(testReminders);
       reminders = reminderGen.replaceVariablesInReminders(reminders);
+      if (reminders.length < 1) {
+        res.status(200);
+        res.json(reminders);
+        return Promise.resolve();
+      }
+      var schoolName = reminders[0].schoolName;
       reminders = reminderGen.groupAndSortByDueDate(reminders);
       res.status(200);
-      res.json(reminders);
+      res.json({schoolName: schoolName, reminders: reminders});
     });
   }).catch(function(error) {
     res.status(500);

@@ -105,57 +105,60 @@ describe('/api/reminders', function() {
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body.should.deep.equal([{
-            dueDate: '2016-09-01',
+          res.body.should.deep.equal({
+            schoolName: 'Temple',
             reminders: [{
-              detail: 'Some help for writing your Temple essay for Temple',
-              id: 1,
-              lateDetail: 'Should have started sooner',
-              lateMessage: 'Too late. Application was due on 2/1/2017',
-              message: 'Better get writing!',
-              name: 'Write Essay'
+              dueDate: '2016-09-01',
+              reminders: [{
+                detail: 'Some help for writing your Temple essay for Temple',
+                id: 1,
+                lateDetail: 'Should have started sooner',
+                lateMessage: 'Too late. Application was due on 2/1/2017',
+                message: 'Better get writing!',
+                name: 'Write Essay'
+              }]
+            }, {
+              dueDate: '2017-01-01',
+              reminders: [{
+                detail: 'Tips for asking your counselor',
+                id: 3,
+                lateDetail: '',
+                lateMessage: 'Too late',
+                message: 'Ask your counselor by 1/1/2017',
+                name: 'Get Recommendations'
+              }]
+            }, {
+              dueDate: '2017-01-02',
+              reminders: [{
+                detail: 'Some help for writing your Temple essay for Temple',
+                id: 2,
+                lateDetail: 'Should have started sooner',
+                lateMessage: 'Too late. Application was due on 2/1/2017',
+                message: 'Better get writing!',
+                name: 'Write Essay'
+              }]
+            }, {
+              dueDate: '2017-02-01',
+              reminders: [{
+                detail: 'SAT admin detail',
+                id: 1,
+                lateDetail: '',
+                lateMessage: '',
+                message: 'SAT admin message',
+                name: 'SAT test today',
+              }]
+            }, {
+              dueDate: '2017-02-15',
+              reminders: [{
+                detail: 'ACT admin detail',
+                id: 2,
+                lateDetail: '',
+                lateMessage: '',
+                message: 'ACT admin message',
+                name: 'ACT test today',
+              }]
             }]
-          }, {
-            dueDate: '2017-01-01',
-            reminders: [{
-              detail: 'Tips for asking your counselor',
-              id: 3,
-              lateDetail: '',
-              lateMessage: 'Too late',
-              message: 'Ask your counselor by 1/1/2017',
-              name: 'Get Recommendations'
-            }]
-          }, {
-            dueDate: '2017-01-02',
-            reminders: [{
-              detail: 'Some help for writing your Temple essay for Temple',
-              id: 2,
-              lateDetail: 'Should have started sooner',
-              lateMessage: 'Too late. Application was due on 2/1/2017',
-              message: 'Better get writing!',
-              name: 'Write Essay'
-            }]
-          }, {
-            dueDate: '2017-02-01',
-            reminders: [{
-              detail: 'SAT admin detail',
-              id: 1,
-              lateDetail: '',
-              lateMessage: '',
-              message: 'SAT admin message',
-              name: 'SAT test today',
-            }]
-          }, {
-            dueDate: '2017-02-15',
-            reminders: [{
-              detail: 'ACT admin detail',
-              id: 2,
-              lateDetail: '',
-              lateMessage: '',
-              message: 'ACT admin message',
-              name: 'ACT test today',
-            }]
-          }]);
+          });
           done();
         });
     });
@@ -195,27 +198,29 @@ describe('/api/reminders', function() {
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body.should.deep.equal([{
-            dueDate: '2017-02-01',
+          res.body.should.deep.equal({
             reminders: [{
-              detail: 'SAT admin detail',
-              id: 1,
-              lateDetail: '',
-              lateMessage: '',
-              message: 'SAT admin message',
-              name: 'SAT test today'
+              dueDate: '2017-02-01',
+              reminders: [{
+                detail: 'SAT admin detail',
+                id: 1,
+                lateDetail: '',
+                lateMessage: '',
+                message: 'SAT admin message',
+                name: 'SAT test today'
+              }]
+            }, {
+              dueDate: '2017-02-15',
+              reminders: [{
+                detail: 'ACT admin detail',
+                id: 2,
+                lateDetail: '',
+                lateMessage: '',
+                message: 'ACT admin message',
+                name: 'ACT test today'
+              }]
             }]
-          }, {
-            dueDate: '2017-02-15',
-            reminders: [{
-              detail: 'ACT admin detail',
-              id: 2,
-              lateDetail: '',
-              lateMessage: '',
-              message: 'ACT admin message',
-              name: 'ACT test today'
-            }]
-          }]);
+          });
           done();
         });
     });

@@ -232,44 +232,47 @@ describe('Reminders Controller', function() {
     beforeEach(function() {
       reminderServiceResponseForSchool = [reminderServiceResponse[0], reminderServiceResponse[1]];
 
-      reminderControllerResponseForSchool = [{
-        dueDate: '2017-02-01',
+      reminderControllerResponseForSchool = {
+        schoolName: 'Temple',
         reminders: [{
-          id: '2',
-          name: 'Get Recommendations',
-          message: 'Ask your counselor. Application is due on 2/7/2017',
-          detail: 'Tips for asking your counselor',
-          lateMessage: 'Too late',
-          lateDetail: ''
+          dueDate: '2017-02-01',
+          reminders: [{
+            id: '2',
+            name: 'Get Recommendations',
+            message: 'Ask your counselor. Application is due on 2/7/2017',
+            detail: 'Tips for asking your counselor',
+            lateMessage: 'Too late',
+            lateDetail: ''
+          }, {
+            id: '3',
+            name: 'ACT test today',
+            message: 'A message about the test',
+            detail: 'Some details',
+            lateMessage: '',
+            lateDetail: ''
+          }]
         }, {
-          id: '3',
-          name: 'ACT test today',
-          message: 'A message about the test',
-          detail: 'Some details',
-          lateMessage: '',
-          lateDetail: ''
+          dueDate: '2017-02-06',
+          reminders: [{
+            id: '1',
+            name: 'Write Essay',
+            message: 'Better get writing for Temple!',
+            detail: 'Some help for writing your essay that is due on 2/6/2017',
+            lateMessage: 'Too late',
+            lateDetail: 'Should have started sooner'
+          }]
+        }, {
+          dueDate: '2017-02-15',
+          reminders: [{
+            id: '4',
+            name: 'ACT test today',
+            message: 'A message about the test',
+            detail: 'Some details',
+            lateMessage: '',
+            lateDetail: ''
+          }]
         }]
-      }, {
-        dueDate: '2017-02-06',
-        reminders: [{
-          id: '1',
-          name: 'Write Essay',
-          message: 'Better get writing for Temple!',
-          detail: 'Some help for writing your essay that is due on 2/6/2017',
-          lateMessage: 'Too late',
-          lateDetail: 'Should have started sooner'
-        }]
-      }, {
-        dueDate: '2017-02-15',
-        reminders: [{
-          id: '4',
-          name: 'ACT test today',
-          message: 'A message about the test',
-          detail: 'Some details',
-          lateMessage: '',
-          lateDetail: ''
-        }]
-      }];
+      };
       req.params = {id: 1};
       findByUserForSchoolWithBaseReminders = sinon.stub(reminderService, 'findByUserForSchoolWithBaseReminders');
     });
