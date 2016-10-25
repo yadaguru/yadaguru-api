@@ -80,6 +80,10 @@ module.exports = (function() {
     return reminders.reduce(function(groupedReminders, reminder) {
       var currentGroup = false;
 
+      if (moment.utc(reminder.dueDate).isBefore(moment.utc(), 'day')) {
+        reminder.dueDate = moment.utc().subtract(1, 'day').format('YYYY-MM-DD');
+      }
+
       for (var i = 0; i < groupedReminders.length; i++) {
         if (groupedReminders[i].dueDate === reminder.dueDate) {
           currentGroup = groupedReminders[i];

@@ -44,7 +44,7 @@ describe('/api/reminders', function() {
         .end(function(err, res) {
           if (err) return done(err);
           res.body.should.deep.equal([{
-            dueDate: '2016-09-01',
+            dueDate: '2017-01-31',
             reminders: [{
               detail: 'Some help for writing your Temple and Drexel essay for Temple and Drexel',
               id: [1, 4],
@@ -52,20 +52,14 @@ describe('/api/reminders', function() {
               lateMessage: 'Too late. Application was due on 2/1/2017',
               message: 'Better get writing!',
               name: 'Write Essay'
-            }]
-          }, {
-            dueDate: '2017-01-01',
-            reminders: [{
+            }, {
               detail: 'Tips for asking your counselor',
               id: [3, 6],
               lateDetail: '',
               lateMessage: 'Too late',
               message: 'Ask your counselor by 1/1/2017',
               name: 'Get Recommendations'
-            }]
-          }, {
-            dueDate: '2017-01-02',
-            reminders: [{
+            }, {
               detail: 'Some help for writing your Temple and Drexel essay for Temple and Drexel',
               id: [2, 5],
               lateDetail: 'Should have started sooner',
@@ -108,7 +102,7 @@ describe('/api/reminders', function() {
           res.body.should.deep.equal({
             schoolName: 'Temple',
             reminders: [{
-              dueDate: '2016-09-01',
+              dueDate: '2017-01-31',
               reminders: [{
                 detail: 'Some help for writing your Temple essay for Temple',
                 id: 1,
@@ -116,20 +110,14 @@ describe('/api/reminders', function() {
                 lateMessage: 'Too late. Application was due on 2/1/2017',
                 message: 'Better get writing!',
                 name: 'Write Essay'
-              }]
-            }, {
-              dueDate: '2017-01-01',
-              reminders: [{
+              }, {
                 detail: 'Tips for asking your counselor',
                 id: 3,
                 lateDetail: '',
                 lateMessage: 'Too late',
                 message: 'Ask your counselor by 1/1/2017',
                 name: 'Get Recommendations'
-              }]
-            }, {
-              dueDate: '2017-01-02',
-              reminders: [{
+              }, {
                 detail: 'Some help for writing your Temple essay for Temple',
                 id: 2,
                 lateDetail: 'Should have started sooner',
