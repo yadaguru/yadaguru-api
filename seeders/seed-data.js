@@ -121,5 +121,22 @@ module.exports = {
     {id: 12, adminDate: '2017-02-10', registrationDate: '2017-01-12', testId: 2},
     {id: 13, adminDate: '2017-04-07', registrationDate: '2017-03-02', testId: 2},
     {id: 14, adminDate: '2017-06-09', registrationDate: '2017-05-04', testId: 2}
+  ],
+  contentItems: [
+    {name: 'privacy', content: 'Privacy policy goes <b>here</b>'},
+    {name: 'contact', content: '<i>Contact</i> information here'},
+    {name: 'disclaimer', content: '<h2>Disclaimer</h2> goes here'},
+    {name: 'faqs', content: '<h2>Frequenly Asked Questions</h2> go here'},
+    {name: 'help-disclaimer', content: 'Help page for <b>disclaimer</b> view'},
+    {name: 'help-faqs', content: 'Help page for <b>FAQs</b> view'},
+    {name: 'help-privacy', content: 'Help page for <b>privacy</b> view'},
+    {name: 'help-school', content: 'Help page for <b>school</b> view'},
+    {name: 'help-reminder', content: 'Help page for <b>reminder</b> view'},
+    {name: 'help-user', content: 'Help page for <b>user</b> view'},
+    {name: 'faq-app-submission-date', content: 'Help for app <a href="#">submission</a> date'},
+    {name: 'faq-app-find', content: 'Help for finding application'},
+    {name: 'faq-regular-admissions', content: 'Help on Regular Admissions'},
+    {name: 'faq-rolling-admissions', content: 'Help on Rolling Admissions'},
+    {name: 'faq-early-action', content: 'Help on Early Action'},
   ]
 };
