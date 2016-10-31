@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/yadaguru/yadaguru-api.png?label=ready&title=Ready)](https://waffle.io/yadaguru/yadaguru-api)
 #YadaGuru
 ##College Application Reminders
 
