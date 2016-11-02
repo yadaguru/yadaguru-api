@@ -18,7 +18,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 /* Setup cross-origin resource sharing */
 // TODO make origin configurable depending on environment
 app.use(cors({
-  origin: 'http://localhost:9000'
+  origin: ['http://localhost:9000', 'http://localhost:8000']
 }));
 
 /* Setup logging */
