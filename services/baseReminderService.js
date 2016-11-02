@@ -1,10 +1,11 @@
 var models = require('../models/');
 var BaseReminder = models.BaseReminder;
 var Timeframe = models.Timeframe;
+var Category = models.Category;
 var baseReminderService = require('./baseDbService')(BaseReminder);
 
 baseReminderService.findAll = function() {
-  return BaseReminder.findAll({include: Timeframe}).then(function(resp) {
+  return BaseReminder.findAll({include: [Timeframe, Category]}).then(function(resp) {
     var baseReminders = resp.map(function(resp) {
       return resp.dataValues;
     });
@@ -13,7 +14,12 @@ baseReminderService.findAll = function() {
       baseReminder.timeframeIds = baseReminder.Timeframes.map(function(timeframeResp) {
         return timeframeResp.dataValues.id;
       });
+      baseReminder.timeframes = baseReminder.Timeframes.map(function(timeframeResp) {
+        return timeframeResp.dataValues.name;
+      });
+      baseReminder.categoryName = baseReminder.Category.dataValues.name;
       delete baseReminder.Timeframes;
+      delete baseReminder.Category;
       return baseReminder;
     });
 
@@ -42,7 +48,7 @@ baseReminderService.findAllIncludingTimeframes = function() {
 };
 
 baseReminderService.findById = function(id) {
-  return BaseReminder.findById(id, {include: Timeframe}).then(function(resp) {
+  return BaseReminder.findById(id, {include: [Timeframe, Category]}).then(function(resp) {
     if (!resp) {
       return [];
     }
@@ -52,7 +58,12 @@ baseReminderService.findById = function(id) {
     baseReminder.timeframeIds = baseReminder.Timeframes.map(function(timeframeResp) {
       return timeframeResp.dataValues.id;
     });
+    baseReminder.timeframes = baseReminder.Timeframes.map(function(timeframeResp) {
+      return timeframeResp.dataValues.name;
+    });
+    baseReminder.categoryName = baseReminder.Category.dataValues.name;
     delete baseReminder.Timeframes;
+    delete baseReminder.Category;
     return [baseReminder];
 
   });

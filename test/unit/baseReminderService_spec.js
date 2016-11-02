@@ -23,9 +23,12 @@ describe('The BaseReminders Service', function() {
       lateDetail: 'What to do about late essays',
       categoryId: 1,
       Timeframes: [
-        {dataValues: {id: 1}},
-        {dataValues: {id: 2}}
-      ]
+        {dataValues: {id: 1, name: '90 Days'}},
+        {dataValues: {id: 2, name: '60 Days'}}
+      ],
+      Category: {
+        dataValues: {id: 1, name: 'Essays'}
+      }
     }}, {dataValues: {
       id: 1,
       name: 'Get Recommendations',
@@ -35,8 +38,11 @@ describe('The BaseReminders Service', function() {
       lateDetail: 'What to do about late recommendations',
       categoryId: 1,
       Timeframes: [
-        {dataValues: {id: 3}}
-      ]
+        {dataValues: {id: 3, name: '30 Days'}}
+      ],
+      Category: {
+        dataValues: {id: 1, name: 'Essays'}
+      }
     }}];
     baseReminders = [{
       id: 1,
@@ -46,7 +52,9 @@ describe('The BaseReminders Service', function() {
       lateMessage: 'Your Essays are late',
       lateDetail: 'What to do about late essays',
       categoryId: 1,
-      timeframeIds: [1, 2]
+      timeframeIds: [1, 2],
+      timeframes: ['90 Days', '60 Days'],
+      categoryName: 'Essays'
     }, {
       id: 1,
       name: 'Get Recommendations',
@@ -55,7 +63,9 @@ describe('The BaseReminders Service', function() {
       lateMessage: 'Your recommendations are late',
       lateDetail: 'What to do about late recommendations',
       categoryId: 1,
-      timeframeIds: [3]
+      timeframeIds: [3],
+      timeframes: ['30 Days'],
+      categoryName: 'Essays'
     }];
   });
 
