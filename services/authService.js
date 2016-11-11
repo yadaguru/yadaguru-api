@@ -34,6 +34,9 @@ module.exports = function() {
   }
 
   function generateConfirmCode() {
+    if (env === 'qa') {
+      return '999999'
+    }
     return String(Math.floor(Math.random() * (999999 - 100000) + 100000));
   }
 
