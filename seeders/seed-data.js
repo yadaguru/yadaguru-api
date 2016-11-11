@@ -98,13 +98,17 @@ module.exports = {
   tests: [{
     id: 1,
     type: 'SAT',
-    message: "If you're planning on taking the SAT Test on %TESTDATE%, you must register by %REGDATE%.",
-    detail: "<p>Go to the College Board site and register to take the SAT.  Go to <a href=\"https://sat.collegeboard.org/register\" target=\"\">https://sat.collegeboard.org/register</a>.  Remember to include the schools you are applying to as a recipient of your test scores.</p>"
+    registrationMessage: "If you're planning on taking the SAT Test on %TESTDATE%, you must register by %REGDATE%.",
+    registrationDetail: "<p>Go to the College Board site and register to take the SAT.  Go to <a href=\"https://sat.collegeboard.org/register\" target=\"\">https://sat.collegeboard.org/register</a>.  Remember to include the schools you are applying to as a recipient of your test scores.</p>",
+    adminMessage: "<p>Reminders for the day of the test</p>",
+    adminDetail: "<p>Reminder details for the day of the test</p>"
   }, {
     id: 2,
     type: 'ACT',
-    message: "If you're planning on taking the ACT Test on %TESTDATE%, you must register by %REGDATE%.",
-    detail: "<p>Go to <a href=\"http://actstudent.org\" target=\"\">actstudent.org </a>to register for your ACT test  Remember to include the schools you are applying to as a recipient of your test scores.</p>"
+    registrationMessage: "If you're planning on taking the ACT Test on %TESTDATE%, you must register by %REGDATE%.",
+    registrationDetail: "<p>Go to <a href=\"http://actstudent.org\" target=\"\">actstudent.org </a>to register for your ACT test  Remember to include the schools you are applying to as a recipient of your test scores.</p>",
+    adminMessage: "<p>Reminders for the day of the test</p>",
+    adminDetail: "<p>Reminder details for the day of the test</p>"
   }],
   testDates: [
     {id: 1, adminDate: '2016-06-10', registrationDate: '2016-05-05', testId: 2},
