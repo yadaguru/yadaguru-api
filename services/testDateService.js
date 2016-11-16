@@ -10,7 +10,7 @@ var outputSanitizer = function(testDate) {
 
 var testDateService = require('./baseDbService')(TestDate, outputSanitizer);
 
-testDateService.findAllWithTests = function() {
+testDateService.findAll = function() {
   return TestDate.findAll({
     include: Test
   }).then(function(rows) {
@@ -18,8 +18,8 @@ testDateService.findAllWithTests = function() {
       return {
         id: row.dataValues.id,
         testId: row.dataValues.testId,
-        registrationDate: row.dataValues.registrationDate,
-        adminDate: row.dataValues.adminDate,
+        registrationDate: _formatDate(row.dataValues.registrationDate),
+        adminDate: _formatDate(row.dataValues.adminDate),
         type: row.dataValues.Test.dataValues.type,
         registrationMessage: row.dataValues.Test.dataValues.registrationMessage,
         registrationDetail: row.dataValues.Test.dataValues.registrationDetail,
@@ -29,5 +29,9 @@ testDateService.findAllWithTests = function() {
     });
   })
 };
+
+function _formatDate(date) {
+  return moment.utc(date).format('YYYY-MM-DD');
+}
 
 module.exports = testDateService;

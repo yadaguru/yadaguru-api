@@ -191,7 +191,7 @@ module.exports = (function() {
   }
 
   function getTestReminders(currentDate) {
-    return testDateService.findAllWithTests().then(function(testDates) {
+    return testDateService.findAll().then(function(testDates) {
       var testDateReminders = testDates.reduce(function(testDateReminders, testDate) {
         if (moment(testDate.registrationDate).isSameOrAfter(currentDate)) {
           testDateReminders.push({

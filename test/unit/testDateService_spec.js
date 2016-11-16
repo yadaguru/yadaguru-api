@@ -25,60 +25,6 @@ describe('The TestDates Service', function() {
   }];
 
   describe('The findAll function', function() {
-    var findAll;
-
-    before(function() {
-      findAll = sinon.stub(TestDate, 'findAll');
-    });
-
-    after(function() {
-      findAll.restore();
-    });
-
-    it('should resolve with an array of objects representing testDates', function() {
-      findAll.returns(Promise.resolve(testDates.map(
-        function(testDate) {
-          return {dataValues: testDate};
-        }
-      )));
-
-      return testDateService.findAll().should.eventually.deep.equal(testDates);
-    });
-
-    it('should resolve with an empty array there are no testDates', function() {
-      findAll.returns(Promise.resolve([]));
-
-      return testDateService.findAll().should.eventually.deep.equal([]);
-    });
-  });
-
-  describe('The findById function', function() {
-    var findById;
-
-    before(function() {
-      findById = sinon.stub(TestDate, 'findById');
-    });
-
-    after(function() {
-      findById.restore();
-    });
-
-    it('should resolve with an array with the matching testDate object', function() {
-      findById.withArgs(1)
-        .returns(Promise.resolve({dataValues: testDates[0]}));
-
-      return testDateService.findById(1).should.eventually.deep.equal([testDates[0]]);
-    });
-
-    it('should resolve with an empty array if no testDates were found', function() {
-      findById.withArgs(3)
-        .returns(Promise.resolve(null));
-
-      return testDateService.findById(3).should.eventually.deep.equal([]);
-    });
-  });
-
-  describe('The findAllWithTests function', function() {
     var findAll, dbResponse;
 
     beforeEach(function() {
@@ -194,16 +140,43 @@ describe('The TestDates Service', function() {
         adminDetail: 'Some details'
       }];
 
-      return testDateService.findAllWithTests().should.eventually.deep.equal(returnedResult);
+      return testDateService.findAll().should.eventually.deep.equal(returnedResult);
     });
 
     it('should resolve with an empty array there are no testDates', function() {
       findAll.withArgs({include: Test})
         .returns(Promise.resolve([]));
 
-      return testDateService.findAllWithTests().should.eventually.deep.equal([]);
+      return testDateService.findAll().should.eventually.deep.equal([]);
     });
   });
+
+  describe('The findById function', function() {
+    var findById;
+
+    before(function() {
+      findById = sinon.stub(TestDate, 'findById');
+    });
+
+    after(function() {
+      findById.restore();
+    });
+
+    it('should resolve with an array with the matching testDate object', function() {
+      findById.withArgs(1)
+        .returns(Promise.resolve({dataValues: testDates[0]}));
+
+      return testDateService.findById(1).should.eventually.deep.equal([testDates[0]]);
+    });
+
+    it('should resolve with an empty array if no testDates were found', function() {
+      findById.withArgs(3)
+        .returns(Promise.resolve(null));
+
+      return testDateService.findById(3).should.eventually.deep.equal([]);
+    });
+  });
+
 
   describe('The create function', function() {
     var create;

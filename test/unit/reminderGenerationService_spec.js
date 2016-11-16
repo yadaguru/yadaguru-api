@@ -1019,11 +1019,11 @@ describe('The reminderGenerationService', function() {
   });
 
   describe('the getTestReminders function', function() {
-    var findAllWithTests, serviceResponse;
+    var findAll, serviceResponse;
     var testDateService = require('../../services/testDateService');
 
     beforeEach(function() {
-      findAllWithTests = sinon.stub(testDateService, 'findAllWithTests');
+      findAll = sinon.stub(testDateService, 'findAll');
       serviceResponse = [{
         id: '1',
         testId: '1',
@@ -1068,11 +1068,11 @@ describe('The reminderGenerationService', function() {
     });
 
     afterEach(function() {
-      findAllWithTests.restore();
+      findAll.restore();
     });
 
     it('should return test reminders, split into admin and registration dates, from the current date forward', function() {
-      findAllWithTests.withArgs()
+      findAll.withArgs()
         .returns(Promise.resolve(serviceResponse));
 
       var expectedResponse = [{
