@@ -74,10 +74,8 @@ baseReminderService.create = function(data) {
 
   return BaseReminder.create(data).then(function(newBaseReminder) {
     var baseReminder = newBaseReminder.dataValues;
-    return newBaseReminder.setTimeframes(timeframes).then(function(newTimeframeAssociations) {
-      baseReminder.timeframeIds = newTimeframeAssociations[0].map(function(newTimeframeAssociation) {
-        return newTimeframeAssociation.dataValues.TimeframeId;
-      });
+    return newBaseReminder.setTimeframes(timeframes).then(function() {
+      baseReminder.timeframeIds = data.timeframeIds;
       return [baseReminder];
     });
   });
@@ -92,10 +90,8 @@ baseReminderService.update = function(id, data) {
     return baseReminder.update(data).then(function(updatedBaseReminder) {
       var baseReminder = updatedBaseReminder.dataValues;
       if (data.timeframeIds) {
-        return updatedBaseReminder.setTimeframes(data.timeframeIds).then(function(updatedTimeframeAssociations) {
-          baseReminder.timeframeIds = updatedTimeframeAssociations[0].map(function(updatedTimeframeAssociation) {
-            return updatedTimeframeAssociation.dataValues.TimeframeId;
-          });
+        return updatedBaseReminder.setTimeframes(data.timeframeIds).then(function() {
+          baseReminder.timeframeIds = data.timeframeIds;
           return [baseReminder];
         });
       }
