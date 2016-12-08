@@ -4,7 +4,8 @@
     "password": "yadaguru",
     "database": "yadaguru",
     "host": "postgres",
-    "dialect": "postgresql"
+    "dialect": "postgresql",
+    "cors": ["http://localhost:9000", "http://localhost:3000"]
   },
   "test": {
     "username": "yadaguru",
@@ -16,7 +17,8 @@
   },
   "qa": {
     "use_env_variable": "DATABASE_URL",
-    "logging": false
+    "logging": false,
+    "cors": ["http://qa.yadaguru.com", "http://qa-admin.yadaguru.com"]
   },
   "production": {
     "use_env_variable": "DATABASE_URL",

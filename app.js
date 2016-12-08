@@ -16,10 +16,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 /* Setup cross-origin resource sharing */
-// TODO make origin configurable depending on environment
-app.use(cors({
-  origin: ['http://localhost:9000', 'http://localhost:8000', 'http://qa.yadaguru.com', 'http://qa-admin.yadaguru.com']
-}));
+if (config.cors) {
+  app.use(cors({
+    origin: config.cors
+  }));
+}
 
 /* Setup logging */
 // TODO make this configurable depending on environment
