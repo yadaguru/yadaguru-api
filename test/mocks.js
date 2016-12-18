@@ -6,6 +6,7 @@ module.exports = {
   getYadaguruDataMock: function(service) {
     var methodsToMock = [
       'findAll',
+      'findAllIncludingTimeframes',
       'findById',
       'findByName',
       'findByUser',

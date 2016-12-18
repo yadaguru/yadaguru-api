@@ -7,13 +7,20 @@ var Promise = require('bluebird');
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 chai.should();
+var proxyquire = require('proxyquire');
+var mocks = require('../mocks');
 
 
 describe('The reminderGenerationService', function() {
-  var reminderGenerator, todaysDate;
+  var reminderGenerator, todaysDate, yadaguruDataMock;
 
   beforeEach(function() {
-    reminderGenerator = require('../../services/reminderGenerationService');
+    yadaguruDataMock = mocks.getYadaguruDataMock('baseReminderService');
+    yadaguruDataMock.addService('testDateService');
+    yadaguruDataMock.stubMethods();
+    reminderGenerator = proxyquire('../../services/reminderGenerationService', {
+      'yadaguru-data': yadaguruDataMock.getMockObject()
+    });
     todaysDate = moment.utc('2016-09-01');
     this.clock = sinon.useFakeTimers(todaysDate.valueOf());
   });
@@ -24,7 +31,6 @@ describe('The reminderGenerationService', function() {
 
   describe('getRemindersForSchool method', function() {
     var baseReminders, timeframes, schoolId, userId, dueDate;
-    var baseReminderService, findAllIncludingTimeframes;
 
     beforeEach(function() {
       dueDate = '2017-02-01';
@@ -71,14 +77,6 @@ describe('The reminderGenerationService', function() {
         timeframes: [timeframes.absolute],
         categoryId: 2
       }];
-
-      baseReminderService = require('../../services/baseReminderService');
-      findAllIncludingTimeframes = sinon.stub(baseReminderService, 'findAllIncludingTimeframes');
-
-    });
-
-    afterEach(function() {
-      findAllIncludingTimeframes.restore();
     });
 
     it('should generate a reminder on today\'s date if it has a timeframe type of "now"', function() {
@@ -86,7 +84,7 @@ describe('The reminderGenerationService', function() {
       baseReminder.timeframes = [timeframes.now];
       baseReminders = [baseReminder];
 
-      findAllIncludingTimeframes.withArgs()
+      yadaguruDataMock.services.baseReminderService.stubs.findAllIncludingTimeframes.withArgs()
         .returns(Promise.resolve(baseReminders));
 
       var generatedReminders = [{
@@ -107,7 +105,7 @@ describe('The reminderGenerationService', function() {
       baseReminder.timeframes = [timeframes.relative];
       baseReminders = [baseReminder];
 
-      findAllIncludingTimeframes.withArgs()
+      yadaguruDataMock.services.baseReminderService.stubs.findAllIncludingTimeframes.withArgs()
         .returns(Promise.resolve(baseReminders));
 
       var generatedReminders =[{
@@ -128,7 +126,7 @@ describe('The reminderGenerationService', function() {
       baseReminder.timeframes = [timeframes.absolute];
       baseReminders = [baseReminder];
 
-      findAllIncludingTimeframes.withArgs()
+      yadaguruDataMock.services.baseReminderService.stubs.findAllIncludingTimeframes.withArgs()
         .returns(Promise.resolve(baseReminders));
 
       var generatedReminders = [{
@@ -168,7 +166,7 @@ describe('The reminderGenerationService', function() {
         timeframe: baseReminder.timeframes[2].name
       }];
 
-      findAllIncludingTimeframes.withArgs()
+      yadaguruDataMock.services.baseReminderService.stubs.findAllIncludingTimeframes.withArgs()
         .returns(Promise.resolve(baseReminders));
 
       return reminderGenerator.getRemindersForSchool(schoolId, userId, dueDate)
@@ -196,7 +194,7 @@ describe('The reminderGenerationService', function() {
         timeframe: baseReminders[1].timeframes[0].name
       }];
 
-      findAllIncludingTimeframes.withArgs()
+      yadaguruDataMock.services.baseReminderService.stubs.findAllIncludingTimeframes.withArgs()
         .returns(Promise.resolve(baseReminders));
 
       return reminderGenerator.getRemindersForSchool(schoolId, userId, dueDate)
@@ -1019,11 +1017,9 @@ describe('The reminderGenerationService', function() {
   });
 
   describe('the getTestReminders function', function() {
-    var findAll, serviceResponse;
-    var testDateService = require('../../services/testDateService');
+    var serviceResponse;
 
     beforeEach(function() {
-      findAll = sinon.stub(testDateService, 'findAll');
       serviceResponse = [{
         id: '1',
         testId: '1',
@@ -1067,12 +1063,8 @@ describe('The reminderGenerationService', function() {
       }];
     });
 
-    afterEach(function() {
-      findAll.restore();
-    });
-
     it('should return test reminders, split into admin and registration dates, from the current date forward', function() {
-      findAll.withArgs()
+      yadaguruDataMock.services.testDateService.stubs.findAll.withArgs()
         .returns(Promise.resolve(serviceResponse));
 
       var expectedResponse = [{

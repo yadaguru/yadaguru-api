@@ -8,7 +8,8 @@ var chai = require('chai');
 chai.should();
 var app = require('../../app.js');
 var models = require('../../models');
-var adminUserService = require('../../services/adminUserService');
+var config = require('../../config/config.json')['test'];
+var adminUserService = require('yadaguru-data')(config).adminUserService;
 var jwt = require('jsonwebtoken');
 var token = jwt.sign({userId: 1, role: 'admin'}, 'development_secret', {noTimestamp: true});
 

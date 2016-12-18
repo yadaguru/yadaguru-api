@@ -8,7 +8,6 @@ chai.use(sinonChai);
 chai.should();
 var errors = require('../../services/errorService');
 var Promise = require('bluebird');
-var reminderService = require('../../services/reminderService');
 var reminderGenerationService = require('../../services/reminderGenerationService');
 var auth = require('../../services/authService');
 var proxyquire = require('proxyquire');

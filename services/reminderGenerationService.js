@@ -1,5 +1,8 @@
-var baseReminderService = require('./baseReminderService');
-var testDateService = require('./testDateService');
+var env = process.env.NODE_ENV || 'development';
+var config = require('../config/config.json')[env];
+var dbServices = require('yadaguru-data')(config);
+var baseReminderService = dbServices.baseReminderService;
+var testDateService = dbServices.testDateService;
 var moment = require('moment');
 
 module.exports = (function() {
