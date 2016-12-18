@@ -8,49 +8,60 @@ chai.use(sinonChai);
 chai.should();
 var errors = require('../../services/errorService');
 var Promise = require('bluebird');
-var userService = require('../../services/userService');
 var auth = require('../../services/authService');
+var proxyquire = require('proxyquire');
+var mocks = require('../mocks');
 
 describe('Users Controller', function() {
+  var req, res, usersController, reqGet, generateConfirmCode, yadaguruDataMock, user, save;
+  var getUserData, getUserToken;
+
+  beforeEach(function() {
+    yadaguruDataMock = mocks.getYadaguruDataMock('userService');
+    yadaguruDataMock.stubMethods();
+    req = {
+      get: function(){}
+    };
+    res = {
+      status: sinon.spy(),
+      json: sinon.spy()
+    };
+    usersController = proxyquire('../../controllers/usersController', {
+      'yadaguru-data': yadaguruDataMock.getMockObject()
+    });
+    user = {
+      save: function() {}
+    };
+    save = sinon.stub(user, 'save');
+    generateConfirmCode = sinon.stub(auth, 'generateConfirmCode');
+    getUserData = sinon.stub(auth, 'getUserData');
+    getUserToken = sinon.stub(auth, 'getUserToken');
+    reqGet = sinon.stub(req, 'get');
+    this.clock = sinon.useFakeTimers();
+  });
+
+  afterEach(function() {
+    res.status.reset();
+    res.json.reset();
+    save.restore();
+    generateConfirmCode.restore();
+    this.clock.restore();
+    yadaguruDataMock.restoreStubs();
+    getUserData.restore();
+    getUserToken.restore();
+    reqGet.restore();
+  });
+
   describe('POST /users', function() {
-    var req, res, usersController, create, getUserByPhoneNumber, user, save, generateConfirmCode;
-
-    beforeEach(function() {
-      req = {};
-      res = {
-        status: sinon.spy(),
-        json: sinon.spy()
-      };
-      create = sinon.stub(userService, 'create');
-      getUserByPhoneNumber = sinon.stub(userService, 'getUserByPhoneNumber');
-      user = {
-        save: function() {}
-      };
-      save = sinon.stub(user, 'save');
-      usersController = require('../../controllers/usersController');
-      generateConfirmCode = sinon.stub(auth, 'generateConfirmCode');
-      this.clock = sinon.useFakeTimers();
-    });
-
-    afterEach(function() {
-      res.status.reset();
-      res.json.reset();
-      create.restore();
-      getUserByPhoneNumber.restore();
-      save.restore();
-      generateConfirmCode.restore();
-      this.clock.restore();
-    });
-
     it('should create user if matching phone number does not exist, and respond with status 200 & the new user id', function() {
       req.body = {phoneNumber: '1234567890'};
 
-      getUserByPhoneNumber.withArgs('1234567890')
+      yadaguruDataMock.services.userService.stubs.getUserByPhoneNumber.withArgs('1234567890')
         .returns(Promise.resolve(null));
 
       generateConfirmCode.returns('123456');
 
-      create.withArgs({
+      yadaguruDataMock.services.userService.stubs.create.withArgs({
         phoneNumber: '1234567890',
         confirmCode: '123456',
         confirmCodeTimestamp: '1970-01-01T00:00:00Z'
@@ -65,7 +76,7 @@ describe('Users Controller', function() {
     it('should update user if matching phone number exists, and respond with status 200 & the new user id', function() {
       req.body = {phoneNumber: '1234567890'};
 
-      getUserByPhoneNumber.withArgs('1234567890')
+      yadaguruDataMock.services.userService.stubs.getUserByPhoneNumber.withArgs('1234567890')
         .returns(Promise.resolve(user));
 
       generateConfirmCode.returns('123456');
@@ -82,12 +93,12 @@ describe('Users Controller', function() {
     it('should create (or update) user even if phone number is not formatted correctly', function() {
       req.body = {phoneNumber: '(123) 456-7890'};
 
-      getUserByPhoneNumber.withArgs('1234567890')
+      yadaguruDataMock.services.userService.stubs.getUserByPhoneNumber.withArgs('1234567890')
         .returns(Promise.resolve(null));
 
       generateConfirmCode.returns('123456');
 
-      create.withArgs({
+      yadaguruDataMock.services.userService.stubs.create.withArgs({
         phoneNumber: '1234567890',
         confirmCode: '123456',
         confirmCodeTimestamp: '1970-01-01T00:00:00Z'
@@ -129,7 +140,7 @@ describe('Users Controller', function() {
     it('should respond with an error and a 500 status on a database error', function() {
       req.body = {phoneNumber: '1234567890'};
       var databaseError = new Error('some database error');
-      getUserByPhoneNumber.returns(Promise.reject(databaseError));
+      yadaguruDataMock.services.userService.stubs.getUserByPhoneNumber.returns(Promise.reject(databaseError));
 
       return usersController.post(req, res).then(function() {
         res.json.should.have.been.calledWith(databaseError);
@@ -139,40 +150,10 @@ describe('Users Controller', function() {
   });
 
   describe('PUT /users/:id', function() {
-    var req, res, usersController, reqGet, getUserData, findById, getUserToken, update;
-
-    beforeEach(function() {
-      req = {
-        get: function(){}
-      };
-      res = {
-        status: sinon.spy(),
-        json: sinon.spy()
-      };
-      reqGet = sinon.stub(req, 'get');
-      getUserData = sinon.stub(auth, 'getUserData');
-      findById = sinon.stub(userService, 'findById');
-      getUserToken = sinon.stub(auth, 'getUserToken');
-      update = sinon.stub(userService, 'update');
-      usersController = require('../../controllers/usersController');
-      this.clock = sinon.useFakeTimers();
-    });
-
-    afterEach(function() {
-      res.status.reset();
-      res.json.reset();
-      reqGet.restore();
-      getUserData.restore();
-      findById.restore();
-      getUserToken.restore();
-      update.restore();
-      this.clock.restore();
-    });
-
     it('should respond access token and 200 status if confirm code is in body and matches and is not expired.', function() {
       req.body = {confirmCode: '123456'};
       req.params = {id: 1};
-      findById.withArgs(1)
+      yadaguruDataMock.services.userService.stubs.findById.withArgs(1)
         .returns(Promise.resolve([{
           id: 1,
           confirmCode: '123456',
@@ -206,7 +187,7 @@ describe('Users Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
-      update.withArgs(1, {sponsorCode: '123456'})
+      yadaguruDataMock.services.userService.stubs.update.withArgs(1, {sponsorCode: '123456'})
         .returns(Promise.resolve([updatedUser]));
 
       return usersController.putOnId(req, res).then(function() {
@@ -218,7 +199,7 @@ describe('Users Controller', function() {
     it('should respond with an error and 400 status if confirm code does not match.', function() {
       req.body = {confirmCode: '654321'};
       req.params = {id: 1};
-      findById.withArgs(1)
+      yadaguruDataMock.services.userService.stubs.findById.withArgs(1)
         .returns(Promise.resolve([{
           id: 1,
           confirmCode: '123456',
@@ -237,7 +218,7 @@ describe('Users Controller', function() {
     it('should respond with an error and 400 status if confirm code has expired.', function() {
       req.body = {confirmCode: '123456'};
       req.params = {id: 1};
-      findById.withArgs(1)
+      yadaguruDataMock.services.userService.stubs.findById.withArgs(1)
         .returns(Promise.resolve([{
           id: 1,
           confirmCode: '123456',
@@ -277,7 +258,7 @@ describe('Users Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
-      update.withArgs(req.params.id)
+      yadaguruDataMock.services.userService.stubs.update.withArgs(req.params.id)
         .returns(Promise.resolve(false));
 
       return usersController.putOnId(req, res).then(function() {
@@ -323,7 +304,7 @@ describe('Users Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
-      update.withArgs(req.params.id, req.body)
+      yadaguruDataMock.services.userService.stubs.update.withArgs(req.params.id, req.body)
         .returns(Promise.reject(error));
 
       return usersController.putOnId(req, res).then(function() {
@@ -334,37 +315,13 @@ describe('Users Controller', function() {
   });
 
   describe('DELETE /users/:id', function() {
-    var req, res, reqGet, getUserData, usersController, destroy;
-
-    beforeEach(function() {
-      req = {
-        get: function(){}
-      };
-      res = {
-        status: sinon.spy(),
-        json: sinon.spy()
-      };
-      reqGet = sinon.stub(req, 'get');
-      getUserData = sinon.stub(auth, 'getUserData');
-      destroy = sinon.stub(userService, 'destroy');
-      usersController = require('../../controllers/usersController');
-    });
-
-    afterEach(function() {
-      res.status.reset();
-      res.json.reset();
-      reqGet.restore();
-      getUserData.restore();
-      destroy.restore();
-    });
-
     it('should respond with the user ID and 200 status on success', function() {
       req.params = {id: 1};
       reqGet.withArgs('Authorization')
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
-      destroy.withArgs(req.params.id)
+      yadaguruDataMock.services.userService.stubs.destroy.withArgs(req.params.id)
         .returns(Promise.resolve(true));
 
       return usersController.removeById(req, res).then(function() {
@@ -380,7 +337,7 @@ describe('Users Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
       var error = new Error('database error');
-      destroy.withArgs(req.params.id)
+      yadaguruDataMock.services.userService.stubs.destroy.withArgs(req.params.id)
         .returns(Promise.reject(error));
 
       return usersController.removeById(req, res).then(function() {

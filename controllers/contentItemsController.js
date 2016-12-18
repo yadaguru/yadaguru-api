@@ -1,4 +1,6 @@
-var contentItemService = require('../services/contentItemService');
+var env = process.env.NODE_ENV || 'development';
+var config = require('../config/config.json')[env];
+var contentItemService = require('yadaguru-data')(config).contentItemService;
 
 var schema = {
   name: {

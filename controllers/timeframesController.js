@@ -1,4 +1,6 @@
-var timeframeService = require('../services/timeframeService');
+var env = process.env.NODE_ENV || 'development';
+var config = require('../config/config.json')[env];
+var timeframeService = require('yadaguru-data')(config).timeframeService;
 
 var schema = {
   name: {

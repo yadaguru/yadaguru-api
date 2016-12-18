@@ -8,29 +8,33 @@ chai.use(sinonChai);
 chai.should();
 var errors = require('../../services/errorService');
 var Promise = require('bluebird');
-var adminUserService = require('../../services/adminUserService');
 var auth = require('../../services/authService');
+var proxyquire = require('proxyquire');
+var mocks = require('../mocks');
 
 describe('AdminUsers Controller', function() {
   describe('POST /admin_users', function() {
-    var req, res, adminUsersController, verifyUser, getUserToken;
+    var req, res, adminUsersController, getUserToken, yadaguruDataMock;
 
     beforeEach(function() {
+      yadaguruDataMock = mocks.getYadaguruDataMock('adminUserService');
+      yadaguruDataMock.stubMethods();
       req = {};
       res = {
         status: sinon.spy(),
         json: sinon.spy()
       };
-      verifyUser = sinon.stub(adminUserService, 'verifyUser');
-      adminUsersController = require('../../controllers/adminUsersController');
+      adminUsersController = proxyquire('../../controllers/adminUsersController', {
+        'yadaguru-data': yadaguruDataMock.getMockObject()
+      });
       getUserToken = sinon.stub(auth, 'getUserToken');
     });
 
     afterEach(function() {
       res.status.reset();
       res.json.reset();
-      verifyUser.restore();
       getUserToken.restore();
+      yadaguruDataMock.restoreStubs();
     });
 
     it('should respond with a 200 and a user token if username and password are correct', function() {
@@ -39,7 +43,7 @@ describe('AdminUsers Controller', function() {
         password: 'password'
       };
 
-      verifyUser.withArgs('admin', 'password')
+      yadaguruDataMock.services.adminUserService.stubs.verifyUser.withArgs('admin', 'password')
         .returns(Promise.resolve({id: 1}));
 
       getUserToken.withArgs(1, 'admin')
@@ -57,7 +61,7 @@ describe('AdminUsers Controller', function() {
         password: 'password'
       };
 
-      verifyUser.withArgs('admins', 'password')
+      yadaguruDataMock.services.adminUserService.stubs.verifyUser.withArgs('admins', 'password')
         .returns(Promise.resolve(false));
 
       var error = new errors.AdminLoginError();
@@ -74,7 +78,7 @@ describe('AdminUsers Controller', function() {
         password: 'passwords'
       };
 
-      verifyUser.withArgs('admin', 'passwords')
+      yadaguruDataMock.services.adminUserService.stubs.verifyUser.withArgs('admin', 'passwords')
         .returns(Promise.resolve(false));
 
       var error = new errors.AdminLoginError();
@@ -124,7 +128,7 @@ describe('AdminUsers Controller', function() {
         password: 'password'
       };
       var databaseError = new Error('some database error');
-      verifyUser.returns(Promise.reject(databaseError));
+      yadaguruDataMock.services.adminUserService.stubs.verifyUser.returns(Promise.reject(databaseError));
 
       return adminUsersController.post(req, res).then(function() {
         res.json.should.have.been.calledWith(databaseError);

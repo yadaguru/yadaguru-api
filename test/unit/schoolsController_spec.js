@@ -8,15 +8,19 @@ chai.use(sinonChai);
 chai.should();
 var errors = require('../../services/errorService');
 var Promise = require('bluebird');
-var schoolService = require('../../services/schoolService');
 var reminderService = require('../../services/reminderService');
 var reminderGenerationService = require('../../services/reminderGenerationService');
 var auth = require('../../services/authService');
+var proxyquire = require('proxyquire');
+var mocks = require('../mocks');
 
 describe('Schools Controller', function() {
-  var req, res, schoolsController, reqGet, getUserData;
+  var req, res, schoolsController, reqGet, getUserData, yadaguruDataMock;
 
   beforeEach(function() {
+    yadaguruDataMock = mocks.getYadaguruDataMock('schoolService');
+    yadaguruDataMock.addService('reminderService');
+    yadaguruDataMock.stubMethods();
     req = {
       get: function(){}
     };
@@ -26,7 +30,9 @@ describe('Schools Controller', function() {
     };
     reqGet = sinon.stub(req, 'get');
     getUserData = sinon.stub(auth, 'getUserData');
-    schoolsController = require('../../controllers/schoolsController');
+    schoolsController = proxyquire('../../controllers/schoolsController', {
+      'yadaguru-data': yadaguruDataMock.getMockObject()
+    });
   });
 
   afterEach(function() {
@@ -34,19 +40,10 @@ describe('Schools Controller', function() {
     res.json.reset();
     reqGet.restore();
     getUserData.restore();
+    yadaguruDataMock.restoreStubs();
   });
 
   describe('GET /schools', function() {
-    var findByUser;
-
-    beforeEach(function() {
-      findByUser = sinon.stub(schoolService, 'findByUser');
-    });
-
-    afterEach(function() {
-      findByUser.restore();
-    });
-
     it('should respond with an array of all schools and a 200 status', function() {
       var schools = [{
         id: '1',
@@ -67,7 +64,7 @@ describe('Schools Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
-      findByUser.withArgs(1)
+      yadaguruDataMock.services.schoolService.stubs.findByUser.withArgs(1)
         .returns(Promise.resolve(schools));
 
       return schoolsController.getAllForUser(req, res).then(function() {
@@ -83,7 +80,7 @@ describe('Schools Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
 
-      findByUser.withArgs(1)
+      yadaguruDataMock.services.schoolService.stubs.findByUser.withArgs(1)
         .returns(Promise.resolve([]));
 
       return schoolsController.getAllForUser(req, res).then(function() {
@@ -124,7 +121,7 @@ describe('Schools Controller', function() {
         .returns({userId: 1, role: 'user'});
 
       var error = new Error('database error');
-      findByUser.returns(Promise.reject(error));
+      yadaguruDataMock.services.schoolService.stubs.findByUser.returns(Promise.reject(error));
 
       return schoolsController.getAllForUser(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -135,16 +132,6 @@ describe('Schools Controller', function() {
   });
 
   describe('GET /schools/:id', function() {
-    var findByIdForUser;
-
-    beforeEach(function() {
-      findByIdForUser = sinon.stub(schoolService, 'findByIdForUser');
-    });
-
-    afterEach(function() {
-      findByIdForUser.restore();
-    });
-
     it('should respond with an array with the matching school and a 200 status', function() {
       reqGet.withArgs('Authorization')
         .returns('Bearer a valid token');
@@ -158,7 +145,7 @@ describe('Schools Controller', function() {
         dueDate: '2017-02-01',
         isActive: 'true'
       };
-      findByIdForUser.withArgs(1, 1)
+      yadaguruDataMock.services.schoolService.stubs.findByIdForUser.withArgs(1, 1)
         .returns(Promise.resolve([school]));
 
       return schoolsController.getByIdForUser(req, res).then(function() {
@@ -175,7 +162,7 @@ describe('Schools Controller', function() {
 
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('School', req.params.id);
-      findByIdForUser.withArgs(2, 1)
+      yadaguruDataMock.services.schoolService.stubs.findByIdForUser.withArgs(2, 1)
         .returns(Promise.resolve([]));
 
       return schoolsController.getByIdForUser(req, res).then(function() {
@@ -193,7 +180,7 @@ describe('Schools Controller', function() {
 
       req.params = {id: 1};
       var error = new Error('database error');
-      findByIdForUser.returns(Promise.reject(error));
+      yadaguruDataMock.services.schoolService.stubs.findByIdForUser.returns(Promise.reject(error));
 
       return schoolsController.getByIdForUser(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -227,17 +214,13 @@ describe('Schools Controller', function() {
   });
 
   describe('POST /schools', function() {
-    var create, bulkCreate, getRemindersForSchool;
+    var getRemindersForSchool;
 
     beforeEach(function() {
-      create = sinon.stub(schoolService, 'create');
-      bulkCreate = sinon.stub(reminderService, 'bulkCreate');
       getRemindersForSchool = sinon.stub(reminderGenerationService, 'getRemindersForSchool');
     });
 
     afterEach(function() {
-      create.restore();
-      bulkCreate.restore();
       getRemindersForSchool.restore();
     });
 
@@ -248,7 +231,7 @@ describe('Schools Controller', function() {
         .returns({userId: 1, role: 'user'});
       getRemindersForSchool.withArgs('1', '1', '2017-02-01')
         .returns(Promise.resolve('generated reminders'));
-      bulkCreate.withArgs('generated reminders')
+      yadaguruDataMock.services.reminderService.stubs.bulkCreate.withArgs('generated reminders')
         .returns(Promise.resolve('count of new reminders'));
 
       req.body =  {
@@ -269,7 +252,7 @@ describe('Schools Controller', function() {
         dueDate: req.body.dueDate,
         isActive: req.body.isActive
       };
-      create.withArgs(data)
+      yadaguruDataMock.services.schoolService.stubs.create.withArgs(data)
         .returns(Promise.resolve([successfulCreateResponse]));
 
       return schoolsController.postForUser(req, res).then(function() {
@@ -384,7 +367,7 @@ describe('Schools Controller', function() {
         userId: 1
       };
       var databaseError = new Error('some database error');
-      create.withArgs(data)
+      yadaguruDataMock.services.schoolService.stubs.create.withArgs(data)
         .returns(Promise.reject(databaseError));
 
       return schoolsController.postForUser(req, res).then(function() {
@@ -419,16 +402,6 @@ describe('Schools Controller', function() {
   });
 
   describe('PUT /schools/:id', function() {
-    var updateForUser;
-
-    beforeEach(function() {
-      updateForUser = sinon.stub(schoolService, 'updateForUser');
-    });
-
-    afterEach(function() {
-      updateForUser.restore();
-    });
-
     it('should respond with the updated school object and 200 status on success', function() {
       reqGet.withArgs('Authorization')
         .returns('Bearer a valid token');
@@ -448,7 +421,7 @@ describe('Schools Controller', function() {
         dueDate: req.body.dueDate,
         isActive: req.body.isActive
       };
-      updateForUser.withArgs(req.params.id, req.body, 1)
+      yadaguruDataMock.services.schoolService.stubs.updateForUser.withArgs(req.params.id, req.body, 1)
         .returns(Promise.resolve([updatedSchool]));
 
       return schoolsController.putOnIdForUser(req, res).then(function() {
@@ -474,7 +447,7 @@ describe('Schools Controller', function() {
         dueDate: '2017-02-01',
         isActive: req.body.isActive
       };
-      updateForUser.withArgs(req.params.id, req.body, 1)
+      yadaguruDataMock.services.schoolService.stubs.updateForUser.withArgs(req.params.id, req.body, 1)
         .returns(Promise.resolve([updatedSchool]));
 
       return schoolsController.putOnIdForUser(req, res).then(function() {
@@ -496,7 +469,7 @@ describe('Schools Controller', function() {
       };
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('School', req.params.id);
-      updateForUser.withArgs(req.params.id, req.body, 1)
+      yadaguruDataMock.services.schoolService.stubs.updateForUser.withArgs(req.params.id, req.body, 1)
         .returns(Promise.resolve(false));
 
       return schoolsController.putOnIdForUser(req, res).then(function() {
@@ -518,7 +491,7 @@ describe('Schools Controller', function() {
       };
       req.params = {id: 1};
       var error = new Error('database error');
-      updateForUser.withArgs(req.params.id, req.body, 1)
+      yadaguruDataMock.services.schoolService.stubs.updateForUser.withArgs(req.params.id, req.body, 1)
         .returns(Promise.reject(error));
 
       return schoolsController.putOnIdForUser(req, res).then(function() {
@@ -553,16 +526,6 @@ describe('Schools Controller', function() {
   });
 
   describe('DELETE /schools/:id', function() {
-    var destroyForUser;
-
-    beforeEach(function() {
-      destroyForUser = sinon.stub(schoolService, 'destroyForUser');
-    });
-
-    afterEach(function() {
-      destroyForUser.restore();
-    });
-
     it('should respond with the school ID and 200 status on success', function() {
       reqGet.withArgs('Authorization')
         .returns('Bearer a valid token');
@@ -570,7 +533,7 @@ describe('Schools Controller', function() {
         .returns({userId: 1, role: 'user'});
 
       req.params = {id: 1};
-      destroyForUser.withArgs(req.params.id, 1)
+      yadaguruDataMock.services.schoolService.stubs.destroyForUser.withArgs(req.params.id, 1)
         .returns(Promise.resolve(true));
 
       return schoolsController.removeByIdForUser(req, res).then(function() {
@@ -587,7 +550,7 @@ describe('Schools Controller', function() {
 
       req.params = {id: 2};
       var error = new errors.ResourceNotFoundError('School', req.params.id);
-      destroyForUser.withArgs(req.params.id, 1)
+      yadaguruDataMock.services.schoolService.stubs.destroyForUser.withArgs(req.params.id, 1)
         .returns(Promise.resolve(false));
 
       return schoolsController.removeByIdForUser(req, res).then(function() {
@@ -604,7 +567,7 @@ describe('Schools Controller', function() {
 
       req.params = {id: 1};
       var error = new Error('database error');
-      destroyForUser.withArgs(req.params.id, 1)
+      yadaguruDataMock.services.schoolService.stubs.destroyForUser.withArgs(req.params.id, 1)
         .returns(Promise.reject(error));
 
       return schoolsController.removeByIdForUser(req, res).then(function() {

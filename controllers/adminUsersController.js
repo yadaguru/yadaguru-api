@@ -1,4 +1,6 @@
-var adminUserService = require('../services/adminUserService');
+var env = process.env.NODE_ENV || 'development';
+var config = require('../config/config.json')[env];
+var adminUserService = require('yadaguru-data')(config).adminUserService;
 var validators = require('../services/validatorService');
 var errors = require('../services/errorService');
 var moment = require('moment');

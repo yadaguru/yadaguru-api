@@ -5,10 +5,8 @@ var https = require('https');
 var bodyParser = require('body-parser');
 var cors = require('cors');
 var morgan = require('morgan');
-var env       = process.env.NODE_ENV || 'development';
-var config    = require('./config/config.json')[env];
-var Sequelize = require('sequelize');
-var sequelize;
+var env = process.env.NODE_ENV || 'development';
+var config = require('./config/config.json')[env];
 
 /* Setup app and configure middleware */
 var app = express();
@@ -25,14 +23,6 @@ if (config.cors) {
 /* Setup logging */
 // TODO make this configurable depending on environment
 app.use(morgan('dev'));
-
-/* Setup database connection */
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable]);
-} else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
-}
-app.set('db', sequelize);
 
 /* Routes */
 var router = express.Router();
@@ -52,6 +42,11 @@ app.use('/api/schools', require('./routes/schoolsRoute'));
 app.use('/api/timeframes', require('./routes/timeframesRoute'));
 app.use('/api/base_reminders', require('./routes/baseRemindersRoute'));
 app.use('/api/reminders', require('./routes/remindersRoute'));
+
+app.use(function (err, req, res, next) {
+  console.error(err.stack);
+  res.status(500).send('Something broke!')
+})
 
 /* Setup methods for starting and stopping HTTP(S) servers */
 var httpServer, httpsServer;

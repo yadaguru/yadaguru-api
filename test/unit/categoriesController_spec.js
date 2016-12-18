@@ -8,13 +8,16 @@ chai.use(sinonChai);
 chai.should();
 var errors = require('../../services/errorService');
 var Promise = require('bluebird');
-var categoryService = require('../../services/categoryService');
 var auth = require('../../services/authService');
+var proxyquire = require('proxyquire');
+var mocks = require('../mocks');
 
 describe('Categories Controller', function() {
-  var req, res, categoriesController, reqGet, getUserData;
+  var req, res, categoriesController, reqGet, getUserData, yadaguruDataMock;
 
   beforeEach(function() {
+    yadaguruDataMock = mocks.getYadaguruDataMock('categoryService');
+    yadaguruDataMock.stubMethods();
     req = {
       get: function(){}
     };
@@ -24,7 +27,9 @@ describe('Categories Controller', function() {
     };
     reqGet = sinon.stub(req, 'get');
     getUserData = sinon.stub(auth, 'getUserData');
-    categoriesController = require('../../controllers/categoriesController');
+    categoriesController = proxyquire('../../controllers/categoriesController', {
+      'yadaguru-data': yadaguruDataMock.getMockObject()
+    });
   });
 
   afterEach(function() {
@@ -32,19 +37,10 @@ describe('Categories Controller', function() {
     res.json.reset();
     reqGet.restore();
     getUserData.restore();
+    yadaguruDataMock.restoreStubs();
   });
 
   describe('GET /categories', function() {
-    var findAll;
-
-    beforeEach(function() {
-      findAll = sinon.stub(categoryService, 'findAll');
-    });
-
-    afterEach(function() {
-      findAll.restore();
-    });
-
     it('should respond with an array of all categories and a 200 status', function() {
       var categories = [{
         id: '1',
@@ -57,7 +53,7 @@ describe('Categories Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      findAll.returns(Promise.resolve(categories));
+      yadaguruDataMock.services.categoryService.stubs.findAll.returns(Promise.resolve(categories));
 
       return categoriesController.getAll(req, res).then(function() {
         res.json.should.have.been.calledWith(categories);
@@ -67,7 +63,7 @@ describe('Categories Controller', function() {
     });
 
     it('should respond with an empty array and a 200 status if there are no categories', function() {
-      findAll.returns(Promise.resolve([]));
+      yadaguruDataMock.services.categoryService.stubs.findAll.returns(Promise.resolve([]));
       reqGet.withArgs('Authorization')
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
@@ -110,7 +106,7 @@ describe('Categories Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new Error('database error');
-      findAll.returns(Promise.reject(error));
+      yadaguruDataMock.services.categoryService.stubs.findAll.returns(Promise.reject(error));
 
       return categoriesController.getAll(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -121,16 +117,6 @@ describe('Categories Controller', function() {
   });
 
   describe('GET /categories/:id', function() {
-    var findById;
-
-    beforeEach(function() {
-      findById = sinon.stub(categoryService, 'findById');
-    });
-
-    afterEach(function() {
-      findById.restore();
-    });
-
     it('should respond with an array containing matching category and a 200 status', function() {
       req.params = {id: 1};
       var category = {
@@ -141,7 +127,7 @@ describe('Categories Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      findById.withArgs(1)
+      yadaguruDataMock.services.categoryService.stubs.findById.withArgs(1)
         .returns(Promise.resolve([category]));
 
       return categoriesController.getById(req, res).then(function() {
@@ -157,7 +143,7 @@ describe('Categories Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      findById.withArgs(2)
+      yadaguruDataMock.services.categoryService.stubs.findById.withArgs(2)
         .returns(Promise.resolve([]));
 
       return categoriesController.getById(req, res).then(function() {
@@ -198,7 +184,7 @@ describe('Categories Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      findById.returns(Promise.reject(error));
+      yadaguruDataMock.services.categoryService.stubs.findById.returns(Promise.reject(error));
 
       return categoriesController.getById(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -209,16 +195,6 @@ describe('Categories Controller', function() {
   });
 
   describe('POST /categories', function() {
-    var create;
-
-    beforeEach(function() {
-      create = sinon.stub(categoryService, 'create');
-    });
-
-    afterEach(function() {
-      create.restore();
-    });
-
     it('should respond with an array containing the new category object and 200 status on success', function() {
       req.body = {name: 'Essay'};
       var successfulCreateResponse = {
@@ -229,7 +205,7 @@ describe('Categories Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      create.returns(Promise.resolve([successfulCreateResponse]));
+      yadaguruDataMock.services.categoryService.stubs.create.returns(Promise.resolve([successfulCreateResponse]));
 
       return categoriesController.post(req, res).then(function() {
         res.json.should.have.been.calledWith([successfulCreateResponse]);
@@ -287,7 +263,7 @@ describe('Categories Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      create.returns(Promise.reject(databaseError));
+      yadaguruDataMock.services.categoryService.stubs.create.returns(Promise.reject(databaseError));
 
       return categoriesController.post(req, res).then(function() {
         res.json.should.have.been.calledWith(databaseError);
@@ -297,16 +273,6 @@ describe('Categories Controller', function() {
   });
 
   describe('PUT /categories/:id', function() {
-    var update;
-
-    beforeEach(function() {
-      update = sinon.stub(categoryService, 'update');
-    });
-
-    afterEach(function() {
-      update.restore();
-    });
-
     it('should respond with an array containing the updated category object and 200 status on success', function() {
       req.body = {name: 'Essay'};
       req.params = {id: 1};
@@ -318,7 +284,7 @@ describe('Categories Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      update.withArgs(req.params.id, req.body)
+      yadaguruDataMock.services.categoryService.stubs.update.withArgs(req.params.id, req.body)
         .returns(Promise.resolve([updatedCategory]));
 
       return categoriesController.putOnId(req, res).then(function() {
@@ -335,7 +301,7 @@ describe('Categories Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      update.withArgs(req.params.id)
+      yadaguruDataMock.services.categoryService.stubs.update.withArgs(req.params.id)
         .returns(Promise.resolve(false));
 
       return categoriesController.putOnId(req, res).then(function() {
@@ -380,7 +346,7 @@ describe('Categories Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      update.withArgs(req.params.id, req.body)
+      yadaguruDataMock.services.categoryService.stubs.update.withArgs(req.params.id, req.body)
         .returns(Promise.reject(error));
 
       return categoriesController.putOnId(req, res).then(function() {
@@ -391,23 +357,13 @@ describe('Categories Controller', function() {
   });
 
   describe('DELETE /categories/:id', function() {
-    var destroy;
-
-    beforeEach(function() {
-      destroy = sinon.stub(categoryService, 'destroy');
-    });
-
-    afterEach(function() {
-      destroy.restore();
-    });
-
     it('should respond with the categoryService ID and 200 status on success', function() {
       req.params = {id: 1};
       reqGet.withArgs('Authorization')
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      destroy.withArgs(req.params.id)
+      yadaguruDataMock.services.categoryService.stubs.destroy.withArgs(req.params.id)
         .returns(Promise.resolve(true));
 
       return categoriesController.removeById(req, res).then(function() {
@@ -423,7 +379,7 @@ describe('Categories Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ResourceNotFoundError('Category', req.params.id);
-      destroy.withArgs(req.params.id)
+      yadaguruDataMock.services.categoryService.stubs.destroy.withArgs(req.params.id)
         .returns(Promise.resolve(false));
 
       return categoriesController.removeById(req, res).then(function() {
@@ -442,7 +398,7 @@ describe('Categories Controller', function() {
       dbError.name = 'SequelizeForeignKeyConstraintError';
       var error = new errors.ForeignConstraintError('Category');
 
-      destroy.withArgs(req.params.id)
+      yadaguruDataMock.services.categoryService.stubs.destroy.withArgs(req.params.id)
         .returns(Promise.reject(dbError));
 
       return categoriesController.removeById(req, res).then(function() {
@@ -484,7 +440,7 @@ describe('Categories Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new Error('database error');
-      destroy.withArgs(req.params.id)
+      yadaguruDataMock.services.categoryService.stubs.destroy.withArgs(req.params.id)
         .returns(Promise.reject(error));
 
       return categoriesController.removeById(req, res).then(function() {

@@ -1,4 +1,6 @@
-var testService = require('../services/testService');
+var env = process.env.NODE_ENV || 'development';
+var config = require('../config/config.json')[env];
+var testService = require('yadaguru-data')(config).testService;
 
 var schema = {
   type: {

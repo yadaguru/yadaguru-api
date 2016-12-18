@@ -8,13 +8,16 @@ chai.use(sinonChai);
 chai.should();
 var errors = require('../../services/errorService');
 var Promise = require('bluebird');
-var contentItemService = require('../../services/contentItemService');
 var auth = require('../../services/authService');
+var proxyquire = require('proxyquire');
+var mocks = require('../mocks');
 
 describe('Content Items Controller', function() {
-  var req, res, contentItemsController, reqGet, getUserData;
+  var req, res, contentItemsController, reqGet, getUserData, yadaguruDataMock;
 
   beforeEach(function() {
+    yadaguruDataMock = mocks.getYadaguruDataMock('contentItemService');
+    yadaguruDataMock.stubMethods();
     req = {
       get: function(){}
     };
@@ -24,7 +27,9 @@ describe('Content Items Controller', function() {
     };
     reqGet = sinon.stub(req, 'get');
     getUserData = sinon.stub(auth, 'getUserData');
-    contentItemsController = require('../../controllers/contentItemsController');
+    contentItemsController = proxyquire('../../controllers/contentItemsController', {
+      'yadaguru-data': yadaguruDataMock.getMockObject()
+    });
   });
 
   afterEach(function() {
@@ -32,19 +37,10 @@ describe('Content Items Controller', function() {
     res.json.reset();
     reqGet.restore();
     getUserData.restore();
+    yadaguruDataMock.restoreStubs();
   });
 
   describe('GET /content_items', function() {
-    var findAll;
-
-    beforeEach(function() {
-      findAll = sinon.stub(contentItemService, 'findAll');
-    });
-
-    afterEach(function() {
-      findAll.restore();
-    });
-
     it('should respond with an array of all content items and a 200 status', function() {
       var contentItems = [{
         id: 1,
@@ -59,7 +55,7 @@ describe('Content Items Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      findAll.returns(Promise.resolve(contentItems));
+      yadaguruDataMock.services.contentItemService.stubs.findAll.returns(Promise.resolve(contentItems));
 
       return contentItemsController.getAll(req, res).then(function() {
         res.json.should.have.been.calledWith(contentItems);
@@ -73,7 +69,7 @@ describe('Content Items Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      findAll.returns(Promise.resolve([]));
+      yadaguruDataMock.services.contentItemService.stubs.findAll.returns(Promise.resolve([]));
 
       return contentItemsController.getAll(req, res).then(function() {
         res.json.should.have.been.calledWith([]);
@@ -88,7 +84,7 @@ describe('Content Items Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      findAll.returns(Promise.reject(error));
+      yadaguruDataMock.services.contentItemService.stubs.findAll.returns(Promise.reject(error));
 
       return contentItemsController.getAll(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -123,16 +119,6 @@ describe('Content Items Controller', function() {
   });
 
   describe('GET /content_items/:name', function() {
-    var findByName;
-
-    beforeEach(function() {
-      findByName = sinon.stub(contentItemService, 'findByName');
-    });
-
-    afterEach(function() {
-      findByName.restore();
-    });
-
     it('should respond with an array with the matching content item and a 200 status', function() {
       req.params = {name: 'faqs'};
       var contentItem = {
@@ -140,7 +126,7 @@ describe('Content Items Controller', function() {
         name: 'faqs',
         content: 'Some frequently asked questions...'
       };
-      findByName.withArgs('faqs')
+      yadaguruDataMock.services.contentItemService.stubs.findByName.withArgs('faqs')
         .returns(Promise.resolve([contentItem]));
 
       return contentItemsController.getByName(req, res).then(function() {
@@ -152,7 +138,7 @@ describe('Content Items Controller', function() {
     it('should an error object and a 404 status if the content item does not exist', function() {
       req.params = {name: 'foobar'};
       var error = new errors.ResourceNotFoundError('ContentItem', req.params.name);
-      findByName.withArgs('foobar')
+      yadaguruDataMock.services.contentItemService.stubs.findByName.withArgs('foobar')
         .returns(Promise.resolve([]));
 
       return contentItemsController.getByName(req, res).then(function() {
@@ -169,7 +155,7 @@ describe('Content Items Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new Error('database error');
-      findByName.returns(Promise.reject(error));
+      yadaguruDataMock.services.contentItemService.stubs.findByName.returns(Promise.reject(error));
 
       return contentItemsController.getByName(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -180,16 +166,6 @@ describe('Content Items Controller', function() {
   });
 
   describe('POST /content_items', function() {
-    var create;
-
-    beforeEach(function() {
-      create = sinon.stub(contentItemService, 'create');
-    });
-
-    afterEach(function() {
-      create.restore();
-    });
-
     it('should respond with new contentItem object and 200 status on success', function() {
       req.body = {name: 'Help Tip', content: 'Here is a help tip'};
       var successfulCreateResponse = {
@@ -201,7 +177,7 @@ describe('Content Items Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      create.returns(Promise.resolve([successfulCreateResponse]));
+      yadaguruDataMock.services.contentItemService.stubs.create.returns(Promise.resolve([successfulCreateResponse]));
 
       return contentItemsController.post(req, res).then(function() {
         res.json.should.have.been.calledWith([successfulCreateResponse]);
@@ -250,7 +226,7 @@ describe('Content Items Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var databaseError = new Error('some database error');
-      create.returns(Promise.reject(databaseError));
+      yadaguruDataMock.services.contentItemService.stubs.create.returns(Promise.reject(databaseError));
 
       return contentItemsController.post(req, res).then(function() {
         res.json.should.have.been.calledWith(databaseError);
@@ -284,16 +260,6 @@ describe('Content Items Controller', function() {
   });
 
   describe('PUT /content_items/:id', function() {
-    var update;
-
-    beforeEach(function() {
-      update = sinon.stub(contentItemService, 'update');
-    });
-
-    afterEach(function() {
-      update.restore();
-    });
-
     it('should respond with the updated contentItem object and 200 status on success', function() {
       req.body = {name: 'Help Tip', content: 'Some Help Text'};
       req.params = {id: 1};
@@ -306,7 +272,7 @@ describe('Content Items Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      update.withArgs(req.params.id, req.body)
+      yadaguruDataMock.services.contentItemService.stubs.update.withArgs(req.params.id, req.body)
         .returns(Promise.resolve([updatedContentItem]));
 
       return contentItemsController.putOnId(req, res).then(function() {
@@ -323,7 +289,7 @@ describe('Content Items Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ResourceNotFoundError('ContentItem', req.params.id);
-      update.withArgs(2)
+      yadaguruDataMock.services.contentItemService.stubs.update.withArgs(2)
         .returns(Promise.resolve(false));
 
       return contentItemsController.putOnId(req, res).then(function() {
@@ -340,7 +306,7 @@ describe('Content Items Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new Error('database error');
-      update.withArgs(req.params.id, req.body)
+      yadaguruDataMock.services.contentItemService.stubs.update.withArgs(req.params.id, req.body)
         .returns(Promise.reject(error));
 
       return contentItemsController.putOnId(req, res).then(function() {
@@ -375,23 +341,13 @@ describe('Content Items Controller', function() {
   });
 
   describe('DELETE /content_items/:id', function() {
-    var destroy;
-
-    beforeEach(function() {
-      destroy = sinon.stub(contentItemService, 'destroy');
-    });
-
-    afterEach(function() {
-      destroy.restore();
-    });
-
     it('should respond with the content item ID and 200 status on success', function() {
       req.params = {id: 1};
       reqGet.withArgs('Authorization')
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      destroy.withArgs(req.params.id)
+      yadaguruDataMock.services.contentItemService.stubs.destroy.withArgs(req.params.id)
         .returns(Promise.resolve(true));
 
       return contentItemsController.removeById(req, res).then(function() {
@@ -407,7 +363,7 @@ describe('Content Items Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ResourceNotFoundError('ContentItem', req.params.id);
-      destroy.withArgs(req.params.id)
+      yadaguruDataMock.services.contentItemService.stubs.destroy.withArgs(req.params.id)
         .returns(Promise.resolve(false));
 
       return contentItemsController.removeById(req, res).then(function() {
@@ -423,7 +379,7 @@ describe('Content Items Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new Error('database error');
-      destroy.withArgs(req.params.id)
+      yadaguruDataMock.services.contentItemService.stubs.destroy.withArgs(req.params.id)
         .returns(Promise.reject(error));
 
       return contentItemsController.removeById(req, res).then(function() {

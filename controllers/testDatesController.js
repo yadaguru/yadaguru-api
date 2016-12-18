@@ -1,4 +1,6 @@
-var testDateService = require('../services/testDateService');
+var env = process.env.NODE_ENV || 'development';
+var config = require('../config/config.json')[env];
+var testDateService = require('yadaguru-data')(config).testDateService;
 
 var schema = {
   testId: {

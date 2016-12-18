@@ -1,8 +1,10 @@
-var schoolService = require('../services/schoolService');
+var env = process.env.NODE_ENV || 'development';
+var config = require('../config/config.json')[env];
+var schoolService = require('yadaguru-data')(config).schoolService;
+var reminderService = require('yadaguru-data')(config).reminderService;
 var auth = require('../services/authService');
 var errors = require('../services/errorService');
 var reminderGen = require('../services/reminderGenerationService');
-var reminderService = require('../services/reminderService');
 var validators = require('../services/validatorService');
 
 var schema = {

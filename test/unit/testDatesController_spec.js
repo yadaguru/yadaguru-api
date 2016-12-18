@@ -8,13 +8,16 @@ chai.use(sinonChai);
 chai.should();
 var errors = require('../../services/errorService');
 var Promise = require('bluebird');
-var testDateService = require('../../services/testDateService');
 var auth = require('../../services/authService');
+var proxyquire = require('proxyquire');
+var mocks = require('../mocks');
 
 describe('Test Dates Controller', function() {
-  var req, res, testDatesController, reqGet, getUserData;
+  var req, res, testDatesController, reqGet, getUserData, yadaguruDataMock;
 
   beforeEach(function() {
+    yadaguruDataMock = mocks.getYadaguruDataMock('testDateService');
+    yadaguruDataMock.stubMethods();
     req = {
       get: function(){}
     };
@@ -24,7 +27,9 @@ describe('Test Dates Controller', function() {
     };
     reqGet = sinon.stub(req, 'get');
     getUserData = sinon.stub(auth, 'getUserData');
-    testDatesController = require('../../controllers/testDatesController');
+    testDatesController = proxyquire('../../controllers/testDatesController', {
+      'yadaguru-data': yadaguruDataMock.getMockObject()
+    });
   });
 
   afterEach(function() {
@@ -32,19 +37,10 @@ describe('Test Dates Controller', function() {
     res.json.reset();
     reqGet.restore();
     getUserData.restore();
+    yadaguruDataMock.restoreStubs();
   });
 
   describe('GET /test_dates', function() {
-    var findAll;
-
-    beforeEach(function() {
-      findAll = sinon.stub(testDateService, 'findAll');
-    });
-
-    afterEach(function() {
-      findAll.restore();
-    });
-
     it('should respond with an array of all testDates and a 200 status', function() {
       var testDates =[{
         id: 1,
@@ -61,7 +57,7 @@ describe('Test Dates Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      findAll.returns(Promise.resolve(testDates));
+      yadaguruDataMock.services.testDateService.stubs.findAll.returns(Promise.resolve(testDates));
 
       return testDatesController.getAll(req, res).then(function() {
         res.json.should.have.been.calledWith(testDates);
@@ -75,7 +71,7 @@ describe('Test Dates Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      findAll.returns(Promise.resolve([]));
+      yadaguruDataMock.services.testDateService.stubs.findAll.returns(Promise.resolve([]));
 
       return testDatesController.getAll(req, res).then(function() {
         res.json.should.have.been.calledWith([]);
@@ -114,7 +110,7 @@ describe('Test Dates Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      findAll.returns(Promise.reject(error));
+      yadaguruDataMock.services.testDateService.stubs.findAll.returns(Promise.reject(error));
 
       return testDatesController.getAll(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -125,16 +121,6 @@ describe('Test Dates Controller', function() {
   });
 
   describe('GET /testDates/:id', function() {
-    var findById;
-
-    beforeEach(function() {
-      findById = sinon.stub(testDateService, 'findById');
-    });
-
-    afterEach(function() {
-      findById.restore();
-    });
-
     it('should respond with an array with the matching testDate and a 200 status', function() {
       req.params = {id: 1};
       var testDate = {
@@ -147,7 +133,7 @@ describe('Test Dates Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      findById.withArgs(1)
+      yadaguruDataMock.services.testDateService.stubs.findById.withArgs(1)
         .returns(Promise.resolve([testDate]));
 
       return testDatesController.getById(req, res).then(function() {
@@ -163,7 +149,7 @@ describe('Test Dates Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ResourceNotFoundError('TestDate', req.params.id);
-      findById.withArgs(2)
+      yadaguruDataMock.services.testDateService.stubs.findById.withArgs(2)
         .returns(Promise.resolve([]));
 
       return testDatesController.getById(req, res).then(function() {
@@ -204,7 +190,7 @@ describe('Test Dates Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new Error('database error');
-      findById.returns(Promise.reject(error));
+      yadaguruDataMock.services.testDateService.stubs.findById.returns(Promise.reject(error));
 
       return testDatesController.getById(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -215,16 +201,6 @@ describe('Test Dates Controller', function() {
   });
 
   describe('POST /test_dates', function() {
-    var create;
-
-    beforeEach(function() {
-      create = sinon.stub(testDateService, 'create');
-    });
-
-    afterEach(function() {
-      create.restore();
-    });
-
     it('should respond with new testDate object and 200 status on success', function() {
       req.body = {
         testId: '1',
@@ -241,7 +217,7 @@ describe('Test Dates Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      create.returns(Promise.resolve([successfulCreateResponse]));
+      yadaguruDataMock.services.testDateService.stubs.create.returns(Promise.resolve([successfulCreateResponse]));
 
       return testDatesController.post(req, res).then(function() {
         res.json.should.have.been.calledWith([successfulCreateResponse]);
@@ -410,7 +386,7 @@ describe('Test Dates Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var databaseError = new Error('some database error');
-      create.returns(Promise.reject(databaseError));
+      yadaguruDataMock.services.testDateService.stubs.create.returns(Promise.reject(databaseError));
 
       return testDatesController.post(req, res).then(function() {
         res.json.should.have.been.calledWith(databaseError);
@@ -420,16 +396,6 @@ describe('Test Dates Controller', function() {
   });
 
   describe('PUT /testDates/:id', function() {
-    var update;
-
-    beforeEach(function() {
-      update = sinon.stub(testDateService, 'update');
-    });
-
-    afterEach(function() {
-      update.restore();
-    });
-
     it('should respond with the updated testDate object and 200 status on success', function() {
       req.body = {
         testId: '1',
@@ -447,7 +413,7 @@ describe('Test Dates Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      update.withArgs(req.params.id, req.body)
+      yadaguruDataMock.services.testDateService.stubs.update.withArgs(req.params.id, req.body)
         .returns(Promise.resolve([updatedTestDate]));
 
       return testDatesController.putOnId(req, res).then(function() {
@@ -471,7 +437,7 @@ describe('Test Dates Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      update.withArgs(req.params.id, req.body)
+      yadaguruDataMock.services.testDateService.stubs.update.withArgs(req.params.id, req.body)
         .returns(Promise.resolve([updatedTestDate]));
 
       return testDatesController.putOnId(req, res).then(function() {
@@ -493,7 +459,7 @@ describe('Test Dates Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      update.withArgs(2)
+      yadaguruDataMock.services.testDateService.stubs.update.withArgs(2)
         .returns(Promise.resolve(false));
 
       return testDatesController.putOnId(req, res).then(function() {
@@ -538,7 +504,7 @@ describe('Test Dates Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      update.withArgs(req.params.id, req.body)
+      yadaguruDataMock.services.testDateService.stubs.update.withArgs(req.params.id, req.body)
         .returns(Promise.reject(error));
 
       return testDatesController.putOnId(req, res).then(function() {
@@ -549,23 +515,13 @@ describe('Test Dates Controller', function() {
   });
 
   describe('DELETE /testDates/:id', function() {
-    var destroy;
-
-    beforeEach(function() {
-      destroy = sinon.stub(testDateService, 'destroy');
-    });
-
-    afterEach(function() {
-      destroy.restore();
-    });
-
     it('should respond with the testDate ID and 200 status on success', function() {
       req.params = {id: 1};
       reqGet.withArgs('Authorization')
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      destroy.withArgs(req.params.id)
+      yadaguruDataMock.services.testDateService.stubs.destroy.withArgs(req.params.id)
         .returns(Promise.resolve(true));
 
       return testDatesController.removeById(req, res).then(function() {
@@ -581,7 +537,7 @@ describe('Test Dates Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      destroy.withArgs(req.params.id)
+      yadaguruDataMock.services.testDateService.stubs.destroy.withArgs(req.params.id)
         .returns(Promise.resolve(false));
 
       return testDatesController.removeById(req, res).then(function() {
@@ -621,7 +577,7 @@ describe('Test Dates Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      destroy.withArgs(req.params.id)
+      yadaguruDataMock.services.testDateService.stubs.destroy.withArgs(req.params.id)
         .returns(Promise.reject(error));
 
       return testDatesController.removeById(req, res).then(function() {

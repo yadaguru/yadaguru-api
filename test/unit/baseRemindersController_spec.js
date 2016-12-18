@@ -8,14 +8,17 @@ chai.use(sinonChai);
 chai.should();
 var errors = require('../../services/errorService');
 var Promise = require('bluebird');
-var baseReminderService = require('../../services/baseReminderService');
 var auth = require('../../services/authService');
+var proxyquire = require('proxyquire');
+var mocks = require('../mocks');
 
 
 describe('Base Reminders Controller', function() {
-  var req, res, baseRemindersController, reqGet, getUserData;
+  var req, res, baseRemindersController, reqGet, getUserData, yadaguruDataMock;
 
   beforeEach(function() {
+    yadaguruDataMock = mocks.getYadaguruDataMock('baseReminderService');
+    yadaguruDataMock.stubMethods();
     req = {
       get: function(){}
     };
@@ -25,7 +28,9 @@ describe('Base Reminders Controller', function() {
     };
     reqGet = sinon.stub(req, 'get');
     getUserData = sinon.stub(auth, 'getUserData');
-    baseRemindersController = require('../../controllers/baseRemindersController');
+    baseRemindersController = proxyquire('../../controllers/baseRemindersController', {
+      'yadaguru-data': yadaguruDataMock.getMockObject()
+    });
   });
 
   afterEach(function() {
@@ -33,19 +38,10 @@ describe('Base Reminders Controller', function() {
     res.json.reset();
     reqGet.restore();
     getUserData.restore();
+    yadaguruDataMock.restoreStubs();
   });
 
   describe('GET /base_reminders', function() {
-    var findAll;
-
-    beforeEach(function() {
-      findAll = sinon.stub(baseReminderService, 'findAll');
-    });
-
-    afterEach(function() {
-      findAll.restore();
-    });
-
     it('should respond with an array of all baseReminders and a 200 status', function() {
       var baseReminders = [{
         id: '1',
@@ -70,7 +66,7 @@ describe('Base Reminders Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      findAll.withArgs()
+      yadaguruDataMock.services.baseReminderService.stubs.findAll.withArgs()
         .returns(Promise.resolve(baseReminders));
 
       return baseRemindersController.getAll(req, res).then(function() {
@@ -85,7 +81,7 @@ describe('Base Reminders Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      findAll.withArgs()
+      yadaguruDataMock.services.baseReminderService.stubs.findAll.withArgs()
         .returns(Promise.resolve([]));
 
       return baseRemindersController.getAll(req, res).then(function() {
@@ -125,7 +121,7 @@ describe('Base Reminders Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new Error('database error');
-      findAll.returns(Promise.reject(error));
+      yadaguruDataMock.services.baseReminderService.stubs.findAll.returns(Promise.reject(error));
 
       return baseRemindersController.getAll(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -136,16 +132,6 @@ describe('Base Reminders Controller', function() {
   });
 
   describe('GET /base_reminders/:id', function() {
-    var findById;
-
-    beforeEach(function() {
-      findById = sinon.stub(baseReminderService, 'findById');
-    });
-
-    afterEach(function() {
-      findById.restore();
-    });
-
     it('should respond with an array with the matching baseReminder and a 200 status', function() {
       req.params = {id: 1};
       var baseReminder = {
@@ -162,7 +148,7 @@ describe('Base Reminders Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      findById.withArgs(1)
+      yadaguruDataMock.services.baseReminderService.stubs.findById.withArgs(1)
         .returns(Promise.resolve([baseReminder]));
 
       return baseRemindersController.getById(req, res).then(function() {
@@ -178,7 +164,7 @@ describe('Base Reminders Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      findById.withArgs(2)
+      yadaguruDataMock.services.baseReminderService.stubs.findById.withArgs(2)
         .returns(Promise.resolve([]));
 
       return baseRemindersController.getById(req, res).then(function() {
@@ -220,7 +206,7 @@ describe('Base Reminders Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new Error('database error');
-      findById.returns(Promise.reject(error));
+      yadaguruDataMock.services.baseReminderService.stubs.findById.returns(Promise.reject(error));
 
       return baseRemindersController.getById(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -230,16 +216,6 @@ describe('Base Reminders Controller', function() {
   });
 
   describe('POST /base_reminders', function() {
-    var create;
-
-    beforeEach(function() {
-      create = sinon.stub(baseReminderService, 'create');
-    });
-
-    afterEach(function() {
-      create.restore();
-    });
-
     it('should respond with new baseReminder object and 200 status with a valid request', function() {
       req.body = {
         name: 'Write Essay',
@@ -265,7 +241,7 @@ describe('Base Reminders Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      create.returns(Promise.resolve([successfulCreateResponse]));
+      yadaguruDataMock.services.baseReminderService.stubs.create.returns(Promise.resolve([successfulCreateResponse]));
 
       return baseRemindersController.post(req, res).then(function() {
         res.json.should.have.been.calledWith([successfulCreateResponse]);
@@ -296,7 +272,7 @@ describe('Base Reminders Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      create.returns(Promise.resolve([successfulCreateResponse]));
+      yadaguruDataMock.services.baseReminderService.stubs.create.returns(Promise.resolve([successfulCreateResponse]));
 
       return baseRemindersController.post(req, res).then(function() {
         res.json.should.have.been.calledWith([successfulCreateResponse]);
@@ -491,7 +467,7 @@ describe('Base Reminders Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var databaseError = new Error('some database error');
-      create.returns(Promise.reject(databaseError));
+      yadaguruDataMock.services.baseReminderService.stubs.create.returns(Promise.reject(databaseError));
 
       return baseRemindersController.post(req, res).then(function() {
         res.json.should.have.been.calledWith(databaseError);
@@ -501,16 +477,6 @@ describe('Base Reminders Controller', function() {
   });
 
   describe('PUT /base_reminders/:id', function() {
-    var update;
-
-    beforeEach(function() {
-      update = sinon.stub(baseReminderService, 'update');
-    });
-
-    afterEach(function() {
-      update.restore();
-    });
-
     it('should respond with the updated baseReminder object and 200 status on valid request', function() {
       req.body = {
         name: 'Write Essays',
@@ -530,7 +496,7 @@ describe('Base Reminders Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      update.returns(Promise.resolve([updatedBaseReminder]));
+      yadaguruDataMock.services.baseReminderService.stubs.update.returns(Promise.resolve([updatedBaseReminder]));
 
       return baseRemindersController.putOnId(req, res).then(function() {
         res.json.should.have.been.calledWith([updatedBaseReminder]);
@@ -548,7 +514,7 @@ describe('Base Reminders Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      update.withArgs(2)
+      yadaguruDataMock.services.baseReminderService.stubs.update.withArgs(2)
         .returns(Promise.resolve(false));
 
       return baseRemindersController.putOnId(req, res).then(function() {
@@ -593,7 +559,7 @@ describe('Base Reminders Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      update.withArgs(req.params.id, req.body)
+      yadaguruDataMock.services.baseReminderService.stubs.update.withArgs(req.params.id, req.body)
         .returns(Promise.reject(error));
 
       return baseRemindersController.putOnId(req, res).then(function() {
@@ -604,23 +570,13 @@ describe('Base Reminders Controller', function() {
   });
 
   describe('DELETE /base_reminders/:id', function() {
-    var destroy;
-
-    beforeEach(function() {
-      destroy = sinon.stub(baseReminderService, 'destroy');
-    });
-
-    afterEach(function() {
-      destroy.restore();
-    });
-
     it('should respond with the baseReminder ID and 200 status on success', function() {
       req.params = {id: 1};
       reqGet.withArgs('Authorization')
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      destroy.withArgs(req.params.id)
+      yadaguruDataMock.services.baseReminderService.stubs.destroy.withArgs(req.params.id)
         .returns(Promise.resolve(true));
 
       return baseRemindersController.removeById(req, res).then(function() {
@@ -636,7 +592,7 @@ describe('Base Reminders Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      destroy.withArgs(req.params.id)
+      yadaguruDataMock.services.baseReminderService.stubs.destroy.withArgs(req.params.id)
         .returns(Promise.resolve(false));
 
       return baseRemindersController.removeById(req, res).then(function() {
@@ -678,7 +634,7 @@ describe('Base Reminders Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new Error('database error');
-      destroy.withArgs()
+      yadaguruDataMock.services.baseReminderService.stubs.destroy.withArgs()
         .returns(Promise.reject(error));
 
       return baseRemindersController.removeById(req, res).then(function() {

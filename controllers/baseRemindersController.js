@@ -1,4 +1,6 @@
-var baseReminderService = require('../services/baseReminderService');
+var env = process.env.NODE_ENV || 'development';
+var config = require('../config/config.json')[env];
+var baseReminderService = require('yadaguru-data')(config).baseReminderService;
 
 var schema = {
   name: {

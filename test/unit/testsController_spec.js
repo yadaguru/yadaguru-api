@@ -8,13 +8,16 @@ chai.use(sinonChai);
 chai.should();
 var errors = require('../../services/errorService');
 var Promise = require('bluebird');
-var testService = require('../../services/testService');
 var auth = require('../../services/authService');
+var proxyquire = require('proxyquire');
+var mocks = require('../mocks');
 
 describe('Tests Controller', function() {
-  var req, res, testsController, reqGet, getUserData;
+  var req, res, testsController, reqGet, getUserData, yadaguruDataMock;
 
   beforeEach(function() {
+    yadaguruDataMock = mocks.getYadaguruDataMock('testService');
+    yadaguruDataMock.stubMethods();
     req = {
       get: function(){}
     };
@@ -24,7 +27,9 @@ describe('Tests Controller', function() {
     };
     reqGet = sinon.stub(req, 'get');
     getUserData = sinon.stub(auth, 'getUserData');
-    testsController = require('../../controllers/testsController');
+    testsController = proxyquire('../../controllers/testsController', {
+      'yadaguru-data': yadaguruDataMock.getMockObject()
+    });
   });
 
   afterEach(function() {
@@ -32,19 +37,10 @@ describe('Tests Controller', function() {
     res.json.reset();
     reqGet.restore();
     getUserData.restore();
+    yadaguruDataMock.restoreStubs();
   });
 
   describe('GET /tests', function() {
-    var findAll;
-
-    beforeEach(function() {
-      findAll = sinon.stub(testService, 'findAll');
-    });
-
-    afterEach(function() {
-      findAll.restore();
-    });
-
     it('should respond with an array of all tests and a 200 status', function() {
       var tests = [{
         id: 1,
@@ -65,7 +61,7 @@ describe('Tests Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      findAll.returns(Promise.resolve(tests));
+      yadaguruDataMock.services.testService.stubs.findAll.returns(Promise.resolve(tests));
 
       return testsController.getAll(req, res).then(function() {
         res.json.should.have.been.calledWith(tests);
@@ -79,7 +75,7 @@ describe('Tests Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      findAll.returns(Promise.resolve([]));
+      yadaguruDataMock.services.testService.stubs.findAll.returns(Promise.resolve([]));
 
       return testsController.getAll(req, res).then(function() {
         res.json.should.have.been.calledWith([]);
@@ -118,7 +114,7 @@ describe('Tests Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      findAll.returns(Promise.reject(error));
+      yadaguruDataMock.services.testService.stubs.findAll.returns(Promise.reject(error));
 
       return testsController.getAll(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -129,16 +125,6 @@ describe('Tests Controller', function() {
   });
 
   describe('GET /tests/:id', function() {
-    var findById;
-
-    beforeEach(function() {
-      findById = sinon.stub(testService, 'findById');
-    });
-
-    afterEach(function() {
-      findById.restore();
-    });
-
     it('should respond with an array with the matching test and a 200 status', function() {
       req.params = {id: 1};
       var test = {
@@ -153,7 +139,7 @@ describe('Tests Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      findById.withArgs(1)
+      yadaguruDataMock.services.testService.stubs.findById.withArgs(1)
         .returns(Promise.resolve([test]));
 
       return testsController.getById(req, res).then(function() {
@@ -169,7 +155,7 @@ describe('Tests Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      findById.withArgs(2)
+      yadaguruDataMock.services.testService.stubs.findById.withArgs(2)
         .returns(Promise.resolve([]));
 
       return testsController.getById(req, res).then(function() {
@@ -210,7 +196,7 @@ describe('Tests Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      findById.returns(Promise.reject(error));
+      yadaguruDataMock.services.testService.stubs.findById.returns(Promise.reject(error));
 
       return testsController.getById(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
@@ -221,16 +207,6 @@ describe('Tests Controller', function() {
   });
 
   describe('POST /tests', function() {
-    var create;
-
-    beforeEach(function() {
-      create = sinon.stub(testService, 'create');
-    });
-
-    afterEach(function() {
-      create.restore();
-    });
-
     it('should respond with new test object and 200 status on success', function() {
       req.body = {
         type: 'SAT',
@@ -251,7 +227,7 @@ describe('Tests Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      create.returns(Promise.resolve([successfulCreateResponse]));
+      yadaguruDataMock.services.testService.stubs.create.returns(Promise.resolve([successfulCreateResponse]));
 
       return testsController.post(req, res).then(function() {
         res.json.should.have.been.calledWith([successfulCreateResponse]);
@@ -406,7 +382,7 @@ describe('Tests Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var databaseError = new Error('some database error');
-      create.returns(Promise.reject(databaseError));
+      yadaguruDataMock.services.testService.stubs.create.returns(Promise.reject(databaseError));
 
       return testsController.post(req, res).then(function() {
         res.json.should.have.been.calledWith(databaseError);
@@ -416,16 +392,6 @@ describe('Tests Controller', function() {
   });
 
   describe('PUT /tests/:id', function() {
-    var update;
-
-    beforeEach(function() {
-      update = sinon.stub(testService, 'update');
-    });
-
-    afterEach(function() {
-      update.restore();
-    });
-
     it('should respond with the updated test object and 200 status on success', function() {
       req.body = {
         type: 'SAT',
@@ -447,7 +413,7 @@ describe('Tests Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      update.withArgs(req.params.id, req.body)
+      yadaguruDataMock.services.testService.stubs.update.withArgs(req.params.id, req.body)
         .returns(Promise.resolve([updatedTest]));
 
       return testsController.putOnId(req, res).then(function() {
@@ -472,7 +438,7 @@ describe('Tests Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      update.withArgs(req.params.id, req.body)
+      yadaguruDataMock.services.testService.stubs.update.withArgs(req.params.id, req.body)
         .returns(Promise.resolve([updatedTest]));
 
       return testsController.putOnId(req, res).then(function() {
@@ -494,7 +460,7 @@ describe('Tests Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ResourceNotFoundError('Test', req.params.id);
-      update.withArgs(2)
+      yadaguruDataMock.services.testService.stubs.update.withArgs(2)
         .returns(Promise.resolve(false));
 
       return testsController.putOnId(req, res).then(function() {
@@ -539,7 +505,7 @@ describe('Tests Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
       var error = new Error('database error');
-      update.withArgs(req.params.id, req.body)
+      yadaguruDataMock.services.testService.stubs.update.withArgs(req.params.id, req.body)
         .returns(Promise.reject(error));
 
       return testsController.putOnId(req, res).then(function() {
@@ -550,23 +516,13 @@ describe('Tests Controller', function() {
   });
 
   describe('DELETE /tests/:id', function() {
-    var destroy;
-
-    beforeEach(function() {
-      destroy = sinon.stub(testService, 'destroy');
-    });
-
-    afterEach(function() {
-      destroy.restore();
-    });
-
     it('should respond with the test ID and 200 status on success', function() {
       req.params = {id: 1};
       reqGet.withArgs('Authorization')
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      destroy.withArgs(req.params.id)
+      yadaguruDataMock.services.testService.stubs.destroy.withArgs(req.params.id)
         .returns(Promise.resolve(true));
 
       return testsController.removeById(req, res).then(function() {
@@ -582,7 +538,7 @@ describe('Tests Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      destroy.withArgs(req.params.id)
+      yadaguruDataMock.services.testService.stubs.destroy.withArgs(req.params.id)
         .returns(Promise.resolve(false));
 
       return testsController.removeById(req, res).then(function() {
@@ -601,7 +557,7 @@ describe('Tests Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      destroy.withArgs(req.params.id)
+      yadaguruDataMock.services.testService.stubs.destroy.withArgs(req.params.id)
         .returns(Promise.reject(dbError));
 
       return testsController.removeById(req, res).then(function() {
@@ -641,7 +597,7 @@ describe('Tests Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'admin'});
-      destroy.withArgs(req.params.id)
+      yadaguruDataMock.services.testService.stubs.destroy.withArgs(req.params.id)
         .returns(Promise.reject(error));
 
       return testsController.removeById(req, res).then(function() {

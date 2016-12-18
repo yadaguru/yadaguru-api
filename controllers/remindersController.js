@@ -1,4 +1,6 @@
-var reminderService = require('../services/reminderService');
+var env = process.env.NODE_ENV || 'development';
+var config = require('../config/config.json')[env];
+var reminderService = require('yadaguru-data')(config).reminderService;
 var reminderGen = require('../services/reminderGenerationService');
 var auth = require('../services/authService');
 var errors = require('../services/errorService');

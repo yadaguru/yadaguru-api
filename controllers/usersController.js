@@ -1,9 +1,10 @@
-var userService = require('../services/userService');
 var validators = require('../services/validatorService');
 var errors = require('../services/errorService');
 var moment = require('moment');
 var auth = require('../services/authService');
 var env = process.env.NODE_ENV;
+var config = require('../config/config.json')[env];
+var userService = require('yadaguru-data')(config).userService;
 
 var schema = {
   phoneNumber: {
