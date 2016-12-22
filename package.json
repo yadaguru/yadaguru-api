@@ -36,6 +36,7 @@
     "pg-hstore": "2.3.2",
     "sequelize": "3.23.4",
     "validator": "5.4.0",
-    "yadaguru-data": "git+https://github.com/yadaguru/yadaguru-data.git#master"
+    "yadaguru-data": "git+https://github.com/yadaguru/yadaguru-data.git#master",
+    "yadaguru-reminders": "git+https://github.com/yadaguru/yadaguru-reminders.git#master"
   }
 }

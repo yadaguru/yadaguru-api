@@ -67,5 +67,28 @@ module.exports = {
     }
 
     return yadaguruDataMock;
+  },
+  getYadaguruRemindersMock: function() {
+    var yadaguruRemindersMock = {};
+    yadaguruRemindersMock.methods = {};
+
+    yadaguruRemindersMock.methods.getRemindersForSchool = function(){};
+
+    yadaguruRemindersMock.stubMethods = function() {
+      yadaguruRemindersMock.stubs = {};
+      yadaguruRemindersMock.stubs.getRemindersForSchool = sinon.stub(yadaguruRemindersMock.methods, 'getRemindersForSchool');
+    };
+
+    yadaguruRemindersMock.restoreStubs = function() {
+      yadaguruRemindersMock.stubs.getRemindersForSchool.restore();
+    };
+
+    yadaguruRemindersMock.getMockObject = function() {
+      return function(_config) {
+        return yadaguruRemindersMock.methods;
+      }
+    };
+
+    return yadaguruRemindersMock;
   }
 };

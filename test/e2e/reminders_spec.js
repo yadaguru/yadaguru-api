@@ -67,26 +67,6 @@ describe('/api/reminders', function() {
               message: 'Better get writing!',
               name: 'Write Essay'
             }]
-          }, {
-            dueDate: '2017-02-01',
-            reminders: [{
-              detail: 'SAT admin detail',
-              id: 1,
-              lateDetail: '',
-              lateMessage: '',
-              message: 'SAT admin message',
-              name: 'SAT test today',
-            }]
-          }, {
-            dueDate: '2017-02-15',
-            reminders: [{
-              detail: 'ACT admin detail',
-              id: 2,
-              lateDetail: '',
-              lateMessage: '',
-              message: 'ACT admin message',
-              name: 'ACT test today',
-            }]
           }]);
           done();
         });
@@ -124,26 +104,6 @@ describe('/api/reminders', function() {
                 lateMessage: 'Too late. Application was due on 2/1/2017',
                 message: 'Better get writing!',
                 name: 'Write Essay'
-              }]
-            }, {
-              dueDate: '2017-02-01',
-              reminders: [{
-                detail: 'SAT admin detail',
-                id: 1,
-                lateDetail: '',
-                lateMessage: '',
-                message: 'SAT admin message',
-                name: 'SAT test today',
-              }]
-            }, {
-              dueDate: '2017-02-15',
-              reminders: [{
-                detail: 'ACT admin detail',
-                id: 2,
-                lateDetail: '',
-                lateMessage: '',
-                message: 'ACT admin message',
-                name: 'ACT test today',
               }]
             }]
           });
@@ -186,29 +146,7 @@ describe('/api/reminders', function() {
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-          res.body.should.deep.equal({
-            reminders: [{
-              dueDate: '2017-02-01',
-              reminders: [{
-                detail: 'SAT admin detail',
-                id: 1,
-                lateDetail: '',
-                lateMessage: '',
-                message: 'SAT admin message',
-                name: 'SAT test today'
-              }]
-            }, {
-              dueDate: '2017-02-15',
-              reminders: [{
-                detail: 'ACT admin detail',
-                id: 2,
-                lateDetail: '',
-                lateMessage: '',
-                message: 'ACT admin message',
-                name: 'ACT test today'
-              }]
-            }]
-          });
+          res.body.should.deep.equal([]);
           done();
         });
     });

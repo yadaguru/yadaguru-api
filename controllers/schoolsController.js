@@ -4,7 +4,7 @@ var schoolService = require('yadaguru-data')(config).schoolService;
 var reminderService = require('yadaguru-data')(config).reminderService;
 var auth = require('../services/authService');
 var errors = require('../services/errorService');
-var reminderGen = require('../services/reminderGenerationService');
+var reminderGen = require('yadaguru-reminders')(config);
 var validators = require('../services/validatorService');
 
 var schema = {

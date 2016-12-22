@@ -1,7 +1,7 @@
 var env = process.env.NODE_ENV || 'development';
 var config = require('../config/config.json')[env];
 var reminderService = require('yadaguru-data')(config).reminderService;
-var reminderGen = require('../services/reminderGenerationService');
+var reminderGen = require('yadaguru-reminders')(config);
 var auth = require('../services/authService');
 var errors = require('../services/errorService');
 var moment = require('moment');
@@ -27,13 +27,10 @@ remindersController.getAllForUser = function(req, res) {
 
   return reminderService.findByUserWithBaseReminders(userId).then(function(reminders) {
     reminders = reminderGen.deDuplicateReminders(reminders);
-    reminderGen.getTestReminders(moment.utc()).then(function(testReminders) {
-      reminders = reminders.concat(testReminders);
-      reminders = reminderGen.replaceVariablesInReminders(reminders);
-      reminders = reminderGen.groupAndSortByDueDate(reminders);
-      res.status(200);
-      res.json(reminders);
-    });
+    reminders = reminderGen.replaceVariablesInReminders(reminders);
+    reminders = reminderGen.groupAndSortByDueDate(reminders);
+    res.status(200);
+    res.json(reminders);
   }).catch(function(error) {
     res.status(500);
     res.json(error);
@@ -53,19 +50,16 @@ remindersController.getAllForSchoolForUser = function(req, res) {
   var schoolId = req.params.id;
 
   return reminderService.findByUserForSchoolWithBaseReminders(schoolId, userId).then(function(reminders) {
-    reminderGen.getTestReminders(moment.utc()).then(function(testReminders) {
-      reminders = reminders.concat(testReminders);
-      reminders = reminderGen.replaceVariablesInReminders(reminders);
-      if (reminders.length < 1) {
-        res.status(200);
-        res.json(reminders);
-        return Promise.resolve();
-      }
-      var schoolName = reminders[0].schoolName;
-      reminders = reminderGen.groupAndSortByDueDate(reminders);
+    reminders = reminderGen.replaceVariablesInReminders(reminders);
+    if (reminders.length < 1) {
       res.status(200);
-      res.json({schoolName: schoolName, reminders: reminders});
-    });
+      res.json(reminders);
+      return Promise.resolve();
+    }
+    var schoolName = reminders[0].schoolName;
+    reminders = reminderGen.groupAndSortByDueDate(reminders);
+    res.status(200);
+    res.json({schoolName: schoolName, reminders: reminders});
   }).catch(function(error) {
     res.status(500);
     res.json(error);

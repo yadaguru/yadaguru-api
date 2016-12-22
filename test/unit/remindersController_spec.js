@@ -8,14 +8,15 @@ chai.use(sinonChai);
 chai.should();
 var errors = require('../../services/errorService');
 var Promise = require('bluebird');
-var reminderGen = require('../../services/reminderGenerationService');
+var config = require('../../config/config');
+var reminderGen = require('yadaguru-reminders')(config.test);
 var auth = require('../../services/authService');
 var proxyquire = require('proxyquire');
 var mocks = require('../mocks');
 
 describe('Reminders Controller', function() {
-  var reminderServiceResponse, reminderControllerResponse, getTestRemindersResponse, yadaguruDataMock;
-  var req, res, remindersController, reqGet, getUserData, getTestReminders;
+  var reminderServiceResponse, reminderControllerResponse, yadaguruDataMock;
+  var req, res, remindersController, reqGet, getUserData;
 
   beforeEach(function() {
     yadaguruDataMock = mocks.getYadaguruDataMock('reminderService');
@@ -74,13 +75,6 @@ describe('Reminders Controller', function() {
         detail: 'Tips for asking your counselor',
         lateMessage: 'Too late',
         lateDetail: ''
-      }, {
-        id: '3',
-        name: 'ACT test today',
-        message: 'A message about the test',
-        detail: 'Some details',
-        lateMessage: '',
-        lateDetail: ''
       }]
     }, {
       dueDate: '2017-02-06',
@@ -92,34 +86,6 @@ describe('Reminders Controller', function() {
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner'
       }]
-    }, {
-      dueDate: '2017-02-15',
-      reminders: [{
-        id: '4',
-        name: 'ACT test today',
-        message: 'A message about the test',
-        detail: 'Some details',
-        lateMessage: '',
-        lateDetail: ''
-      }]
-    }];
-
-    getTestRemindersResponse = [{
-      dueDate: '2017-02-01',
-      id: '3',
-      name: 'ACT test today',
-      message: 'A message about the test',
-      detail: 'Some details',
-      registrationDate: '2017-01-01',
-      adminDate: '2017-02-01'
-    }, {
-      dueDate: '2017-02-15',
-      id: '4',
-      name: 'ACT test today',
-      message: 'A message about the test',
-      detail: 'Some details',
-      registrationDate: '2017-01-15',
-      adminDate: '2017-02-15'
     }];
 
     req = {
@@ -134,7 +100,6 @@ describe('Reminders Controller', function() {
     remindersController = proxyquire('../../controllers/remindersController', {
       'yadaguru-data': yadaguruDataMock.getMockObject()
     });
-    getTestReminders = sinon.stub(reminderGen, 'getTestReminders');
   });
 
   afterEach(function() {
@@ -142,7 +107,6 @@ describe('Reminders Controller', function() {
     res.json.reset();
     reqGet.restore();
     getUserData.restore();
-    getTestReminders.restore();
     yadaguruDataMock.restoreStubs();
   });
 
@@ -154,8 +118,6 @@ describe('Reminders Controller', function() {
         .returns({userId: 1, role: 'user'});
       yadaguruDataMock.services.reminderService.stubs.findByUserWithBaseReminders.withArgs(1)
         .returns(Promise.resolve(reminderServiceResponse));
-      getTestReminders
-        .returns(Promise.resolve(getTestRemindersResponse));
 
       return remindersController.getAllForUser(req, res).then(function() {
         res.json.should.have.been.calledWith(reminderControllerResponse);
@@ -170,8 +132,6 @@ describe('Reminders Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
       yadaguruDataMock.services.reminderService.stubs.findByUserWithBaseReminders.withArgs(1)
-        .returns(Promise.resolve([]));
-      getTestReminders
         .returns(Promise.resolve([]));
 
       return remindersController.getAllForUser(req, res).then(function() {
@@ -240,13 +200,6 @@ describe('Reminders Controller', function() {
             detail: 'Tips for asking your counselor',
             lateMessage: 'Too late',
             lateDetail: ''
-          }, {
-            id: '3',
-            name: 'ACT test today',
-            message: 'A message about the test',
-            detail: 'Some details',
-            lateMessage: '',
-            lateDetail: ''
           }]
         }, {
           dueDate: '2017-02-06',
@@ -257,16 +210,6 @@ describe('Reminders Controller', function() {
             detail: 'Some help for writing your essay that is due on 2/6/2017',
             lateMessage: 'Too late',
             lateDetail: 'Should have started sooner'
-          }]
-        }, {
-          dueDate: '2017-02-15',
-          reminders: [{
-            id: '4',
-            name: 'ACT test today',
-            message: 'A message about the test',
-            detail: 'Some details',
-            lateMessage: '',
-            lateDetail: ''
           }]
         }]
       };
@@ -280,8 +223,6 @@ describe('Reminders Controller', function() {
         .returns({userId: 1, role: 'user'});
       yadaguruDataMock.services.reminderService.stubs.findByUserForSchoolWithBaseReminders.withArgs(1, 1)
         .returns(Promise.resolve(reminderServiceResponseForSchool));
-      getTestReminders
-        .returns(Promise.resolve(getTestRemindersResponse));
 
       return remindersController.getAllForSchoolForUser(req, res).then(function() {
         res.json.should.have.been.calledWith(reminderControllerResponseForSchool);
@@ -296,8 +237,6 @@ describe('Reminders Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
       yadaguruDataMock.services.reminderService.stubs.findByUserForSchoolWithBaseReminders.withArgs(1, 1)
-        .returns(Promise.resolve([]));
-      getTestReminders
         .returns(Promise.resolve([]));
 
       return remindersController.getAllForSchoolForUser(req, res).then(function() {

@@ -14,12 +14,16 @@ var proxyquire = require('proxyquire');
 var mocks = require('../mocks');
 
 describe('Schools Controller', function() {
-  var req, res, schoolsController, reqGet, getUserData, yadaguruDataMock;
+  var req, res, schoolsController, reqGet, getUserData, yadaguruDataMock, yadaguruRemindersMock;
 
   beforeEach(function() {
     yadaguruDataMock = mocks.getYadaguruDataMock('schoolService');
     yadaguruDataMock.addService('reminderService');
     yadaguruDataMock.stubMethods();
+
+    yadaguruRemindersMock = mocks.getYadaguruRemindersMock();
+    yadaguruRemindersMock.stubMethods();
+
     req = {
       get: function(){}
     };
@@ -30,7 +34,8 @@ describe('Schools Controller', function() {
     reqGet = sinon.stub(req, 'get');
     getUserData = sinon.stub(auth, 'getUserData');
     schoolsController = proxyquire('../../controllers/schoolsController', {
-      'yadaguru-data': yadaguruDataMock.getMockObject()
+      'yadaguru-data': yadaguruDataMock.getMockObject(),
+      'yadaguru-reminders': yadaguruRemindersMock.getMockObject()
     });
   });
 
@@ -40,6 +45,7 @@ describe('Schools Controller', function() {
     reqGet.restore();
     getUserData.restore();
     yadaguruDataMock.restoreStubs();
+    yadaguruRemindersMock.restoreStubs();
   });
 
   describe('GET /schools', function() {
@@ -228,7 +234,7 @@ describe('Schools Controller', function() {
         .returns('Bearer a valid token');
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
-      getRemindersForSchool.withArgs('1', '1', '2017-02-01')
+      yadaguruRemindersMock.stubs.getRemindersForSchool.withArgs('1', '1', '2017-02-01')
         .returns(Promise.resolve('generated reminders'));
       yadaguruDataMock.services.reminderService.stubs.bulkCreate.withArgs('generated reminders')
         .returns(Promise.resolve('count of new reminders'));
