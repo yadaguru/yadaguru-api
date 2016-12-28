@@ -44,7 +44,7 @@ app.use('/api/base_reminders', require('./routes/baseRemindersRoute'));
 app.use('/api/reminders', require('./routes/remindersRoute'));
 
 app.use(function (err, req, res, next) {
-  console.error(err.stack);
+  console.log(err.stack);
   res.status(500).send('Something broke!')
 })
 

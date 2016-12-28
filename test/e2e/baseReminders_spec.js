@@ -7,8 +7,9 @@ var request = require('supertest');
 var chai = require('chai');
 chai.should();
 var app = require('../../app.js');
-var models = require('../../models');
-var mockData = require('../mockData');
+var config = require('../../config/config')[env];
+var models = require('yadaguru-data')(config).models;
+var mockData = require('../mockData')(models);
 var BaseReminder = models.BaseReminder;
 var jwt = require('jsonwebtoken');
 var token = jwt.sign({userId: 1, role: 'admin'}, 'development_secret', {noTimestamp: true});
@@ -34,6 +35,7 @@ describe('/api/base_reminders', function() {
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
+          console.log(res.body);
           res.body.should.have.lengthOf(2);
           res.body[0].should.have.property('name', baseReminders[0].name);
           res.body[0].should.have.property('categoryId', baseReminders[0].categoryId);
