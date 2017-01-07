@@ -9,7 +9,8 @@
   "main": "./app.js",
   "scripts": {
     "test": "NODE_ENV=test mocha --recursive",
-    "start": "node ./index.js"
+    "start": "node ./index.js",
+    "migrations": "sequelize db:migrate --env development-migration"
   },
   "author": "",
   "license": "ISC",

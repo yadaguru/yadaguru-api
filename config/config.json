@@ -7,6 +7,13 @@
     "dialect": "postgresql",
     "cors": ["http://localhost:9000", "http://localhost:3000"]
   },
+  "development-migration": {
+    "username": "yadaguru",
+    "password": "yadaguru",
+    "database": "yadaguru",
+    "host": "127.0.0.1",
+    "dialect": "postgresql"
+  },
   "test": {
     "username": "yadaguru",
     "password": "yadaguru",
