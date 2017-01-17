@@ -112,6 +112,7 @@ describe('/api/base_reminders', function() {
       var json = {
         name: 'Write Essay',
         message: 'Better get writing!',
+        smsMessage: 'Better get writing!',
         detail: 'Some help for writing your essay',
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',
@@ -138,6 +139,7 @@ describe('/api/base_reminders', function() {
       var json = {
         name: 'Write Essay',
         message: 'Better get writing!',
+        smsMessage: 'Better get writing!',
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',
         timeframeIds: [1, 2],
@@ -161,6 +163,7 @@ describe('/api/base_reminders', function() {
       var json = {
         name: 'Write Essay',
         message: 'Better get writing!',
+        smsMessage: 'Better get writing!',
         detail: 'Some help for writing your essay',
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',
