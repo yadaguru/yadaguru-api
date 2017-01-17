@@ -422,11 +422,11 @@ describe('Base Reminders Controller', function() {
       });
     });
 
-    it('should respond with an error and 400 status if smsMessage is longer than 22 characters', function() {
+    it('should respond with an error and 400 status if smsMessage is longer than 28 characters', function() {
       req.body = {
         name: 'Write Essay',
         message: 'Better get writing!',
-        smsMessage: 'Better get writing!!!!!',
+        smsMessage: 'Better get writing!!!!!!!!!!!',
         detail: 'Some help for writing your essay',
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',
@@ -439,8 +439,8 @@ describe('Base Reminders Controller', function() {
         .returns({userId: 1, role: 'admin'});
       var error = new errors.ValidationError([{
         field: 'smsMessage',
-        message: 'must be 22 characters or shorter',
-        value: 'Better get writing!!!!!'
+        message: 'must be 28 characters or shorter',
+        value: 'Better get writing!!!!!!!!!!!'
       }]);
 
       return baseRemindersController.post(req, res).then(function() {

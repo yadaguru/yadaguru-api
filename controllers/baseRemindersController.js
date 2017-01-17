@@ -13,8 +13,8 @@ var schema = {
     required: true,
     rules: [{
       validator: 'isLength',
-      options: {max: 22},
-      message: 'must be 22 characters or shorter'
+      options: {max: 28},
+      message: 'must be 28 characters or shorter'
     }]
   },
   detail: {
