@@ -47,6 +47,7 @@ describe('Base Reminders Controller', function() {
         id: '1',
         name: 'Write Essay',
         message: 'Better get writing!',
+        smsMessage: 'Better get writing!',
         detail: 'Some help for writing your essay',
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',
@@ -56,6 +57,7 @@ describe('Base Reminders Controller', function() {
         id: '2',
         name: 'Get Recommendations',
         message: 'Ask your counselor',
+        smsMessage: 'Ask your counselor',
         detail: 'Tips for asking your counselor',
         lateMessage: 'Too late',
         lateDetail: '',
@@ -138,6 +140,7 @@ describe('Base Reminders Controller', function() {
         id: '1',
         name: 'Write Essay',
         message: 'Better get writing!',
+        smsMessage: 'Better get writing!',
         detail: 'Some help for writing your essay',
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',
@@ -220,6 +223,7 @@ describe('Base Reminders Controller', function() {
       req.body = {
         name: 'Write Essay',
         message: 'Better get writing!',
+        smsMessage: 'Better get writing!',
         detail: 'Some help for writing your essay',
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',
@@ -231,6 +235,7 @@ describe('Base Reminders Controller', function() {
         id: '2',
         name: req.body.name,
         message: req.body.message,
+        smsMessage: req.body.smsMessage,
         detail: req.body.detail,
         lateMessage: req.body.lateMessage,
         lateDetail: req.body.lateDetail,
@@ -253,6 +258,7 @@ describe('Base Reminders Controller', function() {
       req.body = {
         name: 'Write Essay',
         message: 'Better get writing!',
+        smsMessage: 'Better get writing!',
         detail: 'Some help for writing your essay',
         timeframeIds: [1, 2],
         categoryId: '1'
@@ -262,6 +268,7 @@ describe('Base Reminders Controller', function() {
         id: '2',
         name: req.body.name,
         message: req.body.message,
+        smsMessage: req.body.smsMessage,
         detail: req.body.detail,
         lateMessage: null,
         lateDetail: null,
@@ -284,6 +291,7 @@ describe('Base Reminders Controller', function() {
       req.body = {
         name: 'Write Essay',
         message: 'Better get writing!',
+        smsMessage: 'Better get writing!',
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',
         timeframeIds: [1, 2]
@@ -310,6 +318,7 @@ describe('Base Reminders Controller', function() {
       req.body = {
         name: 'Write Essay',
         message: 'Better get writing!',
+        smsMessage: 'Better get writing!',
         detail: 'Some help for writing your essay',
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',
@@ -336,6 +345,7 @@ describe('Base Reminders Controller', function() {
       req.body = {
         name: 'Write Essay',
         message: 'Better get writing!',
+        smsMessage: 'Better get writing!',
         detail: 'Some help for writing your essay',
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',
@@ -362,6 +372,7 @@ describe('Base Reminders Controller', function() {
       req.body = {
         name: 'Write Essay',
         message: 'Better get writing!',
+        smsMessage: 'Better get writing!',
         detail: 'Some help for writing your essay',
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',
@@ -388,6 +399,7 @@ describe('Base Reminders Controller', function() {
       req.body = {
         name: 'Write Essay',
         message: 'Better get writing!',
+        smsMessage: 'Better get writing!',
         detail: 'Some help for writing your essay',
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',
@@ -410,10 +422,38 @@ describe('Base Reminders Controller', function() {
       });
     });
 
+    it('should respond with an error and 400 status if smsMessage is longer than 22 characters', function() {
+      req.body = {
+        name: 'Write Essay',
+        message: 'Better get writing!',
+        smsMessage: 'Better get writing!!!!!',
+        detail: 'Some help for writing your essay',
+        lateMessage: 'Too late',
+        lateDetail: 'Should have started sooner',
+        timeframeIds: [1, 2],
+        categoryId: '1'
+      };
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
+        .returns({userId: 1, role: 'admin'});
+      var error = new errors.ValidationError([{
+        field: 'smsMessage',
+        message: 'must be 22 characters or shorter',
+        value: 'Better get writing!!!!!'
+      }]);
+
+      return baseRemindersController.post(req, res).then(function() {
+        res.json.should.have.been.calledWith(error);
+        res.status.should.have.been.calledWith(400);
+      });
+    });
+
     it('should respond a 401 error if the user role is not authorized for this route', function() {
       req.body = {
         name: 'Write Essay',
         message: 'Better get writing!',
+        smsMessage: 'Better get writing!',
         detail: 'Some help for writing your essay',
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',
@@ -435,6 +475,7 @@ describe('Base Reminders Controller', function() {
       req.body = {
         name: 'Write Essay',
         message: 'Better get writing!',
+        smsMessage: 'Better get writing!',
         detail: 'Some help for writing your essay',
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',
@@ -456,6 +497,7 @@ describe('Base Reminders Controller', function() {
       req.body = {
         name: 'Write Essay',
         message: 'Better get writing!',
+        smsMessage: 'Better get writing!',
         detail: 'Some help for writing your essay',
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',
@@ -486,6 +528,7 @@ describe('Base Reminders Controller', function() {
       var updatedBaseReminder = {
         name: 'Write Essays',
         message: 'Better get writing!',
+        smsMssage: 'Better get writing!',
         detail: 'Some help for writing your essay',
         lateMessage: 'Too late',
         lateDetail: 'Should have started sooner',

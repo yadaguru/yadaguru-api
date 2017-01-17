@@ -9,6 +9,14 @@ var schema = {
   message: {
     required: true
   },
+  smsMessage: {
+    required: true,
+    rules: [{
+      validator: 'isLength',
+      options: {max: 22},
+      message: 'must be 22 characters or shorter'
+    }]
+  },
   detail: {
     required: true
   },
