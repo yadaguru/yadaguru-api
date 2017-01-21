@@ -35,7 +35,6 @@ describe('/api/base_reminders', function() {
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-          console.log(res.body);
           res.body.should.have.lengthOf(2);
           res.body[0].should.have.property('name', baseReminders[0].name);
           res.body[0].should.have.property('categoryId', baseReminders[0].categoryId);

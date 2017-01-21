@@ -10,6 +10,9 @@ var routes = function() {
   router.route('/school/:id')
     .get(remindersController.getAllForSchoolForUser);
 
+  router.route('/date/:date')
+    .get(remindersController.getAllForDateForUser);
+
   router.route('/:id')
     .get(remindersController.getByIdForUser);
 

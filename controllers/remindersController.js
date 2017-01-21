@@ -66,6 +66,29 @@ remindersController.getAllForSchoolForUser = function(req, res) {
   });
 };
 
+remindersController.getAllForDateForUser = function(req, res) {
+  var userData = auth.getUserData(req.get('Authorization'));
+
+  if (!userData || userData.role !== 'user') {
+    res.status(401);
+    res.json(new errors.NotAuthorizedError());
+    return Promise.resolve();
+  }
+
+  var userId = userData.userId; 
+  var date = moment.utc(req.params.date, 'YYYYMMDD').format();
+
+  return reminderService.findByDateForUserWithBaseReminders(date, userId).then(function(reminders) {
+    reminders = reminderGen.deDuplicateReminders(reminders);
+    reminders = reminderGen.replaceVariablesInReminders(reminders);
+    res.status(200);
+    res.json(reminders);
+  }).catch(function(error) {
+    res.status(500);
+    res.json(error);
+  });
+}
+
 remindersController.getByIdForUser = function(req, res) {
   var userData = auth.getUserData(req.get('Authorization'));
 

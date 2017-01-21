@@ -10,6 +10,7 @@ var errors = require('../../services/errorService');
 var Promise = require('bluebird');
 var config = require('../../config/config');
 var reminderGen = require('yadaguru-reminders')(config.test);
+var moment = require('moment');
 var auth = require('../../services/authService');
 var proxyquire = require('proxyquire');
 var mocks = require('../mocks');
@@ -89,7 +90,8 @@ describe('Reminders Controller', function() {
     }];
 
     req = {
-      get: function(){}
+      get: function(){},
+      params: {}
     };
     res = {
       status: sinon.spy(),
@@ -280,6 +282,102 @@ describe('Reminders Controller', function() {
       yadaguruDataMock.services.reminderService.stubs.findByUserForSchoolWithBaseReminders.returns(Promise.reject(error));
 
       return remindersController.getAllForSchoolForUser(req, res).then(function() {
+        res.json.should.have.been.calledWith(error);
+        res.status.should.have.been.calledWith(500);
+      });
+
+    });
+  });
+
+  describe('GET /reminders/:date', function() {
+    var today;
+
+    beforeEach(function() {
+      req.params.date = '20170201'
+      today = moment.utc(req.params.date).format();
+      reminderServiceResponse = reminderServiceResponse.slice(1, 3);
+
+      reminderControllerResponse = [{
+        baseReminderId: '2',
+        name: 'Get Recommendations',
+        category: 'Recommendations',
+        message: 'Ask your counselor. Application is due on 2/7/2017',
+        detail: 'Tips for asking your counselor',
+        lateMessage: 'Too late',
+        lateDetail: '',
+        dueDate: '2017-02-01',
+        id: ['2', '3'],
+        schoolName: 'Temple and Drexel',
+        timeframe: 'One week before',
+        schoolId: ['1', '2'],
+        schoolDueDate: '2017-02-07'
+      }]
+    });
+
+    it('should respond with an array of all reminders for a specific dueDate and a 200 status', function() {
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
+        .returns({userId: 1, role: 'user'});
+      yadaguruDataMock.services.reminderService.stubs.findByDateForUserWithBaseReminders.withArgs(today, 1)
+        .returns(Promise.resolve(reminderServiceResponse));
+
+      return remindersController.getAllForDateForUser(req, res).then(function() {
+        res.json.should.have.been.calledWith(reminderControllerResponse);
+        res.status.should.have.been.calledWith(200);
+      });
+
+    });
+
+    it('should respond with an empty array and a 200 status if there are no reminders', function() {
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
+        .returns({userId: 1, role: 'user'});
+      yadaguruDataMock.services.reminderService.stubs.findByDateForUserWithBaseReminders.withArgs(today, 1)
+        .returns(Promise.resolve([]));
+
+      return remindersController.getAllForDateForUser(req, res).then(function() {
+        res.json.should.have.been.calledWith([]);
+        res.status.should.have.been.calledWith(200);
+      });
+
+    });
+
+    it('should respond a 401 error if the user role is not authorized for this route', function() {
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
+        .returns({userId: 1, role: 'admin'});
+
+      return remindersController.getAllForDateForUser(req, res).then(function() {
+        res.json.should.have.been.calledWith(new errors.NotAuthorizedError());
+        res.status.should.have.been.calledWith(401);
+      });
+    });
+
+    it('should respond a 401 error if the user token is invalid', function() {
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
+        .returns(false);
+
+      return remindersController.getAllForDateForUser(req, res).then(function() {
+        res.json.should.have.been.calledWith(new errors.NotAuthorizedError());
+        res.status.should.have.been.calledWith(401);
+      });
+    });
+
+    it('should respond with an error object and a 500 status on a database error', function() {
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
+        .returns({userId: 1, role: 'user'});
+
+      var error = new Error('database error');
+      yadaguruDataMock.services.reminderService.stubs.findByDateForUserWithBaseReminders.returns(Promise.reject(error));
+
+      return remindersController.getAllForDateForUser(req, res).then(function() {
         res.json.should.have.been.calledWith(error);
         res.status.should.have.been.calledWith(500);
       });

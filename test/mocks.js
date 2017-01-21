@@ -14,6 +14,7 @@ module.exports = {
       'findByIdForUserWithBaseReminders',
       'findByUserWithBaseReminders',
       'findByUserForSchoolWithBaseReminders',
+      'findByDateForUserWithBaseReminders',
       'getUserByPhoneNumber',
       'create',
       'bulkCreate',

@@ -112,6 +112,33 @@ describe('/api/reminders', function() {
         });
     });
 
+    it('should respond with all reminders for a specific day', function(done) {
+      request(app)
+        .get('/api/reminders/date/20170101')
+        .set('Authorization', 'Bearer ' + token)
+        .expect(200)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.should.deep.equal([{
+            dueDate: '2017-01-01',
+            id: [3, 6],
+            timeframe: 'January 1',
+            name: 'Get Recommendations',
+            message: 'Ask your counselor by 1/1/2017',
+            detail: 'Tips for asking your counselor',
+            lateMessage: 'Too late',
+            lateDetail: '',
+            category: 'Recommendations',
+            baseReminderId: 2,
+            schoolName: 'Temple and Drexel',
+            schoolId: [1, 2],
+            schoolDueDate: '2017-02-01T00:00:00.000Z',
+            userId: 1
+          }]);
+          done();
+        });
+    });
+
     it('should respond with requested reminder object', function(done) {
       request(app)
         .get('/api/reminders/1')
