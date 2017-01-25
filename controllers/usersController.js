@@ -5,6 +5,7 @@ var auth = require('../services/authService');
 var env = process.env.NODE_ENV;
 var config = require('../config/config.json')[env];
 var userService = require('yadaguru-data')(config).userService;
+var twilioService = require('../services/twilioService');
 
 var schema = {
   phoneNumber: {
@@ -42,7 +43,19 @@ module.exports = function() {
     return userService.getUserByPhoneNumber(validation.sanitizedData.phoneNumber).then(function(user) {
       if (user) {
         return _loginUser(user).then(function(user) {
-          _sendConfirmCode(user.confirmCode);
+          return _sendConfirmCode(user.confirmCode, validation.sanitizedData.phoneNumber).then(function() {
+            res.status(200);
+            if (env === 'development') {
+              // send confirm code in response for developer convenience
+              res.json({userId: user.id, confirmCode: user.confirmCode});
+            } else {
+              res.json({userId: user.id})
+            }
+          });
+        });
+      }
+      return _createUser(validation.sanitizedData).then(function(user) {
+        return _sendConfirmCode(user.confirmCode, validation.sanitizedData.phoneNumber).then(function() {
           res.status(200);
           if (env === 'development') {
             // send confirm code in response for developer convenience
@@ -51,16 +64,6 @@ module.exports = function() {
             res.json({userId: user.id})
           }
         });
-      }
-      return _createUser(validation.sanitizedData).then(function(user) {
-        _sendConfirmCode(user.confirmCode);
-        res.status(200);
-        if (env === 'development') {
-          // send confirm code in response for developer convenience
-          res.json({userId: user.id, confirmCode: user.confirmCode});
-        } else {
-          res.json({userId: user.id})
-        }
       })
     }).catch(function(error) {
       res.status(500);
@@ -112,11 +115,8 @@ module.exports = function() {
 
 //TODO: Move this to a Twilio service
   function _sendConfirmCode(confirmCode, phoneNumber) {
-    if (env !== 'production') {
-      console.log('### CONFIRM CODE TEXT SIMULATION:', confirmCode, '###');
-    } else {
-      // Send message through Twilio
-    }
+    var message = 'Yadaguru Confirmation Code: ' + confirmCode;
+    return twilioService.sendMessage(phoneNumber, message);
   }
 
   function _update(id, data, res) {
