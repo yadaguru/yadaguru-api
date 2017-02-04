@@ -8,7 +8,7 @@ module.exports = function() {
 
   var sanitizeRequest = function(requestBody, validationSchema) {
     return Object.keys(validationSchema).map(function(field) {
-      if (requestBody[field]) {
+      if (typeof requestBody[field] !== 'undefined') {
         if (validationSchema[field].sanitizers) {
           return validationSchema[field].sanitizers.reduce(function(value, sanitizer) {
             var sanitizedValue = sanitizers[sanitizer](value);
