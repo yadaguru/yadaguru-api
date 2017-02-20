@@ -39,6 +39,6 @@
     "twilio": "^2.11.1",
     "validator": "5.4.0",
     "yadaguru-data": "0.0.3",
-    "yadaguru-reminders": "0.1.0"
+    "yadaguru-reminders": "0.2.0"
   }
 }
