@@ -1,3 +1,4 @@
+var crypto = require('crypto');
 var validators = require('../services/validatorService');
 var errors = require('../services/errorService');
 var moment = require('moment');
@@ -28,6 +29,16 @@ var schema = {
   }
 };
 
+var hashPhone = function (phoneNumber) {
+  if (!process.env.SECRET_SALT) {
+    var msg = 'SECRET_SALT environment variable must be set when deploying';
+    console.log(msg);
+    throw new Error(msg);
+  }
+  var key = crypto.pbkdf2Sync(phoneNumber, process.env.SECRET_SALT, 15000, 256).toString('hex');
+  return key;
+}
+
 var usersController = require('./baseController')('User', userService, schema);
 
 module.exports = function() {
@@ -40,7 +51,7 @@ module.exports = function() {
       return Promise.resolve();
     }
 
-    return userService.getUserByPhoneNumber(validation.sanitizedData.phoneNumber).then(function(user) {
+    return userService.getUserByPhoneNumber(hashPhone(validation.sanitizedData.phoneNumber)).then(function(user) {
       if (user) {
         return _loginUser(user).then(function(user) {
           return _sendConfirmCode(user.confirmCode, validation.sanitizedData.phoneNumber).then(function() {
@@ -108,6 +119,7 @@ module.exports = function() {
   function _createUser(data) {
     data.confirmCode = auth.generateConfirmCode();
     data.confirmCodeTimestamp = moment.utc().format();
+    data.phoneNumber = hashPhone(data.phoneNumber);
     return userService.create(data).then(function(newUser) {
       return newUser[0];
     })
