@@ -1370,8 +1370,8 @@
       "resolved": "https://registry.npmjs.org/yadaguru-data/-/yadaguru-data-0.0.3.tgz"
     },
     "yadaguru-reminders": {
-      "version": "0.2.0",
-      "from": "yadaguru-reminders@0.2.0"
+      "version": "0.2.1",
+      "from": "yadaguru-reminders@0.2.1"
     }
   }
 }
