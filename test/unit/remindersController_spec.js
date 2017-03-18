@@ -73,9 +73,7 @@ describe('Reminders Controller', function() {
         id: ['2', '3'],
         name: 'Get Recommendations',
         message: 'Ask your counselor. Application is due on 2/7/2017',
-        detail: 'Tips for asking your counselor',
-        lateMessage: 'Too late',
-        lateDetail: ''
+        detail: 'Tips for asking your counselor'
       }]
     }, {
       dueDate: '2017-02-06',
@@ -83,9 +81,7 @@ describe('Reminders Controller', function() {
         id: '1',
         name: 'Write Essay',
         message: 'Better get writing for Temple!',
-        detail: 'Some help for writing your essay that is due on 2/6/2017',
-        lateMessage: 'Too late',
-        lateDetail: 'Should have started sooner'
+        detail: 'Some help for writing your essay that is due on 2/6/2017'
       }]
     }];
 
@@ -102,6 +98,7 @@ describe('Reminders Controller', function() {
     remindersController = proxyquire('../../controllers/remindersController', {
       'yadaguru-data': yadaguruDataMock.getMockObject()
     });
+    this.clock = sinon.useFakeTimers();
   });
 
   afterEach(function() {
@@ -199,9 +196,7 @@ describe('Reminders Controller', function() {
             id: '2',
             name: 'Get Recommendations',
             message: 'Ask your counselor. Application is due on 2/7/2017',
-            detail: 'Tips for asking your counselor',
-            lateMessage: 'Too late',
-            lateDetail: ''
+            detail: 'Tips for asking your counselor'
           }]
         }, {
           dueDate: '2017-02-06',
@@ -209,9 +204,7 @@ describe('Reminders Controller', function() {
             id: '1',
             name: 'Write Essay',
             message: 'Better get writing for Temple!',
-            detail: 'Some help for writing your essay that is due on 2/6/2017',
-            lateMessage: 'Too late',
-            lateDetail: 'Should have started sooner'
+            detail: 'Some help for writing your essay that is due on 2/6/2017'
           }]
         }]
       };
