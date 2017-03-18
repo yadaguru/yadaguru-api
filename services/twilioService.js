@@ -1,4 +1,4 @@
-var logger = require('.loggerService');
+var logger = require('./loggerService');
 var TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER || false;
 var TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || false;
 var TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || false;

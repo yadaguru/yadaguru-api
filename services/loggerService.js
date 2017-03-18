@@ -3,7 +3,7 @@ var logLevel = process.env.LOG_LEVEL || 'debug';
 
 var logger = new winston.Logger();
 
-if (!process.env.NODE_ENV === 'test') {
+if (process.env.NODE_ENV !== 'test') {
   logger.add(winston.transports.File, {
     filename: 'logs/yadaguru-api.log',
     level: logLevel
