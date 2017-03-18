@@ -1,3 +1,4 @@
+var logger = require('.loggerService');
 var TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER || false;
 var TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || false;
 var TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || false;
@@ -29,9 +30,9 @@ module.exports = (function() {
   }
 
   function sendMockMessage(to, message) {
-    console.log('Twilio credentials missing! Messages will not be sent!');
-    console.log('to', to);
-    console.log('message', message);
+    logger.warn('Twilio credentials missing! Messages will not be sent!');
+    logger.debug('to', to);
+    logger.debug('message', message);
     return Promise.resolve();
   }
 

@@ -4,7 +4,7 @@ var http = require('http');
 var https = require('https');
 var bodyParser = require('body-parser');
 var cors = require('cors');
-var morgan = require('morgan');
+var logger = require('./services/loggerService');
 var env = process.env.NODE_ENV || 'development';
 var config = require('./config/config.json')[env];
 
@@ -20,12 +20,14 @@ if (config.cors) {
   }));
 }
 
-/* Setup logging */
-// TODO make this configurable depending on environment
-app.use(morgan('dev'));
-
 /* Routes */
 var router = express.Router();
+
+/* Log all requests */
+app.use(function(req, res, next) {
+  logger.debug(req.method, req.originalUrl);
+  next();
+});
 
 router.get('/', function(req, res) {
   res.status(200).send('foobar');
@@ -43,8 +45,9 @@ app.use('/api/timeframes', require('./routes/timeframesRoute'));
 app.use('/api/base_reminders', require('./routes/baseRemindersRoute'));
 app.use('/api/reminders', require('./routes/remindersRoute'));
 
+/* catch and log all errors */
 app.use(function (err, req, res, next) {
-  console.log(err.stack);
+  logger.error(err);
   res.status(500).send('Something broke!')
 })
 
@@ -53,26 +56,26 @@ var httpServer, httpsServer;
 app.startHttp = function() {
   httpServer = http.createServer(app);
   httpServer.listen(3005);
-  console.log("Starting http server on port: " + 3005);
+  logger.info('Starting http server on port: ' + 3005);
 };
 
 app.stopHttp = function() {
   if (httpServer === null) return;
   httpServer.close();
-  console.log('Closing http server');
+  logger.info('Closing http server');
   httpServer = undefined;
 };
 
 app.startHttps = function() {
   httpsServer = http.createServer(app);
   httpsServer.listen(443);
-  console.log("Starting http server on port: " + 443);
+  logger.info("Starting http server on port: " + 443);
 };
 
 app.stopHttps = function() {
   if (httpsServer === null) return;
   httpsServer.stop();
-  console.log('Closing https server');
+  logger.info('Closing https server');
   httpServer = undefined;
 };
 

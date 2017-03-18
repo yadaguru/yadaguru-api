@@ -5,6 +5,7 @@ var reminderGen = require('yadaguru-reminders')(config);
 var auth = require('../services/authService');
 var errors = require('../services/errorService');
 var moment = require('moment');
+var logger = require('../services/loggerService');
 
 var requiredRoles = {
   getAllForUser: ['user'],
@@ -32,6 +33,7 @@ remindersController.getAllForUser = function(req, res) {
     res.status(200);
     res.json(reminders);
   }).catch(function(error) {
+    logger.error(error);
     res.status(500);
     res.json(error);
   });
@@ -61,6 +63,7 @@ remindersController.getAllForSchoolForUser = function(req, res) {
     res.status(200);
     res.json({schoolName: schoolName, reminders: reminders});
   }).catch(function(error) {
+    logger.error(error);
     res.status(500);
     res.json(error);
   });
@@ -84,6 +87,7 @@ remindersController.getAllForDateForUser = function(req, res) {
     res.status(200);
     res.json(reminders);
   }).catch(function(error) {
+    logger.error(error);
     res.status(500);
     res.json(error);
   });
@@ -111,6 +115,7 @@ remindersController.getByIdForUser = function(req, res) {
     res.status(200);
     res.json(reminders);
   }).catch(function(error) {
+    logger.error(error);
     res.status(500);
     res.json(error);
   });
