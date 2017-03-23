@@ -23,7 +23,7 @@ describe('/api/reminders', function() {
 
   beforeEach(function(done) {
     this.clock = sinon.useFakeTimers();
-    this.clock.tick(moment.utc('2017-02-01').valueOf());
+    this.clock.tick(moment.utc('2016-09-01').valueOf());
     models.sequelize.sync({force: true}).then(function() {
       mockData.createMockData().then(function() {
         done();
@@ -45,17 +45,40 @@ describe('/api/reminders', function() {
         .end(function(err, res) {
           if (err) return done(err);
           res.body.should.deep.equal([{
-            dueDate: '2017-01-31',
+            dueDate: '2016-09-01',
             reminders: [{
               id: [1, 4],
-              detail: 'Should have started sooner',
-              message: 'Too late. Application was due on 2/1/2017',
-              name: 'Write Essay'
-            }, {
-              detail: 'Should have started sooner',
+              dueDate: '2016-09-01',
+              baseReminderId: 1,
+              schoolId: [1, 2],
+              schoolName: 'Temple and Drexel',
+              name: 'Write Essay',
+              message: 'Better get writing!',
+              detail: 'Some help for writing your Temple and Drexel essay for Temple and Drexel',
+            }]
+          }, {
+            dueDate: '2017-01-01',
+            reminders: [{
+              id: [3, 6],
+              dueDate: '2017-01-01',
+              baseReminderId: 2, 
+              schoolId: [1, 2],
+              schoolName: 'Temple and Drexel',
+              name: 'Get Recommendations',
+              message: 'Ask your counselor by 1/1/2017',
+              detail: 'Tips for asking your counselor',
+            }]
+          }, {
+            dueDate: '2017-01-02',
+            reminders: [{
               id: [2, 5],
-              message: 'Too late. Application was due on 2/1/2017',
-              name: 'Write Essay'
+              dueDate: '2017-01-02',
+              baseReminderId: 1,
+              schoolId: [1, 2],
+              schoolName: 'Temple and Drexel',
+              name: 'Write Essay',
+              message: 'Better get writing!',
+              detail: 'Some help for writing your Temple and Drexel essay for Temple and Drexel',
             }]
           }]);
           done();
@@ -72,17 +95,40 @@ describe('/api/reminders', function() {
           res.body.should.deep.equal({
             schoolName: 'Temple',
             reminders: [{
-              dueDate: '2017-01-31',
+              dueDate: '2016-09-01',
               reminders: [{
                 id: 1,
-                detail: 'Should have started sooner',
-                message: 'Too late. Application was due on 2/1/2017',
-                name: 'Write Essay'
-              }, {
+                dueDate: '2016-09-01',
+                baseReminderId: 1,
+                schoolId: 1,
+                schoolName: 'Temple',
+                name: 'Write Essay',
+                message: 'Better get writing!',
+                detail: 'Some help for writing your Temple essay for Temple',
+              }]
+            }, {
+              dueDate: '2017-01-01',
+              reminders: [{
+                id: 3,
+                dueDate: '2017-01-01',
+                baseReminderId: 2, 
+                schoolId: 1,
+                schoolName: 'Temple',
+                name: 'Get Recommendations',
+                message: 'Ask your counselor by 1/1/2017',
+                detail: 'Tips for asking your counselor',
+              }]
+            }, {
+              dueDate: '2017-01-02',
+              reminders: [{
                 id: 2,
-                detail: 'Should have started sooner',
-                message: 'Too late. Application was due on 2/1/2017',
-                name: 'Write Essay'
+                dueDate: '2017-01-02',
+                baseReminderId: 1,
+                schoolId: 1,
+                schoolName: 'Temple',
+                name: 'Write Essay',
+                message: 'Better get writing!',
+                detail: 'Some help for writing your Temple essay for Temple'
               }]
             }]
           });
