@@ -30,6 +30,8 @@
     "body-parser": "1.15.0",
     "cors": "2.8.1",
     "express": "4.12.3",
+    "jsnlog": "2.22.1",
+    "jsnlog-nodejs": "2.22.1",
     "jsonwebtoken": "7.1.9",
     "moment": "2.14.1",
     "pg": "6.0.1",
@@ -37,7 +39,7 @@
     "sequelize": "3.23.4",
     "twilio": "^2.11.1",
     "validator": "5.4.0",
-    "winston": "^2.3.1",
+    "winston": "2.3.1",
     "yadaguru-data": "0.0.3",
     "yadaguru-reminders": "0.2.1"
   }

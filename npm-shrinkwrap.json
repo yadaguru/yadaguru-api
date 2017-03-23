@@ -394,6 +394,16 @@
         }
       }
     },
+    "jsnlog": {
+      "version": "2.22.1",
+      "from": "jsnlog@*",
+      "resolved": "https://registry.npmjs.org/jsnlog/-/jsnlog-2.22.1.tgz"
+    },
+    "jsnlog-nodejs": {
+      "version": "2.22.1",
+      "from": "jsnlog-nodejs@*",
+      "resolved": "https://registry.npmjs.org/jsnlog-nodejs/-/jsnlog-nodejs-2.22.1.tgz"
+    },
     "jsonwebtoken": {
       "version": "7.1.9",
       "from": "https://registry.npmjs.org/jsonwebtoken/-/jsonwebtoken-7.1.9.tgz",
