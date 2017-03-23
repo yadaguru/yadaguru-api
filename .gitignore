@@ -7,3 +7,4 @@ sql/dist/yadaguru.sql
 empty/*git
 .vagrant
 .DS_Store
+logs

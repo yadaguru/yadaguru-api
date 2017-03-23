@@ -6,6 +6,7 @@ var env = process.env.NODE_ENV;
 var config = require('../config/config.json')[env];
 var userService = require('yadaguru-data')(config).userService;
 var twilioService = require('../services/twilioService');
+var logger = require('../services/loggerService');
 
 var schema = {
   phoneNumber: {
@@ -66,6 +67,7 @@ module.exports = function() {
         });
       })
     }).catch(function(error) {
+      logger.error(error);
       res.status(500);
       res.json(error);
     });
@@ -136,6 +138,7 @@ module.exports = function() {
         updatedAt: updatedUser.updatedAt
       }]);
     }).catch(function(error) {
+      logger.error(error);
       res.status(500);
       res.json(error);
     });
@@ -190,6 +193,7 @@ module.exports = function() {
         res.json(new errors.ForeignConstraintError('User'));
         return;
       }
+      logger.error(error);
       res.status(500);
       res.json(error);
     });

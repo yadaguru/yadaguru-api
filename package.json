@@ -32,12 +32,12 @@
     "express": "4.12.3",
     "jsonwebtoken": "7.1.9",
     "moment": "2.14.1",
-    "morgan": "1.7.0",
     "pg": "6.0.1",
     "pg-hstore": "2.3.2",
     "sequelize": "3.23.4",
     "twilio": "^2.11.1",
     "validator": "5.4.0",
+    "winston": "^2.3.1",
     "yadaguru-data": "0.0.3",
     "yadaguru-reminders": "0.2.1"
   }

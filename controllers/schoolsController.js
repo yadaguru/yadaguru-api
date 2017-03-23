@@ -6,6 +6,7 @@ var auth = require('../services/authService');
 var errors = require('../services/errorService');
 var reminderGen = require('yadaguru-reminders')(config);
 var validators = require('../services/validatorService');
+var logger = require('../services/loggerService');
 
 var schema = {
   name: {
@@ -67,6 +68,7 @@ schoolsController.postForUser = function(req, res) {
       })
     })
   }).catch(function(error) {
+    logger.error(error);
     res.status(500);
     res.json(error);
   })

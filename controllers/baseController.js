@@ -2,6 +2,7 @@ var validators = require('../services/validatorService');
 var errors = require('../services/errorService');
 var Promise = require('bluebird');
 var auth = require('../services/authService');
+var logger = require('../services/loggerService');
 
 var resourceControllerFactory = function(name, modelService, schema, requiredRoles) {
 
@@ -44,6 +45,7 @@ var resourceControllerFactory = function(name, modelService, schema, requiredRol
       res.status(200);
       res.json(resources);
     }).catch(function(error) {
+      logger.error(error);
       res.status(500);
       res.json(error);
     });
@@ -68,6 +70,7 @@ var resourceControllerFactory = function(name, modelService, schema, requiredRol
       res.status(200);
       res.json(resource);
     }).catch(function(error) {
+      logger.error(error);
       res.status(500);
       res.json(error);
     })
@@ -88,6 +91,7 @@ var resourceControllerFactory = function(name, modelService, schema, requiredRol
         res.status(200);
         res.json(resource);
       }).catch(function(error) {
+        logger.error(error);
         res.status(500);
         res.json(error);
       })
@@ -110,6 +114,7 @@ var resourceControllerFactory = function(name, modelService, schema, requiredRol
         res.status(200);
         res.json(resource);
       }).catch(function(error) {
+        logger.error(error);
         res.status(500);
         res.json(error);
       })
@@ -135,6 +140,7 @@ var resourceControllerFactory = function(name, modelService, schema, requiredRol
       res.status(200);
       res.json(resource);
     }).catch(function(error) {
+      logger.error(error);
       res.status(500);
       res.json(error);
     })
@@ -159,6 +165,7 @@ var resourceControllerFactory = function(name, modelService, schema, requiredRol
       res.status(200);
       res.json(resource);
     }).catch(function(error) {
+      logger.error(error);
       res.status(500);
       res.json(error);
     })
@@ -181,6 +188,7 @@ var resourceControllerFactory = function(name, modelService, schema, requiredRol
       res.status(200);
       res.json(resource);
     }).catch(function(error) {
+      logger.error(error);
       res.status(500);
       res.json(error);
     })
@@ -191,6 +199,7 @@ var resourceControllerFactory = function(name, modelService, schema, requiredRol
       res.status(200);
       res.json(newResource);
     }).catch(function(error) {
+      logger.error(error);
       res.status(500);
       res.json(error);
     });
@@ -272,6 +281,7 @@ var resourceControllerFactory = function(name, modelService, schema, requiredRol
       res.status(200);
       res.json(updatedResource);
     }).catch(function(error) {
+      logger.error(error);
       res.status(500);
       res.json(error);
     });
@@ -334,6 +344,7 @@ var resourceControllerFactory = function(name, modelService, schema, requiredRol
         res.json(new errors.ForeignConstraintError(name));
         return;
       }
+      logger.error(error);
       res.status(500);
       res.json(error);
     });
@@ -363,6 +374,7 @@ var resourceControllerFactory = function(name, modelService, schema, requiredRol
         res.json(new errors.ForeignConstraintError(name));
         return;
       }
+      logger.error(error);
       res.status(500);
       res.json(error);
     });

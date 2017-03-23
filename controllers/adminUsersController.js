@@ -5,6 +5,7 @@ var validators = require('../services/validatorService');
 var errors = require('../services/errorService');
 var moment = require('moment');
 var auth = require('../services/authService');
+var logger = require('../services/loggerService');
 
 var schema = {
   userName: {
@@ -39,6 +40,7 @@ module.exports = function() {
       res.status(200);
       res.json({token: auth.getUserToken(user.id, 'admin')});
     }).catch(function(error) {
+      logger.error(error);
       res.status(500);
       res.json(error);
     });
