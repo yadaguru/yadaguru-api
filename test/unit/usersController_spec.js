@@ -416,7 +416,7 @@ describe('Users Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
       yadaguruDataMock.services.userService.stubs.findById.withArgs(1)
-        .returns(Promise.resolve({phoneNumber: '1234567890'}));
+        .returns(Promise.resolve([{phoneNumber: '1234567890'}]));
       sendMessage
         .returns(Promise.resolve());
 
@@ -431,13 +431,13 @@ describe('Users Controller', function() {
       getUserData.withArgs('Bearer a valid token')
         .returns({userId: 1, role: 'user'});
       yadaguruDataMock.services.userService.stubs.findById.withArgs(1)
-        .returns(Promise.resolve({phoneNumber: '1234567890'}));
+        .returns(Promise.resolve([{phoneNumber: '1234567890'}]));
       sendMessage
         .returns(Promise.resolve());
 
       return usersController.greet(req, res).then(function() {
         sendMessage.should.have.been.calledWith('1234567890', 
-          'Welcome to Yadaguru (YG). You will be receiving texts from me. If you want' +
+          'Welcome to Yadaguru (YG). You will be receiving texts from me. If you want ' +
           'to stop receiving messages go to yadaguru.com>view by school>off switch.'
         );
       });
