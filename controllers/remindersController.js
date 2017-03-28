@@ -27,11 +27,15 @@ remindersController.getAllForUser = function(req, res) {
   var userId = userData.userId;
 
   return reminderService.findByUserWithBaseReminders(userId).then(function(reminders) {
-    reminders = reminderGen.deDuplicateReminders(reminders);
-    reminders = reminderGen.replaceVariablesInReminders(reminders);
-    reminders = reminderGen.groupAndSortByDueDate(reminders);
+    reminderGroups = reminderGen.groupAndSortByDueDate(reminders);
+    reminderGroups = reminderGroups.map(function(reminderGroup) {
+      var dedupedReminders = reminderGen.deDuplicateReminders(reminderGroup.reminders);
+      var replacedReminders = reminderGen.replaceVariablesInReminders(dedupedReminders);
+      reminderGroup.reminders = replacedReminders;
+      return reminderGroup;
+    })
     res.status(200);
-    res.json(reminders);
+    res.json(reminderGroups);
   }).catch(function(error) {
     logger.error(error);
     res.status(500);
