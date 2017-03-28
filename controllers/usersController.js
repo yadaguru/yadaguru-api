@@ -215,7 +215,7 @@ module.exports = function() {
       .then(function(user) {
         return twilioService.sendMessage(
           user.phoneNumber,
-          'Welcome to Yadaguru (YG). You will be receiving texts from me. If you want' +
+          'Welcome to Yadaguru (YG). You will be receiving texts from me. If you want ' +
           'to stop receiving messages go to yadaguru.com>view by school>off switch.'
         );
       })
