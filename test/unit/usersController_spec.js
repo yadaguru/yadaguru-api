@@ -14,7 +14,7 @@ var mocks = require('../mocks');
 
 describe('Users Controller', function() {
   var req, res, usersController, reqGet, generateConfirmCode, yadaguruDataMock, user, save;
-  var getUserData, getUserToken;
+  var getUserData, getUserToken, twilioMock, sendMessage;
 
   beforeEach(function() {
     yadaguruDataMock = mocks.getYadaguruDataMock('userService');
@@ -26,8 +26,16 @@ describe('Users Controller', function() {
       status: sinon.spy(),
       json: sinon.spy()
     };
+
+    twilioMock = {
+      sendMessage: function(){}
+    };
+
+    sendMessage = sinon.stub(twilioMock, 'sendMessage');
+
     usersController = proxyquire('../../controllers/usersController', {
-      'yadaguru-data': yadaguruDataMock.getMockObject()
+      'yadaguru-data': yadaguruDataMock.getMockObject(),
+      '../services/twilioService': twilioMock
     });
     user = {
       save: function() {}
@@ -50,6 +58,7 @@ describe('Users Controller', function() {
     getUserData.restore();
     getUserToken.restore();
     reqGet.restore();
+    sendMessage.restore();
   });
 
   describe('POST /users', function() {
@@ -67,9 +76,32 @@ describe('Users Controller', function() {
         confirmCodeTimestamp: '1970-01-01T00:00:00Z'
       }).returns(Promise.resolve([{id: '1', confirmCode: '123456'}]));
 
+      sendMessage.returns(Promise.resolve());
+
       return usersController.post(req, res).then(function() {
         res.json.should.have.been.calledWith({userId: '1'});
         res.status.should.have.been.calledWith(200);
+      });
+    });
+
+    it('should send the confirm code through SMS', function() {
+      req.body = {phoneNumber: '1234567890'};
+
+      yadaguruDataMock.services.userService.stubs.getUserByPhoneNumber.withArgs('1234567890')
+        .returns(Promise.resolve(null));
+
+      generateConfirmCode.returns('123456');
+
+      yadaguruDataMock.services.userService.stubs.create.withArgs({
+        phoneNumber: '1234567890',
+        confirmCode: '123456',
+        confirmCodeTimestamp: '1970-01-01T00:00:00Z'
+      }).returns(Promise.resolve([{id: '1', confirmCode: '123456'}]));
+
+      sendMessage.returns(Promise.resolve());
+
+      return usersController.post(req, res).then(function() {
+        sendMessage.should.have.been.calledWith('1234567890', 'Yadaguru Confirmation Code: 123456');
       });
     });
 
@@ -83,6 +115,8 @@ describe('Users Controller', function() {
 
       save
         .returns(Promise.resolve({'id': '1', confirmCode: '123456'}));
+
+      sendMessage.returns(Promise.resolve());
 
       return usersController.post(req, res).then(function() {
         res.json.should.have.been.calledWith({userId: '1'});
@@ -103,6 +137,8 @@ describe('Users Controller', function() {
         confirmCode: '123456',
         confirmCodeTimestamp: '1970-01-01T00:00:00Z'
       }).returns(Promise.resolve([{id: '1', confirmCode: '123456'}]));
+
+      sendMessage.returns(Promise.resolve());
 
       return usersController.post(req, res).then(function() {
         res.json.should.have.been.calledWith({userId: '1'});
@@ -367,6 +403,81 @@ describe('Users Controller', function() {
 
       req.params = {id: 1};
       return usersController.removeById(req, res).then(function() {
+        res.json.should.have.been.calledWith(new errors.NotAuthorizedError());
+        res.status.should.have.been.calledWith(401);
+      });
+    });
+  });
+
+  describe('POST /users/greet', function() {
+    it('should respond with a 200 status on success', function() {
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
+        .returns({userId: 1, role: 'user'});
+      yadaguruDataMock.services.userService.stubs.findById.withArgs(1)
+        .returns(Promise.resolve({phoneNumber: '1234567890'}));
+      sendMessage
+        .returns(Promise.resolve());
+
+      return usersController.greet(req, res).then(function() {
+        res.status.should.have.been.calledWith(200);
+      });
+    });
+
+    it('should send a welcome message via SMS', function() {
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
+        .returns({userId: 1, role: 'user'});
+      yadaguruDataMock.services.userService.stubs.findById.withArgs(1)
+        .returns(Promise.resolve({phoneNumber: '1234567890'}));
+      sendMessage
+        .returns(Promise.resolve());
+
+      return usersController.greet(req, res).then(function() {
+        sendMessage.should.have.been.calledWith('1234567890', 
+          'Welcome to Yadaguru (YG). You will be receiving texts from me. If you want' +
+          'to stop receiving messages go to yadaguru.com>view by school>off switch.'
+        );
+      });
+    });
+
+    it('should still respond with a 200, even if there is an error', function() {
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
+        .returns({userId: 1, role: 'user'});
+      var error = new Error('database error');
+      yadaguruDataMock.services.userService.stubs.findById.withArgs(1)
+        .returns(Promise.reject(error));
+
+      return usersController.greet(req, res).then(function() {
+        res.status.should.have.been.calledWith(200);
+      })
+    });
+
+    it('should respond a 401 error if the user role is not authorized for this route', function() {
+      reqGet.withArgs('Authorization')
+        .returns('Bearer a valid token');
+      getUserData.withArgs('Bearer a valid token')
+        .returns({userId: 1, role: 'admin'});
+
+      req.params = {id: 1};
+      return usersController.greet(req, res).then(function() {
+        res.json.should.have.been.calledWith(new errors.NotAuthorizedError());
+        res.status.should.have.been.calledWith(401);
+      });
+    });
+
+    it('should respond a 401 error if the user token is invalid', function() {
+      reqGet.withArgs('Authorization')
+        .returns('Bearer an invalid token');
+      getUserData.withArgs('Bearer an invalid token')
+        .returns(false);
+
+      req.params = {id: 1};
+      return usersController.greet(req, res).then(function() {
         res.json.should.have.been.calledWith(new errors.NotAuthorizedError());
         res.status.should.have.been.calledWith(401);
       });

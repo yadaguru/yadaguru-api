@@ -115,7 +115,6 @@ module.exports = function() {
     })
   }
 
-//TODO: Move this to a Twilio service
   function _sendConfirmCode(confirmCode, phoneNumber) {
     var message = 'Yadaguru Confirmation Code: ' + confirmCode;
     return twilioService.sendMessage(phoneNumber, message);
@@ -198,6 +197,39 @@ module.exports = function() {
       res.json(error);
     });
   };
+
+  /**
+   * POST /api/users/greet
+   * Initiates sending greeting SMS message to user
+   */
+  usersController.greet = function(req, res) {
+    var userData = auth.getUserData(req.get('Authorization'));
+    
+    if (!userData || userData.role !== 'user') {
+      res.status(401);
+      res.json(new errors.NotAuthorizedError());
+      return Promise.resolve();
+    }
+
+    return userService.findById(userData.userId)
+      .then(function(user) {
+        return twilioService.sendMessage(
+          user.phoneNumber,
+          'Welcome to Yadaguru (YG). You will be receiving texts from me. If you want' +
+          'to stop receiving messages go to yadaguru.com>view by school>off switch.'
+        );
+      })
+      .then(function() {
+        res.status(200);
+        res.json({});
+      })
+      .catch(function(error) {
+        // No need to interrupt user if this fails. Log the error and send a 200.
+        logger.error(error);
+        res.status(200);
+        res.json({});
+      });
+  }
 
   return usersController;
 }();

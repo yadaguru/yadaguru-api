@@ -408,4 +408,52 @@ describe('/api/users', function() {
     });
 
   });
+
+  describe('POST /users/greet', function() {
+    it('should respond with a 200 on success', function(done) {
+      request(app)
+        .post('/api/users/greet')
+        .set('Authorization', 'Bearer ' + token)
+        .expect(200)
+        .end(function(err, res) {
+          if (err) return done(err);
+          done();
+        });
+    });
+
+    it('should respond with a 401 if there is no user token header', function(done) {
+      request(app)
+        .post('/api/users/greet')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the token is invalid', function(done) {
+      request(app)
+        .post('/api/users/greet')
+        .set('Authorization', 'Bearer not a valid token')
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+
+    it('should respond with a 401 if the user does not have the correct role for the route', function(done) {
+      request(app)
+        .post('/api/users/greet')
+        .set('Authorization', 'Bearer ' + tokenWrongRole)
+        .expect(401)
+        .end(function(err, res) {
+          if (err) return done(err);
+          res.body.message.should.equal('Not Authorized: You do not have permission to access this resource');
+          done();
+        })
+    });
+  });
 });
