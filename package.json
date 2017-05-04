@@ -1,6 +1,6 @@
 {
-  "name": "yadaguru",
-  "version": "0.7.0",
+  "name": "yadaguru-api",
+  "version": "1.0.0",
   "description": "",
   "repository": {
     "type": "git",
@@ -12,7 +12,7 @@
     "start": "node ./index.js",
     "migrations": "sequelize db:migrate --env development-migration"
   },
-  "author": "",
+  "author": "yadaguru@gmail.com",
   "license": "ISC",
   "devDependencies": {
     "chai": "3.5.0",

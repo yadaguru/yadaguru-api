@@ -1,6 +1,6 @@
 {
-  "name": "yadaguru",
-  "version": "0.7.0",
+  "name": "yadaguru-api",
+  "version": "1.0.0",
   "dependencies": {
     "bcryptjs": {
       "version": "2.3.0",

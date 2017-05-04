@@ -7,6 +7,7 @@ var cors = require('cors');
 var logger = require('./services/loggerService');
 var env = process.env.NODE_ENV || 'development';
 var config = require('./config/config.json')[env];
+var pjson = require('./package.json');
 
 /* Setup app and configure middleware */
 var app = express();
@@ -29,8 +30,8 @@ app.use(function(req, res, next) {
   next();
 });
 
-router.get('/', function(req, res) {
-  res.status(200).send('foobar');
+router.get('/healthcheck', function(req, res) {
+  res.status(200).json({status: 'OK', version: pjson.version});
 });
 
 app.use('/', router);
