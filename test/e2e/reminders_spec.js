@@ -49,6 +49,7 @@ describe('/api/reminders', function() {
             reminders: [{
               id: [1, 4],
               dueDate: '2016-09-01',
+              schoolDueDate: '2017-02-01',
               baseReminderId: 1,
               schoolId: [1, 2],
               schoolName: 'Temple and Drexel',
@@ -61,6 +62,7 @@ describe('/api/reminders', function() {
             reminders: [{
               id: [3, 6],
               dueDate: '2017-01-01',
+              schoolDueDate: '2017-02-01',
               baseReminderId: 2, 
               schoolId: [1, 2],
               schoolName: 'Temple and Drexel',
@@ -73,6 +75,7 @@ describe('/api/reminders', function() {
             reminders: [{
               id: [2, 5],
               dueDate: '2017-01-02',
+              schoolDueDate: '2017-02-01',
               baseReminderId: 1,
               schoolId: [1, 2],
               schoolName: 'Temple and Drexel',
@@ -99,6 +102,7 @@ describe('/api/reminders', function() {
               reminders: [{
                 id: 1,
                 dueDate: '2016-09-01',
+                schoolDueDate: '2017-02-01',
                 baseReminderId: 1,
                 schoolId: 1,
                 schoolName: 'Temple',
@@ -111,6 +115,7 @@ describe('/api/reminders', function() {
               reminders: [{
                 id: 3,
                 dueDate: '2017-01-01',
+                schoolDueDate: '2017-02-01',
                 baseReminderId: 2, 
                 schoolId: 1,
                 schoolName: 'Temple',
@@ -123,6 +128,7 @@ describe('/api/reminders', function() {
               reminders: [{
                 id: 2,
                 dueDate: '2017-01-02',
+                schoolDueDate: '2017-02-01',
                 baseReminderId: 1,
                 schoolId: 1,
                 schoolName: 'Temple',
@@ -156,7 +162,7 @@ describe('/api/reminders', function() {
             baseReminderId: 2,
             schoolName: 'Temple and Drexel',
             schoolId: [1, 2],
-            schoolDueDate: '2017-02-01T00:00:00.000Z',
+            schoolDueDate: '2017-02-01',
             userId: 1
           }]);
           done();

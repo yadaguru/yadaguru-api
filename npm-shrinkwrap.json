@@ -1366,12 +1366,12 @@
       }
     },
     "yadaguru-data": {
-      "version": "0.0.3",
+      "version": "0.1.0",
       "from": "yadaguru-data@*",
-      "resolved": "https://registry.npmjs.org/yadaguru-data/-/yadaguru-data-0.0.3.tgz"
+      "resolved": "https://registry.npmjs.org/yadaguru-data/-/yadaguru-data-0.1.0.tgz"
     },
     "yadaguru-reminders": {
-      "version": "0.4.0",
+      "version": "0.4.1",
       "from": "yadaguru-reminders@*"
     }
   }

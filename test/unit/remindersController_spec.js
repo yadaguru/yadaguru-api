@@ -74,9 +74,10 @@ describe('Reminders Controller', function() {
         dueDate: '2017-02-01',
         schoolId: ['1', '2'],
         schoolName: 'Temple and Drexel',
+        schoolDueDate: '2017-02-07',
         baseReminderId: '2',
         name: 'Get Recommendations',
-        message: 'Ask your counselor. Application is due on %APPLICATION_DATE%',
+        message: 'Ask your counselor. Application is due on 2/7/2017',
         detail: 'Tips for asking your counselor'
       }]
     }, {
@@ -84,6 +85,8 @@ describe('Reminders Controller', function() {
       reminders: [{
         id: '1',
         dueDate: '2017-02-06',
+        schoolDueDate: '2017-02-07',
+        baseReminderId: '2',
         baseReminderId: '1',
         schoolId: '1',
         schoolName: 'Temple',
@@ -203,6 +206,7 @@ describe('Reminders Controller', function() {
           reminders: [{
             id: '2',
             dueDate: '2017-02-01',
+            schoolDueDate: '2017-02-07',
             schoolName: 'Temple',
             schoolId: '1',
             baseReminderId: '2',
@@ -216,6 +220,7 @@ describe('Reminders Controller', function() {
             id: '1',
             name: 'Write Essay',
             dueDate: '2017-02-06',
+            schoolDueDate: '2017-02-07',
             schoolName: 'Temple',
             schoolId: '1',
             baseReminderId: '1',

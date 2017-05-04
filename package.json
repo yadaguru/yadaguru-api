@@ -40,7 +40,7 @@
     "twilio": "^2.11.1",
     "validator": "5.4.0",
     "winston": "2.3.1",
-    "yadaguru-data": "0.0.3",
-    "yadaguru-reminders": "0.4.0"
+    "yadaguru-data": "0.1.0",
+    "yadaguru-reminders": "0.4.1"
   }
 }
