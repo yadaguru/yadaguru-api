@@ -22,18 +22,14 @@
     "dialect": "postgresql",
     "logging": false
   },
-  "qa": {
+  "staging": {
     "use_env_variable": "DATABASE_URL",
     "logging": false,
-    "cors": ["http://qa.yadaguru.com", "http://qa-admin.yadaguru.com"]
-  },
-  "qam": {
-    "use_env_variable": "DATABASE_URL",
-    "logging": false,
-    "cors": ["http://qam.yadaguru.com", "http://qam-admin.yadaguru.com"]
+    "cors": ["http://staging.yadaguru.com", "http://staging-admin.yadaguru.com"]
   },
   "production": {
     "use_env_variable": "DATABASE_URL",
-    "logging": false
+    "logging": false,
+    "cors": ["http://www.yadaguru.com", "http://admin.yadaguru.com"]
   }
 }
