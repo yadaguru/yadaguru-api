@@ -1,0 +1,19 @@
+#!/usr/local/bin/node
+var Client = require('pg').Client;
+var client = new Client(process.env.DATABASE_URL);
+client.connect(function(error) {
+  if (error) {
+    console.log('Database connection not ready!');
+    process.exit(1);
+  }
+
+  client.query('SELECT 1', function(error) {
+    if (error) {
+    console.log('Database connection not ready!');
+      process.exit(1);
+    }
+
+    console.log('Database connection is available!');
+    process.exit(0);
+  });
+});

@@ -1,25 +1,10 @@
 {
   "development": {
-    "username": "yadaguru",
-    "password": "yadaguru",
-    "database": "yadaguru",
-    "host": "postgres",
-    "dialect": "postgresql",
+    "use_env_variable": "DATABASE_URL",
     "cors": ["http://localhost:9000", "http://localhost:3000"]
   },
-  "development-migration": {
-    "username": "yadaguru",
-    "password": "yadaguru",
-    "database": "yadaguru",
-    "host": "127.0.0.1",
-    "dialect": "postgresql"
-  },
   "test": {
-    "username": "yadaguru",
-    "password": "yadaguru",
-    "database": "yadaguru_test",
-    "host": "127.0.0.1",
-    "dialect": "postgresql",
+    "use_env_variable": "DATABASE_URL",
     "logging": false
   },
   "staging": {

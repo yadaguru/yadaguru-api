@@ -8,4 +8,4 @@ COPY . /usr/src/app
 EXPOSE 3005
 EXPOSE 5858
 
-CMD ["npm", "start"]
+CMD ./entrypoint.sh
